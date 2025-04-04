@@ -1,0 +1,3 @@
+= Annotation-driven MCP Java SDK
+
+Declarative MCP (Model Context Protocol) Development with Java Annotations and No Spring Framework Required.
