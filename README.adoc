@@ -1,3 +1,96 @@
 = Annotation-driven MCP Java SDK
 
-Declarative MCP (Model Context Protocol) Development with Java Annotations and No Spring Framework Required.
+Declarative https://github.com/modelcontextprotocol/java-sdk[MCP Java SDK] Development with Java Annotations - No Spring Framework Required.
+
+Focus on your core logic (resources/prompts/tools) - Not SDK low-level details. Instant MCP Java server in 1 LOC.
+
+== Showcase
+
+Just put this one line code in your `main` method:
+
+[source,java]
+----
+// You can specify the base package to scan for MCP resources, prompts, tools, but it's optional.
+@McpComponentScan(basePackage = "com.github.codeboyzhou.mcp.examples")
+public class MyMcpServer {
+
+    public static void main(String[] args) {
+        // Start a STDIO MCP server
+        McpServers.run(MyMcpServer.class, args).startSyncStdioServer("mcp-server", "1.0.0");
+        // or a HTTP SSE MCP server
+        // McpServers.run(MyMcpServer.class, args).startSyncSseServer("mcp-server", "1.0.0");
+    }
+
+}
+----
+
+and don't need to care how to create the MCP resources, prompts, and tools. You only need to annotate them like this:
+
+[source,java]
+----
+@McpResources
+public class MyMcpResources {
+
+    // This method defines a MCP resource to expose the OS env variables
+    @McpResource(uri = "env://variables", name = "env", description = "OS env variables")
+    public String getSystemEnv() {
+        // Only need to put your logic code here, forget about the MCP SDK details.
+        return System.getenv().toString();
+    }
+
+    // Your other MCP resources here...
+}
+----
+
+[source,java]
+----
+@McpTools
+public class MyMcpTools {
+
+    // This method defines a MCP tool to read a file
+    @McpTool(name = "read_file", description = "Read complete file contents with UTF-8 encoding")
+    public String readFile(
+        @McpToolParam(name = "path", description = "filepath", required = true) String path) {
+        // Only need to put your logic code here, forget about the MCP SDK details.
+        return Files.readString(Path.of(path));
+    }
+
+    // Your other MCP tools here...
+}
+----
+
+Now it's all set, choose one MCP client you like and start your MCP exploration journey.
+
+[WARNING]
+
+Please note that this project is under development and is not ready for production use.
+
+== Getting Started
+
+=== Installation
+
+Add the following Maven dependency to your project:
+
+[source,xml]
+----
+<dependency>
+    <groupId>io.github.codeboyzhou</groupId>
+    <artifactId>mcp-declarative-java-sdk</artifactId>
+    <version>0.1.0-SNAPSHOT</version>
+</dependency>
+----
+
+== Requirements
+
+- Java 17 or later (Restricted by MCP Java SDK)
+
+== What is MCP?
+
+The https://modelcontextprotocol.io[Model Context Protocol (MCP)] lets you build servers that expose data and functionality to LLM applications in a secure, standardized way. Think of it like a web API, but specifically designed for LLM interactions. MCP servers can:
+
+- Expose data through **Resources** (think of these sort of like GET endpoints; they are used to load information into the LLM's context)
+- Provide functionality through **Tools** (sort of like POST endpoints; they are used to execute code or otherwise produce a side effect)
+- Define interaction patterns through **Prompts** (reusable templates for LLM interactions)
+- And more!
+
+You can start exploring everything about *MCP* from https://modelcontextprotocol.io[here].

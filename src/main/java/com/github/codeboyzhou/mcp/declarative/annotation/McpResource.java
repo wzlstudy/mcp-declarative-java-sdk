@@ -12,11 +12,11 @@ import java.lang.annotation.Target;
 public @interface McpResource {
     String uri();
 
-    String name();
+    String name() default "";
 
     String description();
 
-    String mimeType();
+    String mimeType() default "text/plain";
 
     McpSchema.Role[] roles() default {McpSchema.Role.ASSISTANT, McpSchema.Role.USER};
 
