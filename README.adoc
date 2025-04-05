@@ -10,7 +10,8 @@ Just put this one line code in your `main` method:
 
 [source,java]
 ----
-// You can specify the base package to scan for MCP resources, prompts, tools, but it's optional.
+// You can use this annotation to specify the base package
+// to scan for MCP resources, prompts, tools, but it's not required.
 @McpComponentScan(basePackage = "com.github.codeboyzhou.mcp.examples")
 public class MyMcpServer {
 
@@ -24,7 +25,7 @@ public class MyMcpServer {
 }
 ----
 
-and don't need to care how to create the MCP resources, prompts, and tools. You only need to annotate them like this:
+No need to care about the low-level details of native MCP Java SDK and how to create the MCP resources, prompts, and tools. Just annotate them like this:
 
 [source,java]
 ----
@@ -34,7 +35,7 @@ public class MyMcpResources {
     // This method defines a MCP resource to expose the OS env variables
     @McpResource(uri = "env://variables", name = "env", description = "OS env variables")
     public String getSystemEnv() {
-        // Only need to put your logic code here, forget about the MCP SDK details.
+        // Just put your logic code here, forget about the MCP SDK details.
         return System.getenv().toString();
     }
 
@@ -51,7 +52,7 @@ public class MyMcpTools {
     @McpTool(name = "read_file", description = "Read complete file contents with UTF-8 encoding")
     public String readFile(
         @McpToolParam(name = "path", description = "filepath", required = true) String path) {
-        // Only need to put your logic code here, forget about the MCP SDK details.
+        // Just put your logic code here, forget about the MCP SDK details.
         return Files.readString(Path.of(path));
     }
 
@@ -59,13 +60,17 @@ public class MyMcpTools {
 }
 ----
 
-Now it's all set, choose one MCP client you like and start your MCP exploration journey.
+Now it's all set, run your MCP server, choose one MCP client you like and start your MCP exploration journey.
 
 [WARNING]
 
 Please note that this project is under development and is not ready for production use.
 
 == Getting Started
+
+=== Requirements
+
+- Java 17 or later (Restricted by MCP Java SDK)
 
 === Installation
 
@@ -80,9 +85,9 @@ Add the following Maven dependency to your project:
 </dependency>
 ----
 
-== Requirements
+=== Examples
 
-- Java 17 or later (Restricted by MCP Java SDK)
+You can find more examples and usages in this https://github.com/codeboyzhou/mcp-declarative-java-sdk-examples[repository].
 
 == What is MCP?
 
