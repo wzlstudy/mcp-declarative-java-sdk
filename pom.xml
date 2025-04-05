@@ -7,7 +7,35 @@
 
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0</version>
+
+    <name>MCP Declarative Java SDK</name>
+    <description>Annotation-driven MCP (Model Context Protocol) Development with Java - Zero Spring Framework Dependencies</description>
+    <url>https://github.com/codeboyzhou/mcp-declarative-java-sdk</url>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>codeboyzhou</name>
+            <email>imzhouchen@gmail.com</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/codeboyzhou/mcp-declarative-java-sdk</url>
+    </scm>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/codeboyzhou/mcp-declarative-java-sdk/issues</url>
+    </issueManagement>
 
     <properties>
         <java.version>17</java.version>
