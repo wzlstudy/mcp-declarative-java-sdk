@@ -102,7 +102,6 @@ class McpServersTest {
 
     @ParameterizedTest
     @ValueSource(strings = {
-        "mcp-server.yml",
         "mcp-server-async.yml",
         "mcp-server-sse-mode.yml",
         "mcp-server-not-enabled.yml"

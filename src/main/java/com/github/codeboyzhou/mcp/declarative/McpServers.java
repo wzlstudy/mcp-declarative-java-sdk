@@ -100,7 +100,9 @@ public class McpServers {
     }
 
     public void startServer() {
-        startServer("mcp-server.yml");
+        YamlConfigurationLoader configurationLoader = new YamlConfigurationLoader();
+        McpServerConfiguration configuration = configurationLoader.loadConfiguration();
+        startServerWith(configuration);
     }
 
     private void startServerWith(McpServerConfiguration configuration) {

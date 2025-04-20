@@ -10,7 +10,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.file.NoSuchFileException;
-import java.util.Objects;
 
 import static java.util.stream.Collectors.joining;
 
@@ -22,14 +21,14 @@ public class YamlConfigurationLoader {
 
     public McpServerConfiguration loadConfiguration() {
         try {
-            McpServerConfiguration configuration = load("mcp-server.yml");
-            if (configuration == null) {
-                configuration = load("mcp-server.yaml");
-            }
-            return Objects.requireNonNullElseGet(configuration, McpServerConfiguration::defaultConfiguration);
+            return load("mcp-server.yml");
         } catch (IOException e) {
-            logger.error("Error loading configuration file, will use default configuration", e);
-            return McpServerConfiguration.defaultConfiguration();
+            try {
+                return load("mcp-server.yaml");
+            } catch (IOException ex) {
+                logger.warn("The mcp-server.yml and mcp-server.yaml were not found, will use default configuration");
+                return McpServerConfiguration.defaultConfiguration();
+            }
         }
     }
 
