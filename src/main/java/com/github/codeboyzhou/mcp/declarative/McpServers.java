@@ -18,6 +18,7 @@ import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import io.modelcontextprotocol.util.Assert;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,32 +84,23 @@ public class McpServers {
     }
 
     public void startServer(String configFileName) {
-        McpServerConfiguration configuration = loadConfiguration(configFileName);
-        if (configuration.enabled()) {
-            startServerWith(configuration);
-        } else {
-            logger.info("MCP server is disabled.");
+        Assert.notNull(configFileName, "configFileName must not be null");
+        YamlConfigurationLoader configurationLoader = new YamlConfigurationLoader();
+        McpServerConfiguration configuration;
+        try {
+            configuration = configurationLoader.load(configFileName);
+            if (configuration.enabled()) {
+                startServerWith(configuration);
+            } else {
+                logger.info("MCP server is disabled.");
+            }
+        } catch (IOException e) {
+            throw new McpServerException("Error loading configuration file: " + e.getMessage(), e);
         }
     }
 
     public void startServer() {
-        // Load configuration from default file
-        startServer(null);
-    }
-
-    private McpServerConfiguration loadConfiguration(String configFileName) {
-        YamlConfigurationLoader configurationLoader = new YamlConfigurationLoader();
-        McpServerConfiguration configuration;
-        try {
-            if (configFileName == null || configFileName.isBlank()) {
-                configuration = configurationLoader.loadConfiguration();
-            } else {
-                configuration = configurationLoader.load(configFileName);
-            }
-        } catch (IOException e) {
-            throw new McpServerException("Error loading configuration file", e);
-        }
-        return configuration;
+        startServer("mcp-server.yml");
     }
 
     private void startServerWith(McpServerConfiguration configuration) {

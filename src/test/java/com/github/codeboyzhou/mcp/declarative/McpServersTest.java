@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageClass;
@@ -9,6 +10,7 @@ import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanDefault
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanIsNull;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpTools;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -23,12 +25,18 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class McpServersTest {
 
     static final String[] EMPTY_ARGS = new String[]{};
 
     Reflections reflections;
+
+    @BeforeEach
+    void setUp() {
+        System.setProperty("mcp.declarative.java.sdk.testing", "true");
+    }
 
     @AfterEach
     void tearDown() throws NoSuchFieldException, IllegalAccessException {
@@ -68,7 +76,6 @@ class McpServersTest {
 
     @Test
     void testStartSyncSseServer() {
-        System.setProperty("mcp.declarative.java.sdk.testing", "true");
         McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
         assertDoesNotThrow(() -> {
             McpSseServerInfo serverInfo = McpSseServerInfo.builder()
@@ -83,6 +90,37 @@ class McpServersTest {
                 .build();
             servers.startSyncSseServer(serverInfo);
         });
+    }
+
+    @Test
+    void testStartServer() {
+        assertDoesNotThrow(() -> {
+            McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
+            servers.startServer();
+        });
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+        "mcp-server.yml",
+        "mcp-server-async.yml",
+        "mcp-server-sse-mode.yml",
+        "mcp-server-not-enabled.yml"
+    })
+    void testStartServerWithConfigFileName(String configFileName) {
+        assertDoesNotThrow(() -> {
+            McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
+            servers.startServer(configFileName);
+        });
+    }
+
+    @Test
+    void testStartServerWithInvalidConfigFileName() {
+        McpServerException e = assertThrows(McpServerException.class, () -> {
+            McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
+            servers.startServer("mcp-server-not-exist.yml");
+        });
+        assertEquals("Error loading configuration file: mcp-server-not-exist.yml", e.getMessage());
     }
 
     private Reflections getReflectionsField() throws NoSuchFieldException, IllegalAccessException {
