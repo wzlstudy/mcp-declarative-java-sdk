@@ -58,6 +58,20 @@ public class MyMcpResources {
 ```
 
 ```java
+@McpPrompts
+public class MyMcpPrompts {
+
+    @McpPrompt(description = "A simple prompt to read a file")
+    public String readFile(
+        @McpPromptParam(name = "path", description = "filepath", required = true) String path) {
+        // Just put your logic code here, forget about the MCP SDK details.
+        return String.format("What is the complete contents of the file: %s", path);
+    }
+
+}
+```
+
+```java
 @McpTools
 public class MyMcpTools {
 
