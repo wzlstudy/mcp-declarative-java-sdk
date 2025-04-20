@@ -14,6 +14,7 @@ Declarative [MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) Dev
 - No need to write more SDK low-level codes.
 - Get rid of complex and lengthy JSON schema definitions.
 - Just focus on your core logic (resources/prompts/tools).
+- Configuration file compatible with the Spring AI framework.
 
 ## Showcase
 
@@ -35,6 +36,8 @@ public class MyMcpServer {
         McpServers.run(MyMcpServer.class, args).startSyncSseServer(
             McpSseServerInfo.builder().name("mcp-server").version("1.0.0").port(8080).build()
         );
+        // or start with yaml configuration file compatible with the Spring AI framework
+        McpServers.run(MyMcpServer.class, args).startServer();
     }
 
 }
