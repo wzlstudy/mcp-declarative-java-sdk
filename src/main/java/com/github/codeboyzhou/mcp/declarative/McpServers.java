@@ -16,15 +16,13 @@ import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import org.reflections.Reflections;
 
+import java.time.Duration;
+
 public class McpServers {
 
     private static final McpServers INSTANCE = new McpServers();
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private static final String DEFAULT_MESSAGE_ENDPOINT = "/message";
-
-    private static final int DEFAULT_HTTP_SERVER_PORT = 8080;
 
     private static Reflections reflections;
 
@@ -46,16 +44,18 @@ public class McpServers {
         return applicationMainClass.getPackageName();
     }
 
+    @Deprecated(since = "0.4.0")
     public void startSyncStdioServer(String name, String version, String instructions) {
-        McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
-        McpServerInfo serverInfo = McpServerInfo.builder().name(name).version(version).instructions(instructions).build();
-        McpServerTransportProvider transportProvider = new StdioServerTransportProvider();
-        McpSyncServer server = factory.create(serverInfo, transportProvider);
-        McpServerComponentRegisters.registerAllTo(server, reflections);
+        McpServerInfo serverInfo = McpServerInfo.builder().name(name).version(version)
+            .instructions(instructions).requestTimeout(Duration.ofSeconds(10)).build();
+        startSyncStdioServer(serverInfo);
     }
 
     public void startSyncStdioServer(McpServerInfo serverInfo) {
-        startSyncStdioServer(serverInfo.name(), serverInfo.version(), serverInfo.instructions());
+        McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
+        McpServerTransportProvider transportProvider = new StdioServerTransportProvider();
+        McpSyncServer server = factory.create(serverInfo, transportProvider);
+        McpServerComponentRegisters.registerAllTo(server, reflections);
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
