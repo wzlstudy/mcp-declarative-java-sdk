@@ -23,14 +23,18 @@ Just put this one line code in your `main` method:
 // You can use this annotation to specify the base package
 // to scan for MCP resources, prompts, tools, but it's optional.
 // If not specified, it will scan the package where the main method is located.
-@McpComponentScan(basePackage = "com.github.codeboyzhou.mcp.examples")
+@McpComponentScan(basePackage = "com.github.codeboyzhou.mcp.server.examples")
 public class MyMcpServer {
 
     public static void main(String[] args) {
         // Start a STDIO MCP server
-        McpServers.run(MyMcpServer.class, args).startSyncStdioServer("mcp-server", "1.0.0");
+        McpServers.run(MyMcpServer.class, args).startSyncStdioServer(
+            McpServerInfo.builder().name("mcp-server").version("1.0.0").build()
+        );
         // or a HTTP SSE MCP server
-        McpServers.run(MyMcpServer.class, args).startSyncSseServer("mcp-server", "1.0.0");
+        McpServers.run(MyMcpServer.class, args).startSyncSseServer(
+            McpSseServerInfo.builder().name("mcp-server").version("1.0.0").port(8080).build()
+        );
     }
 
 }
