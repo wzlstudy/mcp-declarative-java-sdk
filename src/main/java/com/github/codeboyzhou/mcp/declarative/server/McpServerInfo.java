@@ -42,13 +42,13 @@ public class McpServerInfo {
     @SuppressWarnings("unchecked")
     public static class Builder<T extends Builder<T>> {
 
-        protected String name;
+        protected String name = "mcp-server";
 
-        protected String version;
+        protected String version = "1.0.0";
 
-        protected String instructions;
+        protected String instructions = "";
 
-        protected Duration requestTimeout;
+        protected Duration requestTimeout = Duration.ofSeconds(10);
 
         protected T self() {
             return (T) this;
