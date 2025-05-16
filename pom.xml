@@ -55,7 +55,7 @@
         <jetty.version>12.0.18</jetty.version>
         <junit5.version>5.10.2</junit5.version>
         <logback.version>1.5.18</logback.version>
-        <mcp-sdk.version>0.10.0-SNAPSHOT</mcp-sdk.version>
+        <mcp-sdk.version>0.10.0</mcp-sdk.version>
         <reflections.version>0.10.2</reflections.version>
     </properties>
 
