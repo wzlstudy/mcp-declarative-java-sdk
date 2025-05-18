@@ -3,11 +3,13 @@ package com.github.codeboyzhou.mcp.declarative.util;
 import io.modelcontextprotocol.spec.McpSchema;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -21,6 +23,13 @@ public final class ReflectionHelper {
     public static Set<Parameter> getParametersAnnotatedWith(Method method, Class<? extends Annotation> annotation) {
         Parameter[] parameters = method.getParameters();
         return Set.of(parameters).stream().filter(p -> p.isAnnotationPresent(annotation)).collect(toSet());
+    }
+
+    public static void doWithFields(Class<?> clazz, Consumer<Field> consumer) {
+        Field[] declaredFields = clazz.getDeclaredFields();
+        for (Field field : declaredFields) {
+            consumer.accept(field);
+        }
     }
 
     public static Object invokeMethod(Class<?> clazz, Method method) throws Exception {
@@ -48,14 +57,16 @@ public final class ReflectionHelper {
             Object parameterValue = parameters.get(parameterName);
             if (parameterValue == null) {
                 Map<String, Object> map = (Map<String, Object>) parameterProperties;
-                final String parameterType = map.get("type").toString();
-                if (isTypeOf(String.class, parameterType)) {
-                    typedParameters.put(parameterName, "");
-                } else if (isTypeOf(Integer.class, parameterType)) {
+                final String jsonSchemaType = map.getOrDefault("type", StringHelper.EMPTY).toString();
+                if (jsonSchemaType.isEmpty()) {
+                    typedParameters.put(parameterName, null);
+                } else if (isTypeOf(String.class, jsonSchemaType)) {
+                    typedParameters.put(parameterName, StringHelper.EMPTY);
+                } else if (isTypeOf(Integer.class, jsonSchemaType)) {
                     typedParameters.put(parameterName, 0);
-                } else if (isTypeOf(Number.class, parameterType)) {
+                } else if (isTypeOf(Number.class, jsonSchemaType)) {
                     typedParameters.put(parameterName, 0.0);
-                } else if (isTypeOf(Boolean.class, parameterType)) {
+                } else if (isTypeOf(Boolean.class, jsonSchemaType)) {
                     typedParameters.put(parameterName, false);
                 }
             } else {
