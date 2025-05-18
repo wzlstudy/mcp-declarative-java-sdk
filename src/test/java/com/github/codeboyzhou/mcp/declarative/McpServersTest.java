@@ -1,5 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative;
 
+import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
@@ -8,6 +10,8 @@ import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePac
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageString;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanDefault;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanIsNull;
+import com.github.codeboyzhou.mcp.declarative.server.TestMcpPrompts;
+import com.github.codeboyzhou.mcp.declarative.server.TestMcpResources;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpTools;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +46,21 @@ class McpServersTest {
     void tearDown() throws NoSuchFieldException, IllegalAccessException {
         reflections = getReflectionsField();
         assertNotNull(reflections);
+
         Map<String, Set<String>> scannedClasses = reflections.getStore().get(Scanners.TypesAnnotated.name());
+
+        Set<String> scannedPromptClass = scannedClasses.get(McpPrompts.class.getName());
+        assertEquals(1, scannedPromptClass.size());
+        assertEquals(scannedPromptClass.iterator().next(), TestMcpPrompts.class.getName());
+
+        Set<String> scannedResourceClass = scannedClasses.get(McpResources.class.getName());
+        assertEquals(1, scannedResourceClass.size());
+        assertEquals(scannedResourceClass.iterator().next(), TestMcpResources.class.getName());
+
         Set<String> scannedToolClass = scannedClasses.get(McpTools.class.getName());
         assertEquals(1, scannedToolClass.size());
         assertEquals(scannedToolClass.iterator().next(), TestMcpTools.class.getName());
+
         reflections = null;
     }
 
@@ -81,10 +96,10 @@ class McpServersTest {
             McpSseServerInfo serverInfo = McpSseServerInfo.builder()
                 .instructions("test-mcp-sync-sse-server-instructions")
                 .requestTimeout(Duration.ofSeconds(10))
-                .baseUrl("http://127.0.0.1:8080")
+                .baseUrl("http://127.0.0.1:8081")
                 .messageEndpoint("/message")
                 .sseEndpoint("/sse")
-                .port(8080)
+                .port(8081)
                 .name("test-mcp-sync-sse-server")
                 .version("1.0.0")
                 .build();

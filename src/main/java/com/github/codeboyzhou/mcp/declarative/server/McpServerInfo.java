@@ -1,5 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
+import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
+
 import java.time.Duration;
 
 public class McpServerInfo {
@@ -46,7 +48,7 @@ public class McpServerInfo {
 
         protected String version = "1.0.0";
 
-        protected String instructions = "";
+        protected String instructions = StringHelper.EMPTY;
 
         protected Duration requestTimeout = Duration.ofSeconds(10);
 

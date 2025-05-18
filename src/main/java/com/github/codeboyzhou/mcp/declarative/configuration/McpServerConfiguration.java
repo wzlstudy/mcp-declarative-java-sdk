@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.configuration;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 
 import java.util.Map;
 
@@ -37,7 +38,7 @@ public record McpServerConfiguration(
             Map.of(),
             "/mcp/message",
             "/sse",
-            "",
+            StringHelper.EMPTY,
             8080
         );
     }

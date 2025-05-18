@@ -1,5 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.annotation;
 
+import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import io.modelcontextprotocol.spec.McpSchema;
 
 import java.lang.annotation.ElementType;
@@ -12,7 +13,7 @@ import java.lang.annotation.Target;
 public @interface McpResource {
     String uri();
 
-    String name() default "";
+    String name() default StringHelper.EMPTY;
 
     String description();
 
