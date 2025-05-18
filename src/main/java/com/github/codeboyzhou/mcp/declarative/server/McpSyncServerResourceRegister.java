@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
+import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -42,6 +43,7 @@ public class McpSyncServerResourceRegister
             res.uri(), name, res.description(), res.mimeType(),
             new McpSchema.Annotations(List.of(res.roles()), res.priority())
         );
+        logger.debug("Registering resource: {}", JsonHelper.toJson(resource));
         return new McpServerFeatures.SyncResourceSpecification(resource, (exchange, request) -> {
             Object result;
             try {

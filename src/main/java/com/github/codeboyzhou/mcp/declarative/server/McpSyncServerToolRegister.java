@@ -4,6 +4,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
+import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -49,6 +50,7 @@ public class McpSyncServerToolRegister
         McpSchema.JsonSchema paramSchema = createJsonSchema(method);
         final String name = toolMethod.name().isBlank() ? method.getName() : toolMethod.name();
         McpSchema.Tool tool = new McpSchema.Tool(name, toolMethod.description(), paramSchema);
+        logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
         return new McpServerFeatures.SyncToolSpecification(tool, (exchange, params) -> {
             Object result;
             boolean isError = false;
