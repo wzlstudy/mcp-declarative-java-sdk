@@ -77,6 +77,7 @@ public class McpHttpServer<T> {
             final boolean testing = Boolean.parseBoolean(System.getProperty("mcp.declarative.java.sdk.testing"));
             if (testing) {
                 logger.debug("Jetty-based HTTP server is running in test mode, not waiting for HTTP server to stop");
+                httpserver.stop();
                 return;
             }
 

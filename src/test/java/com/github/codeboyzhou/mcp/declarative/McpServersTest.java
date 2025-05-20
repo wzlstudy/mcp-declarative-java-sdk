@@ -96,10 +96,10 @@ class McpServersTest {
             McpSseServerInfo serverInfo = McpSseServerInfo.builder()
                 .instructions("test-mcp-sync-sse-server-instructions")
                 .requestTimeout(Duration.ofSeconds(10))
-                .baseUrl("http://127.0.0.1:8081")
+                .baseUrl("http://127.0.0.1:8080")
                 .messageEndpoint("/message")
                 .sseEndpoint("/sse")
-                .port(8081)
+                .port(8080)
                 .name("test-mcp-sync-sse-server")
                 .version("1.0.0")
                 .build();
