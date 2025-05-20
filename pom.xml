@@ -6,7 +6,7 @@
 
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 
     <name>MCP Declarative Java SDK</name>
     <description>Annotation-driven MCP (Model Context Protocol) Development with Java - No Spring Framework Required</description>
@@ -51,10 +51,11 @@
         <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
         <sortpom-maven-plugin.version>4.0.0</sortpom-maven-plugin.version>
         <!--==================== dependency versions ======================-->
+        <jackson-dataformat-yaml.version>2.18.3</jackson-dataformat-yaml.version>
         <jetty.version>12.0.18</jetty.version>
         <junit5.version>5.10.2</junit5.version>
         <logback.version>1.5.18</logback.version>
-        <mcp-sdk.version>0.9.0</mcp-sdk.version>
+        <mcp-sdk.version>0.10.0</mcp-sdk.version>
         <reflections.version>0.10.2</reflections.version>
     </properties>
 
@@ -77,6 +78,11 @@
             <artifactId>logback-classic</artifactId>
             <version>${logback.version}</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.dataformat</groupId>
+            <artifactId>jackson-dataformat-yaml</artifactId>
+            <version>${jackson-dataformat-yaml.version}</version>
         </dependency>
         <dependency>
             <groupId>io.modelcontextprotocol.sdk</groupId>

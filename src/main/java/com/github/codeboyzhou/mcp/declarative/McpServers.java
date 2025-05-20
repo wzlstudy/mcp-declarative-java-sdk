@@ -2,6 +2,10 @@ package com.github.codeboyzhou.mcp.declarative;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
+import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
+import com.github.codeboyzhou.mcp.declarative.configuration.YamlConfigurationLoader;
+import com.github.codeboyzhou.mcp.declarative.enums.ServerType;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import com.github.codeboyzhou.mcp.declarative.listener.DefaultMcpSyncHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.listener.McpHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
@@ -14,17 +18,21 @@ import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import io.modelcontextprotocol.util.Assert;
 import org.reflections.Reflections;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.time.Duration;
 
 public class McpServers {
+
+    private static final Logger logger = LoggerFactory.getLogger(McpServers.class);
 
     private static final McpServers INSTANCE = new McpServers();
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
-
-    private static final String DEFAULT_MESSAGE_ENDPOINT = "/message";
-
-    private static final int DEFAULT_HTTP_SERVER_PORT = 8080;
 
     private static Reflections reflections;
 
@@ -46,16 +54,18 @@ public class McpServers {
         return applicationMainClass.getPackageName();
     }
 
+    @Deprecated(since = "0.4.0")
     public void startSyncStdioServer(String name, String version, String instructions) {
-        McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
-        McpServerInfo serverInfo = McpServerInfo.builder().name(name).version(version).instructions(instructions).build();
-        McpServerTransportProvider transportProvider = new StdioServerTransportProvider();
-        McpSyncServer server = factory.create(serverInfo, transportProvider);
-        McpServerComponentRegisters.registerAllTo(server, reflections);
+        McpServerInfo serverInfo = McpServerInfo.builder().name(name).version(version)
+            .instructions(instructions).requestTimeout(Duration.ofSeconds(10)).build();
+        startSyncStdioServer(serverInfo);
     }
 
     public void startSyncStdioServer(McpServerInfo serverInfo) {
-        startSyncStdioServer(serverInfo.name(), serverInfo.version(), serverInfo.instructions());
+        McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
+        McpServerTransportProvider transportProvider = new StdioServerTransportProvider();
+        McpSyncServer server = factory.create(serverInfo, transportProvider);
+        McpServerComponentRegisters.registerAllTo(server, reflections);
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
@@ -71,6 +81,54 @@ public class McpServers {
 
     public void startSyncSseServer(McpSseServerInfo serverInfo) {
         startSyncSseServer(serverInfo, new DefaultMcpSyncHttpServerStatusListener());
+    }
+
+    public void startServer(String configFileName) {
+        Assert.notNull(configFileName, "configFileName must not be null");
+        YamlConfigurationLoader configurationLoader = new YamlConfigurationLoader();
+        McpServerConfiguration configuration;
+        try {
+            configuration = configurationLoader.load(configFileName);
+            if (configuration.enabled()) {
+                startServerWith(configuration);
+            } else {
+                logger.info("MCP server is disabled.");
+            }
+        } catch (IOException e) {
+            throw new McpServerException("Error loading configuration file: " + e.getMessage(), e);
+        }
+    }
+
+    public void startServer() {
+        YamlConfigurationLoader configurationLoader = new YamlConfigurationLoader();
+        McpServerConfiguration configuration = configurationLoader.loadConfiguration();
+        startServerWith(configuration);
+    }
+
+    private void startServerWith(McpServerConfiguration configuration) {
+        if (ServerType.SYNC.name().equalsIgnoreCase(configuration.type())) {
+            if (configuration.stdio()) {
+                McpServerInfo serverInfo = McpServerInfo.builder()
+                    .name(configuration.name())
+                    .version(configuration.version())
+                    .instructions(configuration.instructions())
+                    .requestTimeout(Duration.ofSeconds(configuration.requestTimeout()))
+                    .build();
+                startSyncStdioServer(serverInfo);
+            } else {
+                McpSseServerInfo serverInfo = McpSseServerInfo.builder()
+                    .name(configuration.name())
+                    .version(configuration.version())
+                    .instructions(configuration.instructions())
+                    .requestTimeout(Duration.ofSeconds(configuration.requestTimeout()))
+                    .baseUrl(configuration.baseUrl())
+                    .messageEndpoint(configuration.sseMessageEndpoint())
+                    .sseEndpoint(configuration.sseEndpoint())
+                    .port(configuration.ssePort())
+                    .build();
+                startSyncSseServer(serverInfo);
+            }
+        }
     }
 
 }

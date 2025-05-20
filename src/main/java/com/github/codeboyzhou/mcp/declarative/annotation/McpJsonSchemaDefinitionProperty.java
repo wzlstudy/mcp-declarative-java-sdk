@@ -1,25 +1,18 @@
 package com.github.codeboyzhou.mcp.declarative.annotation;
 
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
-import io.modelcontextprotocol.spec.McpSchema;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target(ElementType.METHOD)
+@Target(ElementType.FIELD)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface McpResource {
-    String uri();
-
+public @interface McpJsonSchemaDefinitionProperty {
     String name() default StringHelper.EMPTY;
 
     String description();
 
-    String mimeType() default "text/plain";
-
-    McpSchema.Role[] roles() default {McpSchema.Role.ASSISTANT, McpSchema.Role.USER};
-
-    double priority() default 1.0;
+    boolean required() default false;
 }

@@ -2,6 +2,7 @@ package com.github.codeboyzhou.mcp.declarative.server;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
+import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -44,10 +45,11 @@ public class McpSyncServerPromptRegister
         final String description = promptMethod.description();
         List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
         McpSchema.Prompt prompt = new McpSchema.Prompt(name, description, promptArguments);
+        logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
         return new McpServerFeatures.SyncPromptSpecification(prompt, (exchange, request) -> {
             Object result;
             try {
-                result = ReflectionHelper.invokeMethod(clazz, method, request.arguments());
+                result = ReflectionHelper.invokeMethod(clazz, method, promptArguments, request.arguments());
             } catch (Throwable e) {
                 logger.error("Error invoking prompt method", e);
                 result = e + ": " + e.getMessage();
