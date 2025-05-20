@@ -21,6 +21,8 @@ Declarative [MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) Dev
 Just put this one line code in your `main` method:
 
 ```java
+import com.github.codeboyzhou.mcp.declarative.McpServers;
+
 // You can use this annotation to specify the base package
 // to scan for MCP resources, prompts, tools, but it's optional.
 // If not specified, it will scan the package where the main method is located.
@@ -36,11 +38,32 @@ public class MyMcpServer {
         McpServers.run(MyMcpServer.class, args).startSyncSseServer(
             McpSseServerInfo.builder().name("mcp-server").version("1.0.0").port(8080).build()
         );
-        // or start with yaml configuration file compatible with the Spring AI framework
+        // or start with yaml configuration file (compatible with the Spring AI framework)
         McpServers.run(MyMcpServer.class, args).startServer();
+        // or start with a specific configuration file (compatible with the Spring AI framework)
+        McpServers.run(MyMcpServer.class, args).startServer("my-mcp-server.yml");
     }
 
 }
+```
+
+This is a yaml configuration file example (named `mcp-server.yml` by default, or also `mcp-server.yaml`) only if you are using `startServer()` method:
+
+```yaml
+enabled: true
+stdio: false
+name: mcp-server
+version: 1.0.0
+instructions: mcp-server
+request-timeout: 30000
+type: SYNC
+resource-change-notification: true
+prompt-change-notification: true
+tool-change-notification: true
+sse-message-endpoint: /mcp/message
+sse-endpoint: /sse
+base-url: http://localhost:8080
+sse-port: 8080
 ```
 
 No need to care about the low-level details of native MCP Java SDK and how to create the MCP resources, prompts, and tools. Just annotate them like this:
@@ -106,11 +129,11 @@ Now it's all set, run your MCP server, choose one MCP client you like and start 
 Add the following Maven dependency to your project:
 
 ```xml
-<!-- Internally relies on native MCP Java SDK 0.9.0 -->
+<!-- Internally relies on native MCP Java SDK 0.10.0 -->
 <dependency>
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.3.0</version>
+    <version>0.4.0</version>
 </dependency>
 ```
 

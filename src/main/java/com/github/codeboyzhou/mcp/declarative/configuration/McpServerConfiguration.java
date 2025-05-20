@@ -3,8 +3,6 @@ package com.github.codeboyzhou.mcp.declarative.configuration;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 
-import java.util.Map;
-
 public record McpServerConfiguration(
     @JsonProperty("enabled") boolean enabled,
     @JsonProperty("stdio") boolean stdio,
@@ -16,7 +14,6 @@ public record McpServerConfiguration(
     @JsonProperty("resource-change-notification") boolean resourceChangeNotification,
     @JsonProperty("prompt-change-notification") boolean promptChangeNotification,
     @JsonProperty("tool-change-notification") boolean toolChangeNotification,
-    @JsonProperty("tool-response-mime-type") Map<String, String> toolResponseMimeType,
     @JsonProperty("sse-message-endpoint") String sseMessageEndpoint,
     @JsonProperty("sse-endpoint") String sseEndpoint,
     @JsonProperty("base-url") String baseUrl,
@@ -35,7 +32,6 @@ public record McpServerConfiguration(
             true,
             true,
             true,
-            Map.of(),
             "/mcp/message",
             "/sse",
             StringHelper.EMPTY,
