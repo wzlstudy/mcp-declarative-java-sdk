@@ -7,22 +7,21 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Consumer;
-
-import static java.util.stream.Collectors.toSet;
+import java.util.stream.Stream;
 
 public final class ReflectionHelper {
 
-    public static Set<Method> getMethodsAnnotatedWith(Class<?> clazz, Class<? extends Annotation> annotation) {
+    public static List<Method> getMethodsAnnotatedWith(Class<?> clazz, Class<? extends Annotation> annotation) {
         Method[] methods = clazz.getMethods();
-        return Set.of(methods).stream().filter(m -> m.isAnnotationPresent(annotation)).collect(toSet());
+        return Stream.of(methods).filter(m -> m.isAnnotationPresent(annotation)).toList();
     }
 
-    public static Set<Parameter> getParametersAnnotatedWith(Method method, Class<? extends Annotation> annotation) {
+    public static List<Parameter> getParametersAnnotatedWith(Method method, Class<? extends Annotation> annotation) {
         Parameter[] parameters = method.getParameters();
-        return Set.of(parameters).stream().filter(p -> p.isAnnotationPresent(annotation)).collect(toSet());
+        return Stream.of(parameters).filter(p -> p.isAnnotationPresent(annotation)).toList();
     }
 
     public static void doWithFields(Class<?> clazz, Consumer<Field> consumer) {
