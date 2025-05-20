@@ -49,7 +49,7 @@ public class McpSyncServerPromptRegister
         return new McpServerFeatures.SyncPromptSpecification(prompt, (exchange, request) -> {
             Object result;
             try {
-                result = ReflectionHelper.invokeMethod(clazz, method, request.arguments());
+                result = ReflectionHelper.invokeMethod(clazz, method, promptArguments, request.arguments());
             } catch (Throwable e) {
                 logger.error("Error invoking prompt method", e);
                 result = e + ": " + e.getMessage();

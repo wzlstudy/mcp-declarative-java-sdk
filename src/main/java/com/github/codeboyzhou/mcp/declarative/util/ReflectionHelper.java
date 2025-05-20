@@ -36,15 +36,46 @@ public final class ReflectionHelper {
         return method.invoke(object);
     }
 
-    public static Object invokeMethod(Class<?> clazz, Method method, Map<String, Object> parameters) throws Exception {
+    public static Object invokeMethod(Class<?> clazz, Method method, List<McpSchema.PromptArgument> arguments, Map<String, Object> parameters) throws Exception {
         Object object = clazz.getDeclaredConstructor().newInstance();
-        return method.invoke(object, parameters.values().toArray());
+        Map<String, Object> typedParameters = asTypedParameters(method, arguments, parameters);
+        return method.invoke(object, typedParameters.values().toArray());
     }
 
     public static Object invokeMethod(Class<?> clazz, Method method, McpSchema.JsonSchema schema, Map<String, Object> parameters) throws Exception {
         Object object = clazz.getDeclaredConstructor().newInstance();
         Map<String, Object> typedParameters = asTypedParameters(schema, parameters);
         return method.invoke(object, typedParameters.values().toArray());
+    }
+
+    private static Map<String, Object> asTypedParameters(Method method, List<McpSchema.PromptArgument> arguments, Map<String, Object> parameters) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Map<String, Object> typedParameters = new LinkedHashMap<>(parameters.size());
+
+        for (int i = 0, size = arguments.size(); i < size; i++) {
+            final String parameterName = arguments.get(i).name();
+            final Object parameterValue = parameters.get(parameterName);
+            // Fill in a default value when the parameter is not specified
+            // to ensure that the parameter type is correct when calling method.invoke()
+            Class<?> parameterType = parameterTypes[i];
+            if (String.class == parameterType) {
+                typedParameters.put(parameterName, parameterValue == null ? StringHelper.EMPTY : parameterValue.toString());
+            } else if (int.class == parameterType || Integer.class == parameterType) {
+                typedParameters.put(parameterName, parameterValue == null ? 0 : Integer.parseInt(parameterValue.toString()));
+            } else if (long.class == parameterType || Long.class == parameterType) {
+                typedParameters.put(parameterName, parameterValue == null ? 0 : Long.parseLong(parameterValue.toString()));
+            } else if (float.class == parameterType || Float.class == parameterType) {
+                typedParameters.put(parameterName, parameterValue == null ? 0.0 : Float.parseFloat(parameterValue.toString()));
+            } else if (double.class == parameterType || Double.class == parameterType) {
+                typedParameters.put(parameterName, parameterValue == null ? 0.0 : Double.parseDouble(parameterValue.toString()));
+            } else if (boolean.class == parameterType || Boolean.class == parameterType) {
+                typedParameters.put(parameterName, parameterValue != null && Boolean.parseBoolean(parameterValue.toString()));
+            } else {
+                typedParameters.put(parameterName, parameterValue);
+            }
+        }
+
+        return typedParameters;
     }
 
     @SuppressWarnings("unchecked")
@@ -54,30 +85,24 @@ public final class ReflectionHelper {
 
         properties.forEach((parameterName, parameterProperties) -> {
             Object parameterValue = parameters.get(parameterName);
-            if (parameterValue == null) {
-                Map<String, Object> map = (Map<String, Object>) parameterProperties;
-                final String jsonSchemaType = map.getOrDefault("type", StringHelper.EMPTY).toString();
-                if (jsonSchemaType.isEmpty()) {
-                    typedParameters.put(parameterName, null);
-                } else if (isTypeOf(String.class, jsonSchemaType)) {
-                    typedParameters.put(parameterName, StringHelper.EMPTY);
-                } else if (isTypeOf(Integer.class, jsonSchemaType)) {
-                    typedParameters.put(parameterName, 0);
-                } else if (isTypeOf(Number.class, jsonSchemaType)) {
-                    typedParameters.put(parameterName, 0.0);
-                } else if (isTypeOf(Boolean.class, jsonSchemaType)) {
-                    typedParameters.put(parameterName, false);
-                }
+            // Fill in a default value when the parameter is not specified
+            // to ensure that the parameter type is correct when calling method.invoke()
+            Map<String, Object> map = (Map<String, Object>) parameterProperties;
+            final String jsonSchemaType = map.getOrDefault("type", StringHelper.EMPTY).toString();
+            if (String.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+                typedParameters.put(parameterName, parameterValue == null ? StringHelper.EMPTY : parameterValue.toString());
+            } else if (Integer.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+                typedParameters.put(parameterName, parameterValue == null ? 0 : Integer.parseInt(parameterValue.toString()));
+            } else if (Number.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+                typedParameters.put(parameterName, parameterValue == null ? 0.0 : Double.parseDouble(parameterValue.toString()));
+            } else if (Boolean.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+                typedParameters.put(parameterName, parameterValue != null && Boolean.parseBoolean(parameterValue.toString()));
             } else {
                 typedParameters.put(parameterName, parameterValue);
             }
         });
 
         return typedParameters;
-    }
-
-    private static boolean isTypeOf(Class<?> clazz, String jsonSchemaType) {
-        return clazz.getName().equalsIgnoreCase(jsonSchemaType) || clazz.getSimpleName().equalsIgnoreCase(jsonSchemaType);
     }
 
 }

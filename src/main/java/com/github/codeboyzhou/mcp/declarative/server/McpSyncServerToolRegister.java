@@ -80,7 +80,7 @@ public class McpSyncServerToolRegister
             Map<String, String> property = new HashMap<>();
 
             if (parameterType.getAnnotation(McpJsonSchemaDefinition.class) == null) {
-                property.put("type", parameterType.getName().toLowerCase());
+                property.put("type", parameterType.getSimpleName().toLowerCase());
                 property.put("description", toolParam.description());
             } else {
                 final String parameterTypeSimpleName = parameterType.getSimpleName();
@@ -103,7 +103,7 @@ public class McpSyncServerToolRegister
         Map<String, Object> definitionJsonSchema = new HashMap<>();
         definitionJsonSchema.put("type", OBJECT_TYPE_NAME);
 
-        Map<String, Object> properties = new HashMap<>();
+        Map<String, Object> properties = new LinkedHashMap<>();
         List<String> required = new ArrayList<>();
 
         ReflectionHelper.doWithFields(definitionClass, field -> {
@@ -113,7 +113,7 @@ public class McpSyncServerToolRegister
             }
 
             Map<String, Object> fieldProperties = new HashMap<>();
-            fieldProperties.put("type", field.getType().getName().toLowerCase());
+            fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
             fieldProperties.put("description", property.description());
 
             final String fieldName = property.name().isBlank() ? field.getName() : property.name();
