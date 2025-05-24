@@ -57,22 +57,8 @@ public final class ReflectionHelper {
             final Object parameterValue = parameters.get(parameterName);
             // Fill in a default value when the parameter is not specified
             // to ensure that the parameter type is correct when calling method.invoke()
-            Class<?> parameterType = parameterTypes[i];
-            if (String.class == parameterType) {
-                typedParameters.put(parameterName, parameterValue == null ? StringHelper.EMPTY : parameterValue.toString());
-            } else if (int.class == parameterType || Integer.class == parameterType) {
-                typedParameters.put(parameterName, parameterValue == null ? 0 : Integer.parseInt(parameterValue.toString()));
-            } else if (long.class == parameterType || Long.class == parameterType) {
-                typedParameters.put(parameterName, parameterValue == null ? 0 : Long.parseLong(parameterValue.toString()));
-            } else if (float.class == parameterType || Float.class == parameterType) {
-                typedParameters.put(parameterName, parameterValue == null ? 0.0 : Float.parseFloat(parameterValue.toString()));
-            } else if (double.class == parameterType || Double.class == parameterType) {
-                typedParameters.put(parameterName, parameterValue == null ? 0.0 : Double.parseDouble(parameterValue.toString()));
-            } else if (boolean.class == parameterType || Boolean.class == parameterType) {
-                typedParameters.put(parameterName, parameterValue != null && Boolean.parseBoolean(parameterValue.toString()));
-            } else {
-                typedParameters.put(parameterName, parameterValue);
-            }
+            Object typedParameterValue = TypeConverter.convert(parameterValue, parameterTypes[i]);
+            typedParameters.put(parameterName, typedParameterValue);
         }
 
         return typedParameters;
@@ -89,17 +75,8 @@ public final class ReflectionHelper {
             // to ensure that the parameter type is correct when calling method.invoke()
             Map<String, Object> map = (Map<String, Object>) parameterProperties;
             final String jsonSchemaType = map.getOrDefault("type", StringHelper.EMPTY).toString();
-            if (String.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
-                typedParameters.put(parameterName, parameterValue == null ? StringHelper.EMPTY : parameterValue.toString());
-            } else if (Integer.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
-                typedParameters.put(parameterName, parameterValue == null ? 0 : Integer.parseInt(parameterValue.toString()));
-            } else if (Number.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
-                typedParameters.put(parameterName, parameterValue == null ? 0.0 : Double.parseDouble(parameterValue.toString()));
-            } else if (Boolean.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
-                typedParameters.put(parameterName, parameterValue != null && Boolean.parseBoolean(parameterValue.toString()));
-            } else {
-                typedParameters.put(parameterName, parameterValue);
-            }
+            Object typedParameterValue = TypeConverter.convert(parameterValue, jsonSchemaType);
+            typedParameters.put(parameterName, typedParameterValue);
         });
 
         return typedParameters;
