@@ -1,6 +1,10 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
+import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
+import com.github.codeboyzhou.mcp.declarative.configuration.McpServerSSE;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
+
+import java.time.Duration;
 
 public class McpSseServerInfo extends McpServerInfo {
 
@@ -22,6 +26,20 @@ public class McpSseServerInfo extends McpServerInfo {
 
     public static McpSseServerInfo.Builder builder() {
         return new McpSseServerInfo.Builder();
+    }
+
+    public static McpSseServerInfo from(McpServerConfiguration configuration) {
+        McpSseServerInfo.Builder builder = McpSseServerInfo.builder();
+        builder.name(configuration.name());
+        builder.version(configuration.version());
+        builder.instructions(configuration.instructions());
+        builder.requestTimeout(Duration.ofMillis(configuration.requestTimeout()));
+        McpServerSSE sse = configuration.sse();
+        builder.baseUrl(sse.baseUrl());
+        builder.messageEndpoint(sse.messageEndpoint());
+        builder.sseEndpoint(sse.endpoint());
+        builder.port(sse.port());
+        return builder.build();
     }
 
     public String baseUrl() {

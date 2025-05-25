@@ -27,7 +27,12 @@ public class YamlConfigurationLoader {
                 return load("mcp-server.yaml");
             } catch (IOException ex) {
                 logger.warn("The mcp-server.yml and mcp-server.yaml were not found, will use default configuration");
-                return McpServerConfiguration.defaultConfiguration();
+                try {
+                    return load("mcp-server-default.yml");
+                } catch (IOException ignored) {
+                    // should never happen
+                    return null;
+                }
             }
         }
     }
@@ -41,6 +46,7 @@ public class YamlConfigurationLoader {
             InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
             BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
             final String content = bufferedReader.lines().collect(joining(System.lineSeparator()));
+            logger.debug("Loaded configuration from {}:\n{}", configFileName, content);
             return mapper.readValue(content, McpServerConfiguration.class);
         }
     }

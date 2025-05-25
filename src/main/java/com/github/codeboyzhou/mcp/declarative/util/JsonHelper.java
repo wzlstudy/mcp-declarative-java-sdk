@@ -6,7 +6,7 @@ import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 
 public final class JsonHelper {
 
-    private static final ObjectMapper MAPPER = new ObjectMapper();
+    public static final ObjectMapper MAPPER = new ObjectMapper();
 
     public static String toJson(Object object) {
         try {
