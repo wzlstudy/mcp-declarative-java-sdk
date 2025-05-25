@@ -24,7 +24,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.time.Duration;
 
 public class McpServers {
 
@@ -50,13 +49,6 @@ public class McpServers {
             }
         }
         return applicationMainClass.getPackageName();
-    }
-
-    @Deprecated(since = "0.4.0")
-    public void startSyncStdioServer(String name, String version, String instructions) {
-        McpServerInfo serverInfo = McpServerInfo.builder().name(name).version(version)
-            .instructions(instructions).requestTimeout(Duration.ofSeconds(10)).build();
-        startSyncStdioServer(serverInfo);
     }
 
     public void startSyncStdioServer(McpServerInfo serverInfo) {
