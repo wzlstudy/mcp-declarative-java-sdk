@@ -81,7 +81,7 @@ class McpServersTest {
             McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
             McpServerInfo serverInfo = McpServerInfo.builder()
                 .instructions("test-mcp-sync-stdio-server-instructions")
-                .requestTimeout(Duration.ofSeconds(10))
+                .requestTimeout(Duration.ofSeconds(20))
                 .name("test-mcp-sync-stdio-server")
                 .version("1.0.0")
                 .build();
@@ -95,7 +95,7 @@ class McpServersTest {
         assertDoesNotThrow(() -> {
             McpSseServerInfo serverInfo = McpSseServerInfo.builder()
                 .instructions("test-mcp-sync-sse-server-instructions")
-                .requestTimeout(Duration.ofSeconds(10))
+                .requestTimeout(Duration.ofSeconds(20))
                 .baseUrl("http://127.0.0.1:8080")
                 .messageEndpoint("/message")
                 .sseEndpoint("/sse")

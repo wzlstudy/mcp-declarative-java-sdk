@@ -60,7 +60,7 @@ public class McpServerInfo {
 
         protected String instructions = StringHelper.EMPTY;
 
-        protected Duration requestTimeout = Duration.ofSeconds(10);
+        protected Duration requestTimeout = Duration.ofSeconds(20);
 
         protected T self() {
             return (T) this;
