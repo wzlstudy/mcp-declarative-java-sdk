@@ -1,5 +1,6 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.factory;
 
+import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;

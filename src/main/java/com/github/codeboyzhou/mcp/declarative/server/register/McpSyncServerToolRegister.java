@@ -5,6 +5,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
+import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
@@ -30,8 +31,6 @@ import java.util.stream.Stream;
 public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncToolSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpSyncServerToolRegister.class);
-
-    private static final String OBJECT_TYPE_NAME = Object.class.getSimpleName().toLowerCase();
 
     protected McpSyncServerToolRegister(Injector injector) {
         super(injector);
@@ -106,12 +105,12 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
         }
 
         final boolean hasAdditionalProperties = false;
-        return new McpSchema.JsonSchema(OBJECT_TYPE_NAME, properties, required, hasAdditionalProperties, definitions, definitions);
+        return new McpSchema.JsonSchema(JsonSchemaDataType.OBJECT.getType(), properties, required, hasAdditionalProperties, definitions, definitions);
     }
 
     private Map<String, Object> createJsonSchemaDefinition(Class<?> definitionClass) {
         Map<String, Object> definitionJsonSchema = new HashMap<>();
-        definitionJsonSchema.put("type", OBJECT_TYPE_NAME);
+        definitionJsonSchema.put("type", JsonSchemaDataType.OBJECT.getType());
 
         Map<String, Object> properties = new LinkedHashMap<>();
         List<String> required = new ArrayList<>();

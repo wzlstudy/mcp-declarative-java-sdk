@@ -5,13 +5,13 @@ import com.github.codeboyzhou.mcp.declarative.configuration.YamlConfigurationLoa
 import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import com.github.codeboyzhou.mcp.declarative.listener.DefaultMcpSyncHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.listener.McpHttpServerStatusListener;
-import com.github.codeboyzhou.mcp.declarative.server.ConfigurableMcpSyncServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpSyncServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import com.github.codeboyzhou.mcp.declarative.server.register.McpServerComponentRegisters;
-import com.github.codeboyzhou.mcp.declarative.server.McpServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.McpSyncServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSyncServerFactory;
 import com.github.codeboyzhou.mcp.declarative.util.GuiceInjector;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.google.inject.Guice;

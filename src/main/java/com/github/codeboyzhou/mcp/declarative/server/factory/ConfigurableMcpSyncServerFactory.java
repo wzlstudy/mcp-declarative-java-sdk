@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;

@@ -1,5 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.util;
 
+import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
+
 public final class TypeConverter {
 
     public static Object convert(Object value, Class<?> targetType) {
@@ -38,16 +40,16 @@ public final class TypeConverter {
 
         final String valueAsString = value.toString();
 
-        if (String.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+        if (JsonSchemaDataType.STRING.getType().equals(jsonSchemaType)) {
             return valueAsString;
         }
-        if (Integer.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+        if (JsonSchemaDataType.INTEGER.getType().equals(jsonSchemaType)) {
             return Integer.parseInt(valueAsString);
         }
-        if (Number.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+        if (JsonSchemaDataType.NUMBER.getType().equals(jsonSchemaType)) {
             return Double.parseDouble(valueAsString);
         }
-        if (Boolean.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+        if (JsonSchemaDataType.BOOLEAN.getType().equals(jsonSchemaType)) {
             return Boolean.parseBoolean(valueAsString);
         }
 
