@@ -6,7 +6,6 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
-import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Injector;
@@ -17,6 +16,7 @@ import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -25,6 +25,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncToolSpecification> {
 
@@ -41,7 +42,8 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
         for (Class<?> toolClass : toolClasses) {
-            List<Method> methods = ReflectionHelper.getMethodsAnnotatedWith(toolClass, McpTool.class);
+            Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
+            List<Method> methods = toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
             for (Method method : methods) {
                 McpServerFeatures.SyncToolSpecification tool = createComponentFrom(toolClass, method);
                 server.addTool(tool);
@@ -78,11 +80,13 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
         Map<String, Object> definitions = new LinkedHashMap<>();
         List<String> required = new ArrayList<>();
 
-        List<Parameter> parameters = ReflectionHelper.getParametersAnnotatedWith(method, McpToolParam.class);
-        for (Parameter parameter : parameters) {
-            McpToolParam toolParam = parameter.getAnnotation(McpToolParam.class);
+        Stream<Parameter> parameters = Stream.of(method.getParameters());
+        List<Parameter> params = parameters.filter(p -> p.isAnnotationPresent(McpToolParam.class)).toList();
+
+        for (Parameter param : params) {
+            McpToolParam toolParam = param.getAnnotation(McpToolParam.class);
             final String parameterName = toolParam.name();
-            Class<?> parameterType = parameter.getType();
+            Class<?> parameterType = param.getType();
             Map<String, String> property = new HashMap<>();
 
             if (parameterType.getAnnotation(McpJsonSchemaDefinition.class) == null) {
@@ -112,10 +116,14 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
         Map<String, Object> properties = new LinkedHashMap<>();
         List<String> required = new ArrayList<>();
 
-        ReflectionHelper.doWithFields(definitionClass, field -> {
+        Reflections reflections = injector.getInstance(Reflections.class);
+        Set<Field> definitionFields = reflections.getFieldsAnnotatedWith(McpJsonSchemaDefinitionProperty.class);
+        List<Field> fields = definitionFields.stream().filter(f -> f.getDeclaringClass() == definitionClass).toList();
+
+        for (Field field : fields) {
             McpJsonSchemaDefinitionProperty property = field.getAnnotation(McpJsonSchemaDefinitionProperty.class);
             if (property == null) {
-                return;
+                continue;
             }
 
             Map<String, Object> fieldProperties = new HashMap<>();
@@ -128,7 +136,7 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
             if (property.required()) {
                 required.add(fieldName);
             }
-        });
+        }
 
         definitionJsonSchema.put("properties", properties);
         definitionJsonSchema.put("required", required);

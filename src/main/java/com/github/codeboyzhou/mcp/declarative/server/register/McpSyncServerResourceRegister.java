@@ -3,7 +3,6 @@ package com.github.codeboyzhou.mcp.declarative.server.register;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
-import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -29,7 +28,8 @@ public class McpSyncServerResourceRegister extends McpSyncServerComponentRegiste
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
         for (Class<?> resourceClass : resourceClasses) {
-            List<Method> methods = ReflectionHelper.getMethodsAnnotatedWith(resourceClass, McpResource.class);
+            Set<Method> resourceMethods = reflections.getMethodsAnnotatedWith(McpResource.class);
+            List<Method> methods = resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
             for (Method method : methods) {
                 McpServerFeatures.SyncResourceSpecification resource = createComponentFrom(resourceClass, method);
                 server.addResource(resource);

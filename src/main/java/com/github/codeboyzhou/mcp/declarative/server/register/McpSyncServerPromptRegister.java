@@ -4,7 +4,6 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
-import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
@@ -21,6 +20,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Stream;
 
 public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncPromptSpecification> {
 
@@ -35,7 +35,8 @@ public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
         for (Class<?> promptClass : promptClasses) {
-            List<Method> methods = ReflectionHelper.getMethodsAnnotatedWith(promptClass, McpPrompt.class);
+            Set<Method> promptMethods = reflections.getMethodsAnnotatedWith(McpPrompt.class);
+            List<Method> methods = promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
             for (Method method : methods) {
                 McpServerFeatures.SyncPromptSpecification prompt = createComponentFrom(promptClass, method);
                 server.addPrompt(prompt);
@@ -68,10 +69,11 @@ public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<
     }
 
     private List<McpSchema.PromptArgument> createPromptArguments(Method method) {
-        List<Parameter> parameters = ReflectionHelper.getParametersAnnotatedWith(method, McpPromptParam.class);
-        List<McpSchema.PromptArgument> promptArguments = new ArrayList<>(parameters.size());
-        for (Parameter parameter : parameters) {
-            McpPromptParam promptParam = parameter.getAnnotation(McpPromptParam.class);
+        Stream<Parameter> parameters = Stream.of(method.getParameters());
+        List<Parameter> params = parameters.filter(p -> p.isAnnotationPresent(McpPromptParam.class)).toList();
+        List<McpSchema.PromptArgument> promptArguments = new ArrayList<>(params.size());
+        for (Parameter param : params) {
+            McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
             final String name = promptParam.name();
             final String description = promptParam.description();
             final boolean required = promptParam.required();
