@@ -1,6 +1,5 @@
 package com.github.codeboyzhou.mcp.declarative;
 
-import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YamlConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
@@ -8,18 +7,20 @@ import com.github.codeboyzhou.mcp.declarative.listener.DefaultMcpSyncHttpServerS
 import com.github.codeboyzhou.mcp.declarative.listener.McpHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.server.ConfigurableMcpSyncServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
-import com.github.codeboyzhou.mcp.declarative.server.McpServerComponentRegisters;
+import com.github.codeboyzhou.mcp.declarative.server.register.McpServerComponentRegisters;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSyncServerFactory;
+import com.github.codeboyzhou.mcp.declarative.util.GuiceInjector;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,31 +32,18 @@ public class McpServers {
 
     private static final McpServers INSTANCE = new McpServers();
 
-    private static Reflections reflections;
+    private static Injector injector;
 
     public static McpServers run(Class<?> applicationMainClass, String[] args) {
-        McpComponentScan scan = applicationMainClass.getAnnotation(McpComponentScan.class);
-        reflections = new Reflections(determineBasePackage(scan, applicationMainClass));
+        injector = Guice.createInjector(new GuiceInjector(applicationMainClass));
         return INSTANCE;
-    }
-
-    private static String determineBasePackage(McpComponentScan scan, Class<?> applicationMainClass) {
-        if (scan != null) {
-            if (!scan.basePackage().trim().isBlank()) {
-                return scan.basePackage();
-            }
-            if (scan.basePackageClass() != Object.class) {
-                return scan.basePackageClass().getPackageName();
-            }
-        }
-        return applicationMainClass.getPackageName();
     }
 
     public void startSyncStdioServer(McpServerInfo serverInfo) {
         McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
         McpServerTransportProvider transportProvider = new StdioServerTransportProvider();
         McpSyncServer server = factory.create(serverInfo, transportProvider);
-        McpServerComponentRegisters.registerAllTo(server, reflections);
+        new McpServerComponentRegisters(injector).registerAllTo(server);
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
@@ -64,7 +52,7 @@ public class McpServers {
             JsonHelper.MAPPER, serverInfo.baseUrl(), serverInfo.messageEndpoint(), serverInfo.sseEndpoint()
         );
         McpSyncServer server = factory.create(serverInfo, transportProvider);
-        McpServerComponentRegisters.registerAllTo(server, reflections);
+        new McpServerComponentRegisters(injector).registerAllTo(server);
         McpHttpServer<McpSyncServer> httpServer = new McpHttpServer<>();
         httpServer.with(transportProvider).with(serverInfo).with(listener).attach(server).start();
     }
@@ -94,7 +82,7 @@ public class McpServers {
     private void doStartServer(McpServerConfiguration configuration) {
         if (configuration.enabled()) {
             McpSyncServer server = new ConfigurableMcpSyncServerFactory(configuration).create();
-            McpServerComponentRegisters.registerAllTo(server, reflections);
+            new McpServerComponentRegisters(injector).registerAllTo(server);
             if (configuration.stdio()) {
                 startSyncStdioServer(McpServerInfo.from(configuration));
             } else {

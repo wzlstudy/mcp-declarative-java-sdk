@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.register;
 
 import java.lang.reflect.Method;
 

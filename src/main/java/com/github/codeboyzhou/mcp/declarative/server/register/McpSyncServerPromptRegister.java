@@ -1,12 +1,15 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.register;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
+import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,19 +19,18 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class McpSyncServerPromptRegister
-    implements McpServerComponentRegister<McpSyncServer, McpServerFeatures.SyncPromptSpecification> {
+public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncPromptSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpSyncServerPromptRegister.class);
 
-    private final Set<Class<?>> promptClasses;
-
-    public McpSyncServerPromptRegister(Set<Class<?>> promptClasses) {
-        this.promptClasses = promptClasses;
+    protected McpSyncServerPromptRegister(Injector injector) {
+        super(injector);
     }
 
     @Override
     public void registerTo(McpSyncServer server) {
+        Reflections reflections = injector.getInstance(Reflections.class);
+        Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
         for (Class<?> promptClass : promptClasses) {
             List<Method> methods = ReflectionHelper.getMethodsAnnotatedWith(promptClass, McpPrompt.class);
             for (Method method : methods) {

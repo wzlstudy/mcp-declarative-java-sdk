@@ -1,14 +1,17 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.register;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
+import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,21 +24,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public class McpSyncServerToolRegister
-    implements McpServerComponentRegister<McpSyncServer, McpServerFeatures.SyncToolSpecification> {
+public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncToolSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpSyncServerToolRegister.class);
 
     private static final String OBJECT_TYPE_NAME = Object.class.getSimpleName().toLowerCase();
 
-    private final Set<Class<?>> toolClasses;
-
-    public McpSyncServerToolRegister(Set<Class<?>> toolClasses) {
-        this.toolClasses = toolClasses;
+    protected McpSyncServerToolRegister(Injector injector) {
+        super(injector);
     }
 
     @Override
     public void registerTo(McpSyncServer server) {
+        Reflections reflections = injector.getInstance(Reflections.class);
+        Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
         for (Class<?> toolClass : toolClasses) {
             List<Method> methods = ReflectionHelper.getMethodsAnnotatedWith(toolClass, McpTool.class);
             for (Method method : methods) {

@@ -13,6 +13,9 @@ import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanIsNull;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpPrompts;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpResources;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpTools;
+import com.github.codeboyzhou.mcp.declarative.util.GuiceInjector;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +24,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 
-import java.lang.reflect.Field;
 import java.time.Duration;
 import java.util.Map;
 import java.util.Set;
@@ -35,16 +37,15 @@ class McpServersTest {
 
     static final String[] EMPTY_ARGS = new String[]{};
 
-    Reflections reflections;
-
     @BeforeEach
     void setUp() {
         System.setProperty("mcp.declarative.java.sdk.testing", "true");
     }
 
     @AfterEach
-    void tearDown() throws NoSuchFieldException, IllegalAccessException {
-        reflections = getReflectionsField();
+    void tearDown() {
+        Injector injector = Guice.createInjector(new GuiceInjector(TestMcpComponentScanIsNull.class));
+        Reflections reflections = injector.getInstance(Reflections.class);
         assertNotNull(reflections);
 
         Map<String, Set<String>> scannedClasses = reflections.getStore().get(Scanners.TypesAnnotated.name());
@@ -60,8 +61,6 @@ class McpServersTest {
         Set<String> scannedToolClass = scannedClasses.get(McpTools.class.getName());
         assertEquals(1, scannedToolClass.size());
         assertEquals(scannedToolClass.iterator().next(), TestMcpTools.class.getName());
-
-        reflections = null;
     }
 
     @ParameterizedTest
@@ -135,14 +134,6 @@ class McpServersTest {
             servers.startServer("mcp-server-not-exist.yml");
         });
         assertEquals("Error loading configuration file: mcp-server-not-exist.yml", e.getMessage());
-    }
-
-    private Reflections getReflectionsField() throws NoSuchFieldException, IllegalAccessException {
-        Field reflectionsField = McpServers.class.getDeclaredField("reflections");
-        reflectionsField.setAccessible(true);
-        Reflections reflections = (Reflections) reflectionsField.get(null);
-        reflectionsField.setAccessible(false);
-        return reflections;
     }
 
 }
