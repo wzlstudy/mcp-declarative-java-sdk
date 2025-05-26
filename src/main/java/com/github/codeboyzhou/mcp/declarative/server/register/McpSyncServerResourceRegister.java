@@ -49,8 +49,9 @@ public class McpSyncServerResourceRegister extends McpSyncServerComponentRegiste
         return new McpServerFeatures.SyncResourceSpecification(resource, (exchange, request) -> {
             Object result;
             try {
-                result = ReflectionHelper.invokeMethod(clazz, method);
-            } catch (Throwable e) {
+                Object instance = injector.getInstance(clazz);
+                result = method.invoke(instance);
+            } catch (Exception e) {
                 logger.error("Error invoking resource method", e);
                 result = e + ": " + e.getMessage();
             }

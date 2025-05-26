@@ -1,8 +1,12 @@
 package com.github.codeboyzhou.mcp.declarative.util;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
+import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.reflections.Reflections;
 
@@ -21,6 +25,14 @@ public final class GuiceInjector extends AbstractModule {
         McpComponentScan scan = applicationMainClass.getAnnotation(McpComponentScan.class);
         final String basePackage = determineBasePackage(scan, applicationMainClass);
         return new Reflections(basePackage);
+    }
+
+    @Override
+    protected void configure() {
+        Reflections reflections = provideReflections();
+        reflections.getTypesAnnotatedWith(McpResources.class).forEach(clazz -> bind(clazz).in(Scopes.SINGLETON));
+        reflections.getTypesAnnotatedWith(McpPrompts.class).forEach(clazz -> bind(clazz).in(Scopes.SINGLETON));
+        reflections.getTypesAnnotatedWith(McpTools.class).forEach(clazz -> bind(clazz).in(Scopes.SINGLETON));
     }
 
     private String determineBasePackage(McpComponentScan scan, Class<?> applicationMainClass) {

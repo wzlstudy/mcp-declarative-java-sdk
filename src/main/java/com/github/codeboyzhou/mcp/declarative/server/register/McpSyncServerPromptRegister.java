@@ -5,6 +5,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
+import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -16,7 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncPromptSpecification> {
@@ -51,8 +54,10 @@ public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<
         return new McpServerFeatures.SyncPromptSpecification(prompt, (exchange, request) -> {
             Object result;
             try {
-                result = ReflectionHelper.invokeMethod(clazz, method, promptArguments, request.arguments());
-            } catch (Throwable e) {
+                Object instance = injector.getInstance(clazz);
+                Map<String, Object> typedParameters = asTypedParameters(method, promptArguments, request.arguments());
+                result = method.invoke(instance, typedParameters.values().toArray());
+            } catch (Exception e) {
                 logger.error("Error invoking prompt method", e);
                 result = e + ": " + e.getMessage();
             }
@@ -74,6 +79,22 @@ public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<
             promptArguments.add(promptArgument);
         }
         return promptArguments;
+    }
+
+    private Map<String, Object> asTypedParameters(Method method, List<McpSchema.PromptArgument> arguments, Map<String, Object> parameters) {
+        Class<?>[] parameterTypes = method.getParameterTypes();
+        Map<String, Object> typedParameters = new LinkedHashMap<>(parameters.size());
+
+        for (int i = 0, size = arguments.size(); i < size; i++) {
+            final String parameterName = arguments.get(i).name();
+            final Object parameterValue = parameters.get(parameterName);
+            // Fill in a default value when the parameter is not specified
+            // to ensure that the parameter type is correct when calling method.invoke()
+            Object typedParameterValue = TypeConverter.convert(parameterValue, parameterTypes[i]);
+            typedParameters.put(parameterName, typedParameterValue);
+        }
+
+        return typedParameters;
     }
 
 }

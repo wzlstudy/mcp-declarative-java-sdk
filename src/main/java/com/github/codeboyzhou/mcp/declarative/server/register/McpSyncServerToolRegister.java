@@ -7,6 +7,8 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.ReflectionHelper;
+import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
+import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -58,8 +60,10 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
             Object result;
             boolean isError = false;
             try {
-                result = ReflectionHelper.invokeMethod(clazz, method, paramSchema, params);
-            } catch (Throwable e) {
+                Object instance = injector.getInstance(clazz);
+                Map<String, Object> typedParameters = asTypedParameters(paramSchema, params);
+                result = method.invoke(instance, typedParameters.values().toArray());
+            } catch (Exception e) {
                 logger.error("Error invoking tool method", e);
                 result = e + ": " + e.getMessage();
                 isError = true;
@@ -130,6 +134,24 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
         definitionJsonSchema.put("required", required);
 
         return definitionJsonSchema;
+    }
+
+    @SuppressWarnings("unchecked")
+    private Map<String, Object> asTypedParameters(McpSchema.JsonSchema schema, Map<String, Object> parameters) {
+        Map<String, Object> properties = schema.properties();
+        Map<String, Object> typedParameters = new LinkedHashMap<>(properties.size());
+
+        properties.forEach((parameterName, parameterProperties) -> {
+            Object parameterValue = parameters.get(parameterName);
+            // Fill in a default value when the parameter is not specified
+            // to ensure that the parameter type is correct when calling method.invoke()
+            Map<String, Object> map = (Map<String, Object>) parameterProperties;
+            final String jsonSchemaType = map.getOrDefault("type", StringHelper.EMPTY).toString();
+            Object typedParameterValue = TypeConverter.convert(parameterValue, jsonSchemaType);
+            typedParameters.put(parameterName, typedParameterValue);
+        });
+
+        return typedParameters;
     }
 
 }
