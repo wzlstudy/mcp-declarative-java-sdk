@@ -47,7 +47,7 @@ public class MyMcpServer {
 }
 ```
 
-This is a yaml configuration file example (named `mcp-server.yml` by default, or also `mcp-server.yaml`) only if you are using `startServer()` method:
+This is a yaml configuration file example (named `mcp-server.yml` by default) only if you are using `startServer()` method:
 
 ```yaml
 enabled: true

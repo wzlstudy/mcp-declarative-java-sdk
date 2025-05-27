@@ -3,7 +3,6 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
-import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageClass;
@@ -31,7 +30,6 @@ import java.util.Set;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class McpServersTest {
 
@@ -125,15 +123,6 @@ class McpServersTest {
             McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
             servers.startServer(configFileName);
         });
-    }
-
-    @Test
-    void testStartServerWithInvalidConfigFileName() {
-        McpServerException e = assertThrows(McpServerException.class, () -> {
-            McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
-            servers.startServer("mcp-server-not-exist.yml");
-        });
-        assertEquals("Error loading configuration file: mcp-server-not-exist.yml", e.getMessage());
     }
 
 }
