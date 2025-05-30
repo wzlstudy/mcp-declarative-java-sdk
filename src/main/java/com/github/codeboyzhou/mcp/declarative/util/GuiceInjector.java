@@ -9,6 +9,7 @@ import com.google.inject.Provides;
 import com.google.inject.Scopes;
 import com.google.inject.Singleton;
 import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 
 public final class GuiceInjector extends AbstractModule {
 
@@ -24,7 +25,7 @@ public final class GuiceInjector extends AbstractModule {
     public Reflections provideReflections() {
         McpComponentScan scan = applicationMainClass.getAnnotation(McpComponentScan.class);
         final String basePackage = determineBasePackage(scan, applicationMainClass);
-        return new Reflections(basePackage);
+        return new Reflections(basePackage, Scanners.TypesAnnotated, Scanners.MethodsAnnotated, Scanners.FieldsAnnotated);
     }
 
     @Override
