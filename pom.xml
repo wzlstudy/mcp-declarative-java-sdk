@@ -51,6 +51,7 @@
         <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
         <sortpom-maven-plugin.version>4.0.0</sortpom-maven-plugin.version>
         <!--==================== dependency versions ======================-->
+        <annotations.version>24.0.0</annotations.version>
         <guice.version>6.0.0</guice.version>
         <jackson-dataformat-yaml.version>2.18.3</jackson-dataformat-yaml.version>
         <jetty.version>12.0.18</jetty.version>
@@ -98,6 +99,12 @@
             <groupId>org.eclipse.jetty.ee10</groupId>
             <artifactId>jetty-ee10-servlet</artifactId>
             <version>${jetty.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains</groupId>
+            <artifactId>annotations</artifactId>
+            <version>${annotations.version}</version>
+            <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>

@@ -40,14 +40,16 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
     public void registerTo(McpSyncServer server) {
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
+        ComponentBufferQueue<McpSyncServer, McpServerFeatures.SyncToolSpecification> queue = new ComponentBufferQueue<>();
         for (Class<?> toolClass : toolClasses) {
             Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
             List<Method> methods = toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
             for (Method method : methods) {
                 McpServerFeatures.SyncToolSpecification tool = createComponentFrom(toolClass, method);
-                server.addTool(tool);
+                queue.submit(tool);
             }
         }
+        queue.consume(server, McpSyncServer::addTool);
     }
 
     @Override

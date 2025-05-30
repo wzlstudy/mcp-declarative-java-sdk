@@ -34,14 +34,16 @@ public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<
     public void registerTo(McpSyncServer server) {
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
+        ComponentBufferQueue<McpSyncServer, McpServerFeatures.SyncPromptSpecification> queue = new ComponentBufferQueue<>();
         for (Class<?> promptClass : promptClasses) {
             Set<Method> promptMethods = reflections.getMethodsAnnotatedWith(McpPrompt.class);
             List<Method> methods = promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
             for (Method method : methods) {
                 McpServerFeatures.SyncPromptSpecification prompt = createComponentFrom(promptClass, method);
-                server.addPrompt(prompt);
+                queue.submit(prompt);
             }
         }
+        queue.consume(server, McpSyncServer::addPrompt);
     }
 
     @Override

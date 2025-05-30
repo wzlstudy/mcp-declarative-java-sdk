@@ -27,14 +27,16 @@ public class McpSyncServerResourceRegister extends McpSyncServerComponentRegiste
     public void registerTo(McpSyncServer server) {
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
+        ComponentBufferQueue<McpSyncServer, McpServerFeatures.SyncResourceSpecification> queue = new ComponentBufferQueue<>();
         for (Class<?> resourceClass : resourceClasses) {
             Set<Method> resourceMethods = reflections.getMethodsAnnotatedWith(McpResource.class);
             List<Method> methods = resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
             for (Method method : methods) {
                 McpServerFeatures.SyncResourceSpecification resource = createComponentFrom(resourceClass, method);
-                server.addResource(resource);
+                queue.submit(resource);
             }
         }
+        queue.consume(server, McpSyncServer::addResource);
     }
 
     @Override
