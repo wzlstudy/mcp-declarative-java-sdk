@@ -1,19 +1,13 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
-import io.modelcontextprotocol.spec.McpSchema;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
-public interface McpServerFactory<T> {
+public interface McpServerFactory<T extends McpServerTransportProvider, S extends McpServerInfo> {
 
-    T create(McpServerInfo serverInfo, McpServerTransportProvider transportProvider);
+    T transportProvider(S serverInfo);
 
-    default McpSchema.ServerCapabilities configureServerCapabilities() {
-        return McpSchema.ServerCapabilities.builder()
-            .resources(true, true)
-            .prompts(true)
-            .tools(true)
-            .build();
-    }
+    McpAsyncServer create(S serverInfo);
 
 }

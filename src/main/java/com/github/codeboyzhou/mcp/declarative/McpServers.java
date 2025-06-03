@@ -4,21 +4,17 @@ import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfigurati
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.listener.DefaultMcpSyncHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.listener.McpHttpServerStatusListener;
-import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpSyncServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpSyncServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.register.McpServerComponentRegisters;
 import com.github.codeboyzhou.mcp.declarative.util.GuiceInjector;
-import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
-import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
-import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,21 +33,15 @@ public class McpServers {
     }
 
     public void startSyncStdioServer(McpServerInfo serverInfo) {
-        McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
-        McpServerTransportProvider transportProvider = new StdioServerTransportProvider();
-        McpSyncServer server = factory.create(serverInfo, transportProvider);
-        new McpServerComponentRegisters(injector).registerAllTo(server);
+        McpStdioServerFactory factory = new McpStdioServerFactory();
+        McpAsyncServer server = factory.create(serverInfo);
+        new McpServerComponentRegisters(injector).registerAllTo(new McpSyncServer(server));
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
-        McpServerFactory<McpSyncServer> factory = new McpSyncServerFactory();
-        HttpServletSseServerTransportProvider transportProvider = new HttpServletSseServerTransportProvider(
-            JsonHelper.MAPPER, serverInfo.baseUrl(), serverInfo.messageEndpoint(), serverInfo.sseEndpoint()
-        );
-        McpSyncServer server = factory.create(serverInfo, transportProvider);
-        new McpServerComponentRegisters(injector).registerAllTo(server);
-        McpHttpServer<McpSyncServer> httpServer = new McpHttpServer<>();
-        httpServer.with(transportProvider).with(serverInfo).with(listener).attach(server).start();
+        McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
+        McpAsyncServer server = factory.create(serverInfo);
+        new McpServerComponentRegisters(injector).registerAllTo(new McpSyncServer(server));
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo) {
