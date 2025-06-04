@@ -6,18 +6,19 @@ import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncResourceSpecification> {
+public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncResourceSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerResourceFactory.class);
 
@@ -27,7 +28,7 @@ public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<
     }
 
     @Override
-    public McpServerFeatures.SyncResourceSpecification create(Class<?> clazz, Method method) {
+    public McpServerFeatures.AsyncResourceSpecification create(Class<?> clazz, Method method) {
         McpResource res = method.getAnnotation(McpResource.class);
         final String name = res.name().isBlank() ? method.getName() : res.name();
         McpSchema.Resource resource = new McpSchema.Resource(
@@ -35,32 +36,34 @@ public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<
             new McpSchema.Annotations(List.of(res.roles()), res.priority())
         );
         logger.debug("Registering resource: {}", JsonHelper.toJson(resource));
-        return new McpServerFeatures.SyncResourceSpecification(resource, (exchange, request) -> {
-            Object result;
-            try {
-                Object instance = injector.getInstance(clazz);
-                result = method.invoke(instance);
-            } catch (Exception e) {
-                logger.error("Error invoking resource method", e);
-                result = e + ": " + e.getMessage();
-            }
-            McpSchema.ResourceContents contents = new McpSchema.TextResourceContents(
-                resource.uri(), resource.mimeType(), result.toString()
-            );
-            return new McpSchema.ReadResourceResult(List.of(contents));
-        });
+        return new McpServerFeatures.AsyncResourceSpecification(resource, (exchange, request) ->
+            Mono.fromSupplier(() -> {
+                Object result;
+                try {
+                    Object instance = injector.getInstance(clazz);
+                    result = method.invoke(instance);
+                } catch (Exception e) {
+                    logger.error("Error invoking resource method", e);
+                    result = e + ": " + e.getMessage();
+                }
+                McpSchema.ResourceContents contents = new McpSchema.TextResourceContents(
+                    resource.uri(), resource.mimeType(), result.toString()
+                );
+                return new McpSchema.ReadResourceResult(List.of(contents));
+            })
+        );
     }
 
     @Override
-    public void registerTo(McpSyncServer server) {
+    public void registerTo(McpAsyncServer server) {
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
-        BufferQueue<McpServerFeatures.SyncResourceSpecification> queue = new BufferQueue<>();
+        BufferQueue<McpServerFeatures.AsyncResourceSpecification> queue = new BufferQueue<>();
         for (Class<?> resourceClass : resourceClasses) {
             Set<Method> resourceMethods = reflections.getMethodsAnnotatedWith(McpResource.class);
             List<Method> methods = resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
             for (Method method : methods) {
-                McpServerFeatures.SyncResourceSpecification resource = create(resourceClass, method);
+                McpServerFeatures.AsyncResourceSpecification resource = create(resourceClass, method);
                 queue.submit(resource);
             }
         }

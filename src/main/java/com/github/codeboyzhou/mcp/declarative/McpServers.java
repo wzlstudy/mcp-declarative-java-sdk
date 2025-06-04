@@ -79,10 +79,9 @@ public class McpServers {
     }
 
     private void registerComponents(McpAsyncServer server) {
-        McpSyncServer syncServer = new McpSyncServer(server);
-        injector.getInstance(McpServerResourceFactory.class).registerTo(syncServer);
-        injector.getInstance(McpServerPromptFactory.class).registerTo(syncServer);
-        injector.getInstance(McpServerToolFactory.class).registerTo(syncServer);
+        injector.getInstance(McpServerResourceFactory.class).registerTo(server);
+        injector.getInstance(McpServerPromptFactory.class).registerTo(server);
+        injector.getInstance(McpServerToolFactory.class).registerTo(server);
     }
 
 }

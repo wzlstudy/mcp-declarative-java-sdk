@@ -12,12 +12,13 @@ import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncToolSpecification> {
+public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncToolSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerToolFactory.class);
 
@@ -40,39 +41,41 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
     }
 
     @Override
-    public McpServerFeatures.SyncToolSpecification create(Class<?> clazz, Method method) {
+    public McpServerFeatures.AsyncToolSpecification create(Class<?> clazz, Method method) {
         McpTool toolMethod = method.getAnnotation(McpTool.class);
         McpSchema.JsonSchema paramSchema = createJsonSchema(method);
         final String name = toolMethod.name().isBlank() ? method.getName() : toolMethod.name();
         McpSchema.Tool tool = new McpSchema.Tool(name, toolMethod.description(), paramSchema);
         logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
-        return new McpServerFeatures.SyncToolSpecification(tool, (exchange, params) -> {
-            Object result;
-            boolean isError = false;
-            try {
-                Object instance = injector.getInstance(clazz);
-                Map<String, Object> typedParameters = asTypedParameters(paramSchema, params);
-                result = method.invoke(instance, typedParameters.values().toArray());
-            } catch (Exception e) {
-                logger.error("Error invoking tool method", e);
-                result = e + ": " + e.getMessage();
-                isError = true;
-            }
-            McpSchema.Content content = new McpSchema.TextContent(result.toString());
-            return new McpSchema.CallToolResult(List.of(content), isError);
-        });
+        return new McpServerFeatures.AsyncToolSpecification(tool, (exchange, params) ->
+            Mono.fromSupplier(() -> {
+                Object result;
+                boolean isError = false;
+                try {
+                    Object instance = injector.getInstance(clazz);
+                    Map<String, Object> typedParameters = asTypedParameters(paramSchema, params);
+                    result = method.invoke(instance, typedParameters.values().toArray());
+                } catch (Exception e) {
+                    logger.error("Error invoking tool method", e);
+                    result = e + ": " + e.getMessage();
+                    isError = true;
+                }
+                McpSchema.Content content = new McpSchema.TextContent(result.toString());
+                return new McpSchema.CallToolResult(List.of(content), isError);
+            })
+        );
     }
 
     @Override
-    public void registerTo(McpSyncServer server) {
+    public void registerTo(McpAsyncServer server) {
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
-        BufferQueue<McpServerFeatures.SyncToolSpecification> queue = new BufferQueue<>();
+        BufferQueue<McpServerFeatures.AsyncToolSpecification> queue = new BufferQueue<>();
         for (Class<?> toolClass : toolClasses) {
             Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
             List<Method> methods = toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
             for (Method method : methods) {
-                McpServerFeatures.SyncToolSpecification tool = create(toolClass, method);
+                McpServerFeatures.AsyncToolSpecification tool = create(toolClass, method);
                 queue.submit(tool);
             }
         }

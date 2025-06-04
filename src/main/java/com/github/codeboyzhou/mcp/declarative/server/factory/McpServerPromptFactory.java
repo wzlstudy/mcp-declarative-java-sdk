@@ -8,12 +8,13 @@ import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import reactor.core.publisher.Mono;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -24,7 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncPromptSpecification> {
+public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncPromptSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerPromptFactory.class);
 
@@ -34,39 +35,41 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
     }
 
     @Override
-    public McpServerFeatures.SyncPromptSpecification create(Class<?> clazz, Method method) {
+    public McpServerFeatures.AsyncPromptSpecification create(Class<?> clazz, Method method) {
         McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
         final String name = promptMethod.name().isBlank() ? method.getName() : promptMethod.name();
         final String description = promptMethod.description();
         List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
         McpSchema.Prompt prompt = new McpSchema.Prompt(name, description, promptArguments);
         logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
-        return new McpServerFeatures.SyncPromptSpecification(prompt, (exchange, request) -> {
-            Object result;
-            try {
-                Object instance = injector.getInstance(clazz);
-                Map<String, Object> typedParameters = asTypedParameters(method, promptArguments, request.arguments());
-                result = method.invoke(instance, typedParameters.values().toArray());
-            } catch (Exception e) {
-                logger.error("Error invoking prompt method", e);
-                result = e + ": " + e.getMessage();
-            }
-            McpSchema.Content content = new McpSchema.TextContent(result.toString());
-            McpSchema.PromptMessage message = new McpSchema.PromptMessage(McpSchema.Role.USER, content);
-            return new McpSchema.GetPromptResult(description, List.of(message));
-        });
+        return new McpServerFeatures.AsyncPromptSpecification(prompt, (exchange, request) ->
+            Mono.fromSupplier(() -> {
+                Object result;
+                try {
+                    Object instance = injector.getInstance(clazz);
+                    Map<String, Object> typedParameters = asTypedParameters(method, promptArguments, request.arguments());
+                    result = method.invoke(instance, typedParameters.values().toArray());
+                } catch (Exception e) {
+                    logger.error("Error invoking prompt method", e);
+                    result = e + ": " + e.getMessage();
+                }
+                McpSchema.Content content = new McpSchema.TextContent(result.toString());
+                McpSchema.PromptMessage message = new McpSchema.PromptMessage(McpSchema.Role.USER, content);
+                return new McpSchema.GetPromptResult(description, List.of(message));
+            })
+        );
     }
 
     @Override
-    public void registerTo(McpSyncServer server) {
+    public void registerTo(McpAsyncServer server) {
         Reflections reflections = injector.getInstance(Reflections.class);
         Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
-        BufferQueue<McpServerFeatures.SyncPromptSpecification> queue = new BufferQueue<>();
+        BufferQueue<McpServerFeatures.AsyncPromptSpecification> queue = new BufferQueue<>();
         for (Class<?> promptClass : promptClasses) {
             Set<Method> promptMethods = reflections.getMethodsAnnotatedWith(McpPrompt.class);
             List<Method> methods = promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
             for (Method method : methods) {
-                McpServerFeatures.SyncPromptSpecification prompt = create(promptClass, method);
+                McpServerFeatures.AsyncPromptSpecification prompt = create(promptClass, method);
                 queue.submit(prompt);
             }
         }
