@@ -37,20 +37,35 @@ public class McpServers {
         return INSTANCE;
     }
 
+    @Deprecated(since = "0.5.0", forRemoval = true)
     public void startSyncStdioServer(McpServerInfo serverInfo) {
         McpStdioServerFactory factory = new McpStdioServerFactory();
         McpAsyncServer server = factory.create(serverInfo);
         registerComponents(server);
     }
 
+    @Deprecated(since = "0.5.0", forRemoval = true)
     public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
         McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
         McpAsyncServer server = factory.create(serverInfo);
         registerComponents(server);
     }
 
+    @Deprecated(since = "0.5.0", forRemoval = true)
     public void startSyncSseServer(McpSseServerInfo serverInfo) {
         startSyncSseServer(serverInfo, new DefaultMcpSyncHttpServerStatusListener());
+    }
+
+    public void startStdioServer(McpServerInfo serverInfo) {
+        McpStdioServerFactory factory = new McpStdioServerFactory();
+        McpAsyncServer server = factory.create(serverInfo);
+        registerComponents(server);
+    }
+
+    public void startSseServer(McpSseServerInfo serverInfo) {
+        McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
+        McpAsyncServer server = factory.create(serverInfo);
+        registerComponents(server);
     }
 
     public void startServer(String configFileName) {
