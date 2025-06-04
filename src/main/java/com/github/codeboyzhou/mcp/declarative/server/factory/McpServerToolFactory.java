@@ -1,14 +1,16 @@
-package com.github.codeboyzhou.mcp.declarative.server.register;
+package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
+import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -28,32 +30,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncToolSpecification> {
+public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncToolSpecification> {
 
-    private static final Logger logger = LoggerFactory.getLogger(McpSyncServerToolRegister.class);
+    private static final Logger logger = LoggerFactory.getLogger(McpServerToolFactory.class);
 
-    protected McpSyncServerToolRegister(Injector injector) {
+    @Inject
+    protected McpServerToolFactory(Injector injector) {
         super(injector);
     }
 
     @Override
-    public void registerTo(McpSyncServer server) {
-        Reflections reflections = injector.getInstance(Reflections.class);
-        Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
-        ComponentBufferQueue<McpSyncServer, McpServerFeatures.SyncToolSpecification> queue = new ComponentBufferQueue<>();
-        for (Class<?> toolClass : toolClasses) {
-            Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
-            List<Method> methods = toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
-            for (Method method : methods) {
-                McpServerFeatures.SyncToolSpecification tool = createComponentFrom(toolClass, method);
-                queue.submit(tool);
-            }
-        }
-        queue.consume(server, McpSyncServer::addTool);
-    }
-
-    @Override
-    public McpServerFeatures.SyncToolSpecification createComponentFrom(Class<?> clazz, Method method) {
+    public McpServerFeatures.SyncToolSpecification create(Class<?> clazz, Method method) {
         McpTool toolMethod = method.getAnnotation(McpTool.class);
         McpSchema.JsonSchema paramSchema = createJsonSchema(method);
         final String name = toolMethod.name().isBlank() ? method.getName() : toolMethod.name();
@@ -74,6 +61,22 @@ public class McpSyncServerToolRegister extends McpSyncServerComponentRegister<Mc
             McpSchema.Content content = new McpSchema.TextContent(result.toString());
             return new McpSchema.CallToolResult(List.of(content), isError);
         });
+    }
+
+    @Override
+    public void registerTo(McpSyncServer server) {
+        Reflections reflections = injector.getInstance(Reflections.class);
+        Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
+        BufferQueue<McpServerFeatures.SyncToolSpecification> queue = new BufferQueue<>();
+        for (Class<?> toolClass : toolClasses) {
+            Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
+            List<Method> methods = toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
+            for (Method method : methods) {
+                McpServerFeatures.SyncToolSpecification tool = create(toolClass, method);
+                queue.submit(tool);
+            }
+        }
+        queue.consume(server::addTool);
     }
 
     private McpSchema.JsonSchema createJsonSchema(Method method) {

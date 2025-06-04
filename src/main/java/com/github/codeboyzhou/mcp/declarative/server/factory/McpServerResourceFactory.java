@@ -1,8 +1,10 @@
-package com.github.codeboyzhou.mcp.declarative.server.register;
+package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
+import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -15,32 +17,17 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
-public class McpSyncServerResourceRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncResourceSpecification> {
+public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncResourceSpecification> {
 
-    private static final Logger logger = LoggerFactory.getLogger(McpSyncServerResourceRegister.class);
+    private static final Logger logger = LoggerFactory.getLogger(McpServerResourceFactory.class);
 
-    protected McpSyncServerResourceRegister(Injector injector) {
+    @Inject
+    protected McpServerResourceFactory(Injector injector) {
         super(injector);
     }
 
     @Override
-    public void registerTo(McpSyncServer server) {
-        Reflections reflections = injector.getInstance(Reflections.class);
-        Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
-        ComponentBufferQueue<McpSyncServer, McpServerFeatures.SyncResourceSpecification> queue = new ComponentBufferQueue<>();
-        for (Class<?> resourceClass : resourceClasses) {
-            Set<Method> resourceMethods = reflections.getMethodsAnnotatedWith(McpResource.class);
-            List<Method> methods = resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
-            for (Method method : methods) {
-                McpServerFeatures.SyncResourceSpecification resource = createComponentFrom(resourceClass, method);
-                queue.submit(resource);
-            }
-        }
-        queue.consume(server, McpSyncServer::addResource);
-    }
-
-    @Override
-    public McpServerFeatures.SyncResourceSpecification createComponentFrom(Class<?> clazz, Method method) {
+    public McpServerFeatures.SyncResourceSpecification create(Class<?> clazz, Method method) {
         McpResource res = method.getAnnotation(McpResource.class);
         final String name = res.name().isBlank() ? method.getName() : res.name();
         McpSchema.Resource resource = new McpSchema.Resource(
@@ -62,6 +49,22 @@ public class McpSyncServerResourceRegister extends McpSyncServerComponentRegiste
             );
             return new McpSchema.ReadResourceResult(List.of(contents));
         });
+    }
+
+    @Override
+    public void registerTo(McpSyncServer server) {
+        Reflections reflections = injector.getInstance(Reflections.class);
+        Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
+        BufferQueue<McpServerFeatures.SyncResourceSpecification> queue = new BufferQueue<>();
+        for (Class<?> resourceClass : resourceClasses) {
+            Set<Method> resourceMethods = reflections.getMethodsAnnotatedWith(McpResource.class);
+            List<Method> methods = resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
+            for (Method method : methods) {
+                McpServerFeatures.SyncResourceSpecification resource = create(resourceClass, method);
+                queue.submit(resource);
+            }
+        }
+        queue.consume(server::addResource);
     }
 
 }

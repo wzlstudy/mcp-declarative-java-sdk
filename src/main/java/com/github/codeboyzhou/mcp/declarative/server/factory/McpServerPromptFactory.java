@@ -1,10 +1,12 @@
-package com.github.codeboyzhou.mcp.declarative.server.register;
+package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
+import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
+import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -22,32 +24,17 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
-public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<McpServerFeatures.SyncPromptSpecification> {
+public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncPromptSpecification> {
 
-    private static final Logger logger = LoggerFactory.getLogger(McpSyncServerPromptRegister.class);
+    private static final Logger logger = LoggerFactory.getLogger(McpServerPromptFactory.class);
 
-    protected McpSyncServerPromptRegister(Injector injector) {
+    @Inject
+    protected McpServerPromptFactory(Injector injector) {
         super(injector);
     }
 
     @Override
-    public void registerTo(McpSyncServer server) {
-        Reflections reflections = injector.getInstance(Reflections.class);
-        Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
-        ComponentBufferQueue<McpSyncServer, McpServerFeatures.SyncPromptSpecification> queue = new ComponentBufferQueue<>();
-        for (Class<?> promptClass : promptClasses) {
-            Set<Method> promptMethods = reflections.getMethodsAnnotatedWith(McpPrompt.class);
-            List<Method> methods = promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
-            for (Method method : methods) {
-                McpServerFeatures.SyncPromptSpecification prompt = createComponentFrom(promptClass, method);
-                queue.submit(prompt);
-            }
-        }
-        queue.consume(server, McpSyncServer::addPrompt);
-    }
-
-    @Override
-    public McpServerFeatures.SyncPromptSpecification createComponentFrom(Class<?> clazz, Method method) {
+    public McpServerFeatures.SyncPromptSpecification create(Class<?> clazz, Method method) {
         McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
         final String name = promptMethod.name().isBlank() ? method.getName() : promptMethod.name();
         final String description = promptMethod.description();
@@ -68,6 +55,22 @@ public class McpSyncServerPromptRegister extends McpSyncServerComponentRegister<
             McpSchema.PromptMessage message = new McpSchema.PromptMessage(McpSchema.Role.USER, content);
             return new McpSchema.GetPromptResult(description, List.of(message));
         });
+    }
+
+    @Override
+    public void registerTo(McpSyncServer server) {
+        Reflections reflections = injector.getInstance(Reflections.class);
+        Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
+        BufferQueue<McpServerFeatures.SyncPromptSpecification> queue = new BufferQueue<>();
+        for (Class<?> promptClass : promptClasses) {
+            Set<Method> promptMethods = reflections.getMethodsAnnotatedWith(McpPrompt.class);
+            List<Method> methods = promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
+            for (Method method : methods) {
+                McpServerFeatures.SyncPromptSpecification prompt = create(promptClass, method);
+                queue.submit(prompt);
+            }
+        }
+        queue.consume(server::addPrompt);
     }
 
     private List<McpSchema.PromptArgument> createPromptArguments(Method method) {

@@ -1,47 +1,53 @@
-package com.github.codeboyzhou.mcp.declarative.server.register;
+package com.github.codeboyzhou.mcp.declarative.common;
 
-import com.github.codeboyzhou.mcp.declarative.util.NamedThreadFactory;
+import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
-public class ComponentBufferQueue<T, R> {
+public class BufferQueue<T> {
+
+    private static final Logger logger = LoggerFactory.getLogger(BufferQueue.class);
 
     private static final int DEFAULT_DELAYED_CONSUMPTION_MILLIS = 10;
 
-    private final BlockingQueue<R> queue = new LinkedBlockingQueue<>();
+    private final BlockingQueue<T> queue = new LinkedBlockingQueue<>();
 
     private final long delayMillis;
 
-    public ComponentBufferQueue(long delayMillis) {
+    public BufferQueue(long delayMillis) {
         if (delayMillis <= 0) {
             throw new IllegalArgumentException("delayMillis must be greater than 0");
         }
         this.delayMillis = delayMillis;
     }
 
-    public ComponentBufferQueue() {
+    public BufferQueue() {
         this(DEFAULT_DELAYED_CONSUMPTION_MILLIS);
     }
 
-    public void submit(R component) {
+    public void submit(T component) {
         try {
             queue.put(component);
+            logger.debug("Component submitted to queue: {}", JsonHelper.toJson(component));
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
     }
 
-    public void consume(T server, BiConsumer<T, R> consumer) {
+    public void consume(Consumer<T> consumer) {
         NamedThreadFactory threadFactory = new NamedThreadFactory(getClass().getSimpleName());
         Executors.newSingleThreadExecutor(threadFactory).execute(() -> {
             try {
                 while (!Thread.interrupted()) {
-                    R component = queue.take();
-                    consumer.accept(server, component);
+                    T component = queue.take();
+                    consumer.accept(component);
+                    logger.debug("Component consumed from queue: {}", JsonHelper.toJson(component));
                     TimeUnit.MILLISECONDS.sleep(delayMillis);
                 }
             } catch (InterruptedException e) {

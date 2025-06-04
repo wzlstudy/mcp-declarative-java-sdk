@@ -6,7 +6,8 @@ import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
 public abstract class AbstractMcpServerFactory<T extends McpServerTransportProvider, S extends McpServerInfo> implements McpServerFactory<T, S> {
 
-    protected McpSchema.ServerCapabilities serverCapabilities() {
+    @Override
+    public McpSchema.ServerCapabilities serverCapabilities() {
         return McpSchema.ServerCapabilities.builder()
             .resources(true, true)
             .prompts(true)

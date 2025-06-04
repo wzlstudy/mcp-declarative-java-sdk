@@ -3,47 +3,33 @@ package com.github.codeboyzhou.mcp.declarative.server.factory;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
-import com.github.codeboyzhou.mcp.declarative.configuration.McpServerSSE;
-import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.McpSyncServer;
-import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
-import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
 import java.time.Duration;
 
-public class ConfigurableMcpSyncServerFactory implements ConfigurableMcpServerFactory<McpSyncServer> {
+public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTransportProvider> implements ConfigurableMcpServerFactory<T> {
 
-    private final McpServerConfiguration configuration;
+    protected final McpServerConfiguration configuration;
 
-    public ConfigurableMcpSyncServerFactory(McpServerConfiguration configuration) {
+    protected AbstractConfigurableMcpServerFactory(McpServerConfiguration configuration) {
         this.configuration = configuration;
     }
 
     @Override
-    public McpSyncServer create() {
-        return McpServer.sync(transportProvider())
-            .instructions(configuration.instructions())
-            .capabilities(configureServerCapabilities())
+    public McpAsyncServer create() {
+        return McpServer.async(transportProvider())
             .serverInfo(configuration.name(), configuration.version())
+            .capabilities(serverCapabilities())
+            .instructions(configuration.instructions())
             .requestTimeout(Duration.ofMillis(configuration.requestTimeout()))
             .build();
     }
 
     @Override
-    public McpServerTransportProvider transportProvider() {
-        if (configuration.stdio()) {
-            return new StdioServerTransportProvider();
-        } else {
-            McpServerSSE sse = configuration.sse();
-            return new HttpServletSseServerTransportProvider(JsonHelper.MAPPER, sse.baseUrl(), sse.messageEndpoint(), sse.endpoint());
-        }
-    }
-
-    @Override
-    public McpSchema.ServerCapabilities configureServerCapabilities() {
+    public McpSchema.ServerCapabilities serverCapabilities() {
         McpSchema.ServerCapabilities.Builder capabilities = McpSchema.ServerCapabilities.builder();
         McpServerCapabilities capabilitiesConfig = configuration.capabilities();
         McpServerChangeNotification serverChangeNotification = configuration.changeNotification();

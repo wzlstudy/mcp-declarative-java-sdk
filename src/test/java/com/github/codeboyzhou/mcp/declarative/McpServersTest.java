@@ -12,7 +12,7 @@ import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanIsNull;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpPrompts;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpResources;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpTools;
-import com.github.codeboyzhou.mcp.declarative.util.GuiceInjector;
+import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.AfterEach;
@@ -42,7 +42,7 @@ class McpServersTest {
 
     @AfterEach
     void tearDown() {
-        Injector injector = Guice.createInjector(new GuiceInjector(TestMcpComponentScanIsNull.class));
+        Injector injector = Guice.createInjector(new GuiceInjectorModule(TestMcpComponentScanIsNull.class));
         Reflections reflections = injector.getInstance(Reflections.class);
         assertNotNull(reflections);
 

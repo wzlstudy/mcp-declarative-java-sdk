@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.util;
+package com.github.codeboyzhou.mcp.declarative.common;
 
 import org.jetbrains.annotations.NotNull;
 

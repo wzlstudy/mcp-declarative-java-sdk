@@ -1,20 +1,25 @@
 package com.github.codeboyzhou.mcp.declarative;
 
+import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.listener.DefaultMcpSyncHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.listener.McpHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpSyncServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerPromptFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerResourceFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerToolFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.register.McpServerComponentRegisters;
-import com.github.codeboyzhou.mcp.declarative.util.GuiceInjector;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpSyncServer;
+import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,20 +33,20 @@ public class McpServers {
     private static Injector injector;
 
     public static McpServers run(Class<?> applicationMainClass, String[] args) {
-        injector = Guice.createInjector(new GuiceInjector(applicationMainClass));
+        injector = Guice.createInjector(new GuiceInjectorModule(applicationMainClass));
         return INSTANCE;
     }
 
     public void startSyncStdioServer(McpServerInfo serverInfo) {
         McpStdioServerFactory factory = new McpStdioServerFactory();
         McpAsyncServer server = factory.create(serverInfo);
-        new McpServerComponentRegisters(injector).registerAllTo(new McpSyncServer(server));
+        registerComponents(server);
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
         McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
         McpAsyncServer server = factory.create(serverInfo);
-        new McpServerComponentRegisters(injector).registerAllTo(new McpSyncServer(server));
+        registerComponents(server);
     }
 
     public void startSyncSseServer(McpSseServerInfo serverInfo) {
@@ -58,17 +63,26 @@ public class McpServers {
     }
 
     private void doStartServer(McpServerConfiguration configuration) {
-        if (configuration.enabled()) {
-            McpSyncServer server = new ConfigurableMcpSyncServerFactory(configuration).create();
-            new McpServerComponentRegisters(injector).registerAllTo(server);
-            if (configuration.stdio()) {
-                startSyncStdioServer(McpServerInfo.from(configuration));
-            } else {
-                startSyncSseServer(McpSseServerInfo.from(configuration));
-            }
-        } else {
-            logger.info("MCP server is disabled.");
+        if (!configuration.enabled()) {
+            logger.warn("MCP server is disabled, please check your configuration file.");
+            return;
         }
+
+        ConfigurableMcpServerFactory<? extends McpServerTransportProvider> factory;
+        if (configuration.stdio()) {
+            factory = new ConfigurableMcpStdioServerFactory(configuration);
+        } else {
+            factory = new ConfigurableMcpHttpSseServerFactory(configuration);
+        }
+        McpAsyncServer server = factory.create();
+        registerComponents(server);
+    }
+
+    private void registerComponents(McpAsyncServer server) {
+        McpSyncServer syncServer = new McpSyncServer(server);
+        injector.getInstance(McpServerResourceFactory.class).registerTo(syncServer);
+        injector.getInstance(McpServerPromptFactory.class).registerTo(syncServer);
+        injector.getInstance(McpServerToolFactory.class).registerTo(syncServer);
     }
 
 }
