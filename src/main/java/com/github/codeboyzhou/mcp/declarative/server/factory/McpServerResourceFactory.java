@@ -31,10 +31,9 @@ public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<
     public McpServerFeatures.AsyncResourceSpecification create(Class<?> clazz, Method method) {
         McpResource res = method.getAnnotation(McpResource.class);
         final String name = res.name().isBlank() ? method.getName() : res.name();
-        McpSchema.Resource resource = new McpSchema.Resource(
-            res.uri(), name, res.description(), res.mimeType(),
-            new McpSchema.Annotations(List.of(res.roles()), res.priority())
-        );
+        final String description = getDescription(res.descriptionI18nKey(), res.description());
+        McpSchema.Annotations annotations = new McpSchema.Annotations(List.of(res.roles()), res.priority());
+        McpSchema.Resource resource = new McpSchema.Resource(res.uri(), name, description, res.mimeType(), annotations);
         logger.debug("Registering resource: {}", JsonHelper.toJson(resource));
         return new McpServerFeatures.AsyncResourceSpecification(resource, (exchange, request) ->
             Mono.fromSupplier(() -> {

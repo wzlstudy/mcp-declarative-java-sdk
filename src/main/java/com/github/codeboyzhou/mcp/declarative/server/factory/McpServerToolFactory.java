@@ -45,7 +45,8 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
         McpTool toolMethod = method.getAnnotation(McpTool.class);
         McpSchema.JsonSchema paramSchema = createJsonSchema(method);
         final String name = toolMethod.name().isBlank() ? method.getName() : toolMethod.name();
-        McpSchema.Tool tool = new McpSchema.Tool(name, toolMethod.description(), paramSchema);
+        final String description = getDescription(toolMethod.descriptionI18nKey(), toolMethod.description());
+        McpSchema.Tool tool = new McpSchema.Tool(name, description, paramSchema);
         logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
         return new McpServerFeatures.AsyncToolSpecification(tool, (exchange, params) ->
             Mono.fromSupplier(() -> {
@@ -98,7 +99,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
 
             if (parameterType.getAnnotation(McpJsonSchemaDefinition.class) == null) {
                 property.put("type", parameterType.getSimpleName().toLowerCase());
-                property.put("description", toolParam.description());
+                property.put("description", getDescription(toolParam.descriptionI18nKey(), toolParam.description()));
             } else {
                 final String parameterTypeSimpleName = parameterType.getSimpleName();
                 property.put("$ref", "#/definitions/" + parameterTypeSimpleName);
@@ -135,7 +136,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
 
             Map<String, Object> fieldProperties = new HashMap<>();
             fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
-            fieldProperties.put("description", property.description());
+            fieldProperties.put("description", getDescription(property.descriptionI18nKey(), property.description()));
 
             final String fieldName = property.name().isBlank() ? field.getName() : property.name();
             properties.put(fieldName, fieldProperties);

@@ -38,7 +38,7 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
     public McpServerFeatures.AsyncPromptSpecification create(Class<?> clazz, Method method) {
         McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
         final String name = promptMethod.name().isBlank() ? method.getName() : promptMethod.name();
-        final String description = promptMethod.description();
+        final String description = getDescription(promptMethod.descriptionI18nKey(), promptMethod.description());
         List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
         McpSchema.Prompt prompt = new McpSchema.Prompt(name, description, promptArguments);
         logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
@@ -83,7 +83,7 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
         for (Parameter param : params) {
             McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
             final String name = promptParam.name();
-            final String description = promptParam.description();
+            final String description = getDescription(promptParam.descriptionI18nKey(), promptParam.description());
             final boolean required = promptParam.required();
             McpSchema.PromptArgument promptArgument = new McpSchema.PromptArgument(name, description, required);
             promptArguments.add(promptArgument);

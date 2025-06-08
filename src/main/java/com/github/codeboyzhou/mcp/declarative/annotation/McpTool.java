@@ -13,5 +13,8 @@ public @interface McpTool {
 
     String name() default StringHelper.EMPTY;
 
-    String description();
+    String description() default StringHelper.EMPTY;
+
+    String descriptionI18nKey() default StringHelper.EMPTY;
+
 }

@@ -15,11 +15,14 @@ public @interface McpResource {
 
     String name() default StringHelper.EMPTY;
 
-    String description();
+    String description() default StringHelper.EMPTY;
+
+    String descriptionI18nKey() default StringHelper.EMPTY;
 
     String mimeType() default "text/plain";
 
     McpSchema.Role[] roles() default {McpSchema.Role.ASSISTANT, McpSchema.Role.USER};
 
     double priority() default 1.0;
+
 }
