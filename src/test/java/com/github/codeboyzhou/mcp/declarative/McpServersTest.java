@@ -3,6 +3,7 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
+import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageClass;
@@ -12,7 +13,6 @@ import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanIsNull;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpPrompts;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpResources;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpTools;
-import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import org.junit.jupiter.api.AfterEach;
@@ -73,7 +73,7 @@ class McpServersTest {
     }
 
     @Test
-    void testStartSyncStdioServer() {
+    void testStartStdioServer() {
         assertDoesNotThrow(() -> {
             McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
             McpServerInfo serverInfo = McpServerInfo.builder()
@@ -82,12 +82,12 @@ class McpServersTest {
                 .name("test-mcp-sync-stdio-server")
                 .version("1.0.0")
                 .build();
-            servers.startSyncStdioServer(serverInfo);
+            servers.startStdioServer(serverInfo);
         });
     }
 
     @Test
-    void testStartSyncSseServer() {
+    void testStartSseServer() {
         McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
         assertDoesNotThrow(() -> {
             McpSseServerInfo serverInfo = McpSseServerInfo.builder()
@@ -100,7 +100,7 @@ class McpServersTest {
                 .name("test-mcp-sync-sse-server")
                 .version("1.0.0")
                 .build();
-            servers.startSyncSseServer(serverInfo);
+            servers.startSseServer(serverInfo);
         });
     }
 
