@@ -1,6 +1,5 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
-import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 
 import java.time.Duration;
@@ -24,15 +23,6 @@ public class McpServerInfo {
 
     public static Builder<?> builder() {
         return new Builder<>();
-    }
-
-    public static McpServerInfo from(McpServerConfiguration configuration) {
-        Builder<?> builder = builder();
-        builder.name = configuration.name();
-        builder.version = configuration.version();
-        builder.instructions = configuration.instructions();
-        builder.requestTimeout = Duration.ofSeconds(configuration.requestTimeout());
-        return builder.build();
     }
 
     public String name() {
