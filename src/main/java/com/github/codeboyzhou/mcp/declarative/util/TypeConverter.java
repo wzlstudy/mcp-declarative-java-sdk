@@ -1,8 +1,14 @@
 package com.github.codeboyzhou.mcp.declarative.util;
 
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
+import org.jetbrains.annotations.VisibleForTesting;
 
 public final class TypeConverter {
+
+    @VisibleForTesting
+    TypeConverter() {
+        throw new UnsupportedOperationException("Utility class should not be instantiated");
+    }
 
     public static Object convert(Object value, Class<?> targetType) {
         if (value == null) {
