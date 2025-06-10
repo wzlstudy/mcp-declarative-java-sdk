@@ -66,7 +66,7 @@ public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<
                 queue.submit(resource);
             }
         }
-        queue.consume(server::addResource);
+        queue.consume(resource -> server.addResource(resource).subscribe());
     }
 
 }

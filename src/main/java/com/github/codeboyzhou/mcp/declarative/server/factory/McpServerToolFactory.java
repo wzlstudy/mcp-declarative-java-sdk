@@ -80,7 +80,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
                 queue.submit(tool);
             }
         }
-        queue.consume(server::addTool);
+        queue.consume(tool -> server.addTool(tool).subscribe());
     }
 
     private McpSchema.JsonSchema createJsonSchema(Method method) {

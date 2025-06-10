@@ -73,7 +73,7 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
                 queue.submit(prompt);
             }
         }
-        queue.consume(server::addPrompt);
+        queue.consume(prompt -> server.addPrompt(prompt).subscribe());
     }
 
     private List<McpSchema.PromptArgument> createPromptArguments(Method method) {
