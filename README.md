@@ -15,6 +15,7 @@ Declarative [MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) Dev
 - Get rid of complex and lengthy JSON schema definitions.
 - Just focus on your core logic (resources/prompts/tools).
 - Configuration file compatible with the Spring AI framework.
+- Built-in multi-languages support for MCP server (resources/prompts/tools).
 
 ## Showcase
 
@@ -30,18 +31,15 @@ import com.github.codeboyzhou.mcp.declarative.McpServers;
 public class MyMcpServer {
 
     public static void main(String[] args) {
+        McpServers servers = McpServers.run(MyMcpServer.class, args);
         // Start a STDIO MCP server
-        McpServers.run(MyMcpServer.class, args).startSyncStdioServer(
-            McpServerInfo.builder().name("mcp-server").version("1.0.0").build()
-        );
+        servers.startStdioServer(McpServerInfo.builder().name("mcp-server").version("1.0.0").build());
         // or a HTTP SSE MCP server
-        McpServers.run(MyMcpServer.class, args).startSyncSseServer(
-            McpSseServerInfo.builder().name("mcp-server").version("1.0.0").port(8080).build()
-        );
-        // or start with yaml configuration file (compatible with the Spring AI framework)
-        McpServers.run(MyMcpServer.class, args).startServer();
-        // or start with a specific configuration file (compatible with the Spring AI framework)
-        McpServers.run(MyMcpServer.class, args).startServer("my-mcp-server.yml");
+        servers.startSseServer(McpSseServerInfo.builder().name("mcp-server").version("1.0.0").port(8080).build());
+        // or start with yaml config file (compatible with the Spring AI framework)
+        servers.startServer();
+        // or start with a custom config file (compatible with the Spring AI framework)
+        servers.startServer("my-mcp-server.yml");
     }
 
 }
@@ -54,16 +52,21 @@ enabled: true
 stdio: false
 name: mcp-server
 version: 1.0.0
-instructions: mcp-server
-request-timeout: 30000
-type: SYNC
-resource-change-notification: true
-prompt-change-notification: true
-tool-change-notification: true
-sse-message-endpoint: /mcp/message
-sse-endpoint: /sse
-base-url: http://localhost:8080
-sse-port: 8080
+type: ASYNC
+request-timeout: 20000
+capabilities:
+  resource: true
+  prompt: true
+  tool: true
+change-notification:
+  resource: true
+  prompt: true
+  tool: true
+sse:
+  message-endpoint: /mcp/message
+  endpoint: /sse
+  base-url: http://localhost:8080
+  port: 8080
 ```
 
 No need to care about the low-level details of native MCP Java SDK and how to create the MCP resources, prompts, and tools. Just annotate them like this:
@@ -74,6 +77,8 @@ public class MyMcpResources {
 
     // This method defines a MCP resource to expose the OS env variables
     @McpResource(uri = "env://variables", description = "OS env variables")
+    // or you can use it like this to support multi-languages
+    @McpResource(uri = "env://variables", descriptionI18nKey = "your_i18n_key_in_properties_file")
     public String getSystemEnv() {
         // Just put your logic code here, forget about the MCP SDK details.
         return System.getenv().toString();
@@ -87,7 +92,10 @@ public class MyMcpResources {
 @McpPrompts
 public class MyMcpPrompts {
 
+    // This method defines a MCP prompt to read a file
     @McpPrompt(description = "A simple prompt to read a file")
+    // or you can use it like this to support multi-languages
+    @McpPrompt(descriptionI18nKey = "your_i18n_key_in_properties_file")
     public String readFile(
         @McpPromptParam(name = "path", description = "filepath", required = true) String path) {
         // Just put your logic code here, forget about the MCP SDK details.
@@ -103,6 +111,8 @@ public class MyMcpTools {
 
     // This method defines a MCP tool to read a file
     @McpTool(description = "Read complete file contents with UTF-8 encoding")
+    // or you can use it like this to support multi-languages
+    @McpTool(descriptionI18nKey = "your_i18n_key_in_properties_file")
     public String readFile(
         @McpToolParam(name = "path", description = "filepath", required = true) String path) {
         // Just put your logic code here, forget about the MCP SDK details.
@@ -133,7 +143,7 @@ Add the following Maven dependency to your project:
 <dependency>
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.4.0</version>
+    <version>0.5.0</version>
 </dependency>
 ```
 
