@@ -18,7 +18,7 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
 
     protected String getDescription(String descriptionI18nKey, String description) {
         if (!descriptionI18nKey.isBlank() && bundle.containsKey(descriptionI18nKey)) {
-            bundle.getString(descriptionI18nKey);
+            return bundle.getString(descriptionI18nKey);
         }
         if (!description.isBlank()) {
             return description;
