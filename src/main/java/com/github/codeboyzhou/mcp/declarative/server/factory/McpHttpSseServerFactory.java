@@ -1,11 +1,14 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
+import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
+
+import java.util.concurrent.Executors;
 
 public class McpHttpSseServerFactory extends AbstractMcpServerFactory<HttpServletSseServerTransportProvider, McpSseServerInfo> {
 
@@ -27,7 +30,8 @@ public class McpHttpSseServerFactory extends AbstractMcpServerFactory<HttpServle
             .requestTimeout(serverInfo.requestTimeout())
             .build();
         McpHttpServer httpServer = new McpHttpServer(transportProvider, serverInfo.port());
-        httpServer.start();
+        NamedThreadFactory threadFactory = new NamedThreadFactory(McpHttpServer.class.getSimpleName());
+        Executors.newSingleThreadExecutor(threadFactory).execute(httpServer::start);
         return server;
     }
 
