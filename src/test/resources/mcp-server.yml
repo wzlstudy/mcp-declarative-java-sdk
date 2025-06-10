@@ -1,8 +1,8 @@
 enabled: true
 stdio: false
-name: mcp-server
+name: mcp-server-test
 version: 1.0.0
-type: SYNC
+type: ASYNC
 request-timeout: 20000
 capabilities:
   resource: true

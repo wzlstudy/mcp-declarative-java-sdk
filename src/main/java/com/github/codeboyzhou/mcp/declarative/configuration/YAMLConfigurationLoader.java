@@ -2,6 +2,7 @@ package com.github.codeboyzhou.mcp.declarative.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -22,8 +23,6 @@ public class YAMLConfigurationLoader {
     private static final Logger logger = LoggerFactory.getLogger(YAMLConfigurationLoader.class);
 
     private static final ObjectMapper YAML_MAPPER = new ObjectMapper(new YAMLFactory());
-
-    private static final String DEFAULT_CONFIG_FILE_NAME = "mcp-server-default.yml";
 
     private static final String CONFIG_FILE_NAME = "mcp-server.yml";
 
@@ -54,9 +53,8 @@ public class YAMLConfigurationLoader {
             ClassLoader classLoader = YAMLConfigurationLoader.class.getClassLoader();
             URL configFileUrl = classLoader.getResource(fileName);
             if (configFileUrl == null) {
-                configFileUrl = classLoader.getResource(DEFAULT_CONFIG_FILE_NAME);
+                throw new McpServerException("Configuration file not found: " + fileName);
             }
-            assert configFileUrl != null;
             return Paths.get(configFileUrl.toURI());
         } catch (URISyntaxException e) {
             // should never happen
