@@ -3,8 +3,6 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
-import com.github.codeboyzhou.mcp.declarative.listener.DefaultMcpSyncHttpServerStatusListener;
-import com.github.codeboyzhou.mcp.declarative.listener.McpHttpServerStatusListener;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpHttpSseServerFactory;
@@ -18,7 +16,6 @@ import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFacto
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpAsyncServer;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
@@ -35,25 +32,6 @@ public class McpServers {
     public static McpServers run(Class<?> applicationMainClass, String[] args) {
         injector = Guice.createInjector(new GuiceInjectorModule(applicationMainClass));
         return INSTANCE;
-    }
-
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    public void startSyncStdioServer(McpServerInfo serverInfo) {
-        McpStdioServerFactory factory = new McpStdioServerFactory();
-        McpAsyncServer server = factory.create(serverInfo);
-        registerComponents(server);
-    }
-
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    public void startSyncSseServer(McpSseServerInfo serverInfo, McpHttpServerStatusListener<McpSyncServer> listener) {
-        McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
-        McpAsyncServer server = factory.create(serverInfo);
-        registerComponents(server);
-    }
-
-    @Deprecated(since = "0.5.0", forRemoval = true)
-    public void startSyncSseServer(McpSseServerInfo serverInfo) {
-        startSyncSseServer(serverInfo, new DefaultMcpSyncHttpServerStatusListener());
     }
 
     public void startStdioServer(McpServerInfo serverInfo) {
