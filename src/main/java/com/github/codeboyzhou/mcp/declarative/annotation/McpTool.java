@@ -17,6 +17,7 @@ public @interface McpTool {
 
     String description() default StringHelper.EMPTY;
 
+    @Deprecated
     String descriptionI18nKey() default StringHelper.EMPTY;
 
 }

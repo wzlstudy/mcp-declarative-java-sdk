@@ -19,6 +19,7 @@ public @interface McpResource {
 
     String description() default StringHelper.EMPTY;
 
+    @Deprecated
     String descriptionI18nKey() default StringHelper.EMPTY;
 
     String mimeType() default "text/plain";

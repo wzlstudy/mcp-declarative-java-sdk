@@ -14,6 +14,7 @@ public @interface McpJsonSchemaDefinitionProperty {
 
     String description() default StringHelper.EMPTY;
 
+    @Deprecated
     String descriptionI18nKey() default StringHelper.EMPTY;
 
     boolean required() default false;
