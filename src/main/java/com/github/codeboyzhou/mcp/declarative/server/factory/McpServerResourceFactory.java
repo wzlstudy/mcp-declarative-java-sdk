@@ -31,7 +31,7 @@ public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<
     @Override
     public McpServerFeatures.AsyncResourceSpecification create(Class<?> clazz, Method method) {
         McpResource res = method.getAnnotation(McpResource.class);
-        final String name = res.name().isBlank() ? method.getName() : res.name();
+        final String name = StringHelper.defaultIfBlank(res.name(), method.getName());
         final String title = StringHelper.defaultIfBlank(res.title(), NO_TITLE_SPECIFIED);
         final String description = getDescription(res.descriptionI18nKey(), res.description());
         McpSchema.Annotations annotations = new McpSchema.Annotations(List.of(res.roles()), res.priority());

@@ -38,7 +38,7 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
     @Override
     public McpServerFeatures.AsyncPromptSpecification create(Class<?> clazz, Method method) {
         McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
-        final String name = promptMethod.name().isBlank() ? method.getName() : promptMethod.name();
+        final String name = StringHelper.defaultIfBlank(promptMethod.name(), method.getName());
         final String title = StringHelper.defaultIfBlank(promptMethod.title(), NO_TITLE_SPECIFIED);
         final String description = getDescription(promptMethod.descriptionI18nKey(), promptMethod.description());
         List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);

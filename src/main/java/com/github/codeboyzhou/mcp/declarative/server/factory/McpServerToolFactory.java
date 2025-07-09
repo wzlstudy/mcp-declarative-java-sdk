@@ -43,7 +43,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
     @Override
     public McpServerFeatures.AsyncToolSpecification create(Class<?> clazz, Method method) {
         McpTool toolMethod = method.getAnnotation(McpTool.class);
-        final String name = toolMethod.name().isBlank() ? method.getName() : toolMethod.name();
+        final String name = StringHelper.defaultIfBlank(toolMethod.name(), method.getName());
         final String title = StringHelper.defaultIfBlank(toolMethod.title(), NO_TITLE_SPECIFIED);
         final String description = getDescription(toolMethod.descriptionI18nKey(), toolMethod.description());
         McpSchema.JsonSchema paramSchema = createJsonSchema(method);
@@ -139,7 +139,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
             fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
             fieldProperties.put("description", getDescription(property.descriptionI18nKey(), property.description()));
 
-            final String fieldName = property.name().isBlank() ? field.getName() : property.name();
+            final String fieldName = StringHelper.defaultIfBlank(property.name(), field.getName());
             properties.put(fieldName, fieldProperties);
 
             if (property.required()) {
