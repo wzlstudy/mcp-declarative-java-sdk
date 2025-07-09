@@ -13,6 +13,8 @@ public @interface McpPromptParam {
 
     String name();
 
+    String title() default StringHelper.EMPTY;
+
     String description() default StringHelper.EMPTY;
 
     String descriptionI18nKey() default StringHelper.EMPTY;

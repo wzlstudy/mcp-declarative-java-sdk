@@ -43,10 +43,11 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
     @Override
     public McpServerFeatures.AsyncToolSpecification create(Class<?> clazz, Method method) {
         McpTool toolMethod = method.getAnnotation(McpTool.class);
-        McpSchema.JsonSchema paramSchema = createJsonSchema(method);
         final String name = toolMethod.name().isBlank() ? method.getName() : toolMethod.name();
+        final String title = StringHelper.defaultIfBlank(toolMethod.title(), NO_TITLE_SPECIFIED);
         final String description = getDescription(toolMethod.descriptionI18nKey(), toolMethod.description());
-        McpSchema.Tool tool = new McpSchema.Tool(name, description, paramSchema);
+        McpSchema.JsonSchema paramSchema = createJsonSchema(method);
+        McpSchema.Tool tool = McpSchema.Tool.builder().name(name).title(title).description(description).inputSchema(paramSchema).build();
         logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
         return new McpServerFeatures.AsyncToolSpecification(tool, (exchange, params) ->
             Mono.fromSupplier(() -> {

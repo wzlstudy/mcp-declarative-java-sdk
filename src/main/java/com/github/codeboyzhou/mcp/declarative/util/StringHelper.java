@@ -11,4 +11,8 @@ public final class StringHelper {
         throw new UnsupportedOperationException("Utility class should not be instantiated");
     }
 
+    public static String defaultIfBlank(String str, String defaultValue) {
+        return str == null || str.trim().isBlank() ? defaultValue : str;
+    }
+
 }

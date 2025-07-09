@@ -15,6 +15,8 @@ public @interface McpResource {
 
     String name() default StringHelper.EMPTY;
 
+    String title() default StringHelper.EMPTY;
+
     String description() default StringHelper.EMPTY;
 
     String descriptionI18nKey() default StringHelper.EMPTY;

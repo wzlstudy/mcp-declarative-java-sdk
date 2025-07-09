@@ -13,6 +13,8 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
 
     private static final String RESOURCE_BUNDLE_BASE_NAME = "i18n/mcp_server_component_descriptions";
 
+    protected static final String NO_TITLE_SPECIFIED = "No title specified";
+
     protected final Injector injector;
 
     private final ResourceBundle bundle;

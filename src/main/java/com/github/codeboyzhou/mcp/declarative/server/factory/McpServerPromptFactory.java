@@ -5,6 +5,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -38,9 +39,10 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
     public McpServerFeatures.AsyncPromptSpecification create(Class<?> clazz, Method method) {
         McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
         final String name = promptMethod.name().isBlank() ? method.getName() : promptMethod.name();
+        final String title = StringHelper.defaultIfBlank(promptMethod.title(), NO_TITLE_SPECIFIED);
         final String description = getDescription(promptMethod.descriptionI18nKey(), promptMethod.description());
         List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
-        McpSchema.Prompt prompt = new McpSchema.Prompt(name, description, promptArguments);
+        McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
         logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
         return new McpServerFeatures.AsyncPromptSpecification(prompt, (exchange, request) ->
             Mono.fromSupplier(() -> {
@@ -83,9 +85,10 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
         for (Parameter param : params) {
             McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
             final String name = promptParam.name();
+            final String title = StringHelper.defaultIfBlank(promptParam.title(), NO_TITLE_SPECIFIED);
             final String description = getDescription(promptParam.descriptionI18nKey(), promptParam.description());
             final boolean required = promptParam.required();
-            McpSchema.PromptArgument promptArgument = new McpSchema.PromptArgument(name, description, required);
+            McpSchema.PromptArgument promptArgument = new McpSchema.PromptArgument(name, title, description, required);
             promptArguments.add(promptArgument);
         }
         return promptArguments;

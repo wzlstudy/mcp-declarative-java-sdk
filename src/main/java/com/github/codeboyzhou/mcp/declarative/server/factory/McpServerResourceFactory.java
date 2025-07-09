@@ -4,6 +4,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpAsyncServer;
@@ -31,9 +32,10 @@ public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<
     public McpServerFeatures.AsyncResourceSpecification create(Class<?> clazz, Method method) {
         McpResource res = method.getAnnotation(McpResource.class);
         final String name = res.name().isBlank() ? method.getName() : res.name();
+        final String title = StringHelper.defaultIfBlank(res.title(), NO_TITLE_SPECIFIED);
         final String description = getDescription(res.descriptionI18nKey(), res.description());
         McpSchema.Annotations annotations = new McpSchema.Annotations(List.of(res.roles()), res.priority());
-        McpSchema.Resource resource = new McpSchema.Resource(res.uri(), name, description, res.mimeType(), annotations);
+        McpSchema.Resource resource = new McpSchema.Resource(res.uri(), name, title, description, res.mimeType(), null, annotations);
         logger.debug("Registering resource: {}", JsonHelper.toJson(resource));
         return new McpServerFeatures.AsyncResourceSpecification(resource, (exchange, request) ->
             Mono.fromSupplier(() -> {
