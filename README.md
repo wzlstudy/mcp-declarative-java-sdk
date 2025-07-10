@@ -22,12 +22,12 @@ Declarative [MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) Dev
 Just put this one line code in your `main` method:
 
 ```java
-import com.github.codeboyzhou.mcp.declarative.McpServers;
-
 // You can use this annotation to specify the base package
 // to scan for MCP resources, prompts, tools, but it's optional.
 // If not specified, it will scan the package where the main method is located.
 @McpComponentScan(basePackage = "com.github.codeboyzhou.mcp.server.examples")
+// Use this annotation to enable multi-languages support for MCP server components.
+@McpI18nEnabled
 public class MyMcpServer {
 
     public static void main(String[] args) {
@@ -77,8 +77,6 @@ public class MyMcpResources {
 
     // This method defines a MCP resource to expose the OS env variables
     @McpResource(uri = "env://variables", description = "OS env variables")
-    // or you can use it like this to support multi-languages
-    @McpResource(uri = "env://variables", descriptionI18nKey = "your_i18n_key_in_properties_file")
     public String getSystemEnv() {
         // Just put your logic code here, forget about the MCP SDK details.
         return System.getenv().toString();
@@ -94,8 +92,6 @@ public class MyMcpPrompts {
 
     // This method defines a MCP prompt to read a file
     @McpPrompt(description = "A simple prompt to read a file")
-    // or you can use it like this to support multi-languages
-    @McpPrompt(descriptionI18nKey = "your_i18n_key_in_properties_file")
     public String readFile(
         @McpPromptParam(name = "path", description = "filepath", required = true) String path) {
         // Just put your logic code here, forget about the MCP SDK details.
@@ -111,8 +107,6 @@ public class MyMcpTools {
 
     // This method defines a MCP tool to read a file
     @McpTool(description = "Read complete file contents with UTF-8 encoding")
-    // or you can use it like this to support multi-languages
-    @McpTool(descriptionI18nKey = "your_i18n_key_in_properties_file")
     public String readFile(
         @McpToolParam(name = "path", description = "filepath", required = true) String path) {
         // Just put your logic code here, forget about the MCP SDK details.
