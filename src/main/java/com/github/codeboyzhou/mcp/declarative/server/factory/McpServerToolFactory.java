@@ -12,6 +12,7 @@ import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -31,21 +32,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.VARIABLE_NAME_I18N_ENABLED;
+
 public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncToolSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerToolFactory.class);
 
     @Inject
-    protected McpServerToolFactory(Injector injector) {
-        super(injector);
+    protected McpServerToolFactory(Injector injector, @Named(VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
+        super(injector, i18nEnabled);
     }
 
     @Override
     public McpServerFeatures.AsyncToolSpecification create(Class<?> clazz, Method method) {
         McpTool toolMethod = method.getAnnotation(McpTool.class);
         final String name = StringHelper.defaultIfBlank(toolMethod.name(), method.getName());
-        final String title = StringHelper.defaultIfBlank(toolMethod.title(), NO_TITLE_SPECIFIED);
-        final String description = getDescription(toolMethod.descriptionI18nKey(), toolMethod.description());
+        final String title = resolveComponentAttributeValue(toolMethod.title());
+        final String description = resolveComponentAttributeValue(toolMethod.description());
         McpSchema.JsonSchema paramSchema = createJsonSchema(method);
         McpSchema.Tool tool = McpSchema.Tool.builder().name(name).title(title).description(description).inputSchema(paramSchema).build();
         logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
@@ -100,7 +103,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
 
             if (parameterType.getAnnotation(McpJsonSchemaDefinition.class) == null) {
                 property.put("type", parameterType.getSimpleName().toLowerCase());
-                property.put("description", getDescription(toolParam.descriptionI18nKey(), toolParam.description()));
+                property.put("description", resolveComponentAttributeValue(toolParam.description()));
             } else {
                 final String parameterTypeSimpleName = parameterType.getSimpleName();
                 property.put("$ref", "#/definitions/" + parameterTypeSimpleName);
@@ -137,7 +140,7 @@ public class McpServerToolFactory extends AbstractMcpServerComponentFactory<McpS
 
             Map<String, Object> fieldProperties = new HashMap<>();
             fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
-            fieldProperties.put("description", getDescription(property.descriptionI18nKey(), property.description()));
+            fieldProperties.put("description", resolveComponentAttributeValue(property.description()));
 
             final String fieldName = StringHelper.defaultIfBlank(property.name(), field.getName());
             properties.put(fieldName, fieldProperties);

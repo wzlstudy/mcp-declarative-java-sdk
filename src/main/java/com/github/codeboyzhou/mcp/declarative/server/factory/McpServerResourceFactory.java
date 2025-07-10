@@ -7,6 +7,7 @@ import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -19,21 +20,23 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Set;
 
+import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.VARIABLE_NAME_I18N_ENABLED;
+
 public class McpServerResourceFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncResourceSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerResourceFactory.class);
 
     @Inject
-    protected McpServerResourceFactory(Injector injector) {
-        super(injector);
+    protected McpServerResourceFactory(Injector injector, @Named(VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
+        super(injector, i18nEnabled);
     }
 
     @Override
     public McpServerFeatures.AsyncResourceSpecification create(Class<?> clazz, Method method) {
         McpResource res = method.getAnnotation(McpResource.class);
         final String name = StringHelper.defaultIfBlank(res.name(), method.getName());
-        final String title = StringHelper.defaultIfBlank(res.title(), NO_TITLE_SPECIFIED);
-        final String description = getDescription(res.descriptionI18nKey(), res.description());
+        final String title = resolveComponentAttributeValue(res.title());
+        final String description = resolveComponentAttributeValue(res.description());
         McpSchema.Annotations annotations = new McpSchema.Annotations(List.of(res.roles()), res.priority());
         McpSchema.Resource resource = new McpSchema.Resource(res.uri(), name, title, description, res.mimeType(), null, annotations);
         logger.debug("Registering resource: {}", JsonHelper.toJson(resource));

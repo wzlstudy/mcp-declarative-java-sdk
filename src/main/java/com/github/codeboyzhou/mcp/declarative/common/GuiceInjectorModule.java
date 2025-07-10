@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.common;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
@@ -10,6 +11,7 @@ import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerToolFactor
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
+import com.google.inject.name.Names;
 import org.reflections.Reflections;
 
 import static com.google.inject.Scopes.SINGLETON;
@@ -18,6 +20,8 @@ import static org.reflections.scanners.Scanners.MethodsAnnotated;
 import static org.reflections.scanners.Scanners.TypesAnnotated;
 
 public final class GuiceInjectorModule extends AbstractModule {
+
+    public static final String VARIABLE_NAME_I18N_ENABLED = "i18nEnabled";
 
     private final Class<?> applicationMainClass;
 
@@ -41,10 +45,15 @@ public final class GuiceInjectorModule extends AbstractModule {
         reflections.getTypesAnnotatedWith(McpResources.class).forEach(clazz -> bind(clazz).in(SINGLETON));
         reflections.getTypesAnnotatedWith(McpPrompts.class).forEach(clazz -> bind(clazz).in(SINGLETON));
         reflections.getTypesAnnotatedWith(McpTools.class).forEach(clazz -> bind(clazz).in(SINGLETON));
+
         // Bind all implementations of McpServerComponentFactory
         bind(McpServerResourceFactory.class).in(SINGLETON);
         bind(McpServerPromptFactory.class).in(SINGLETON);
         bind(McpServerToolFactory.class).in(SINGLETON);
+
+        // Bind for boolean variable: i18nEnabled
+        final boolean i18nEnabled = applicationMainClass.isAnnotationPresent(McpI18nEnabled.class);
+        bind(Boolean.class).annotatedWith(Names.named(VARIABLE_NAME_I18N_ENABLED)).toInstance(i18nEnabled);
     }
 
     private String determineBasePackage(McpComponentScan scan, Class<?> applicationMainClass) {

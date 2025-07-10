@@ -9,6 +9,7 @@ import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
+import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -26,21 +27,23 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.VARIABLE_NAME_I18N_ENABLED;
+
 public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncPromptSpecification> {
 
     private static final Logger logger = LoggerFactory.getLogger(McpServerPromptFactory.class);
 
     @Inject
-    protected McpServerPromptFactory(Injector injector) {
-        super(injector);
+    protected McpServerPromptFactory(Injector injector, @Named(VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
+        super(injector, i18nEnabled);
     }
 
     @Override
     public McpServerFeatures.AsyncPromptSpecification create(Class<?> clazz, Method method) {
         McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
         final String name = StringHelper.defaultIfBlank(promptMethod.name(), method.getName());
-        final String title = StringHelper.defaultIfBlank(promptMethod.title(), NO_TITLE_SPECIFIED);
-        final String description = getDescription(promptMethod.descriptionI18nKey(), promptMethod.description());
+        final String title = resolveComponentAttributeValue(promptMethod.title());
+        final String description = resolveComponentAttributeValue(promptMethod.description());
         List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
         McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
         logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
@@ -85,8 +88,8 @@ public class McpServerPromptFactory extends AbstractMcpServerComponentFactory<Mc
         for (Parameter param : params) {
             McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
             final String name = promptParam.name();
-            final String title = StringHelper.defaultIfBlank(promptParam.title(), NO_TITLE_SPECIFIED);
-            final String description = getDescription(promptParam.descriptionI18nKey(), promptParam.description());
+            final String title = resolveComponentAttributeValue(promptParam.title());
+            final String description = resolveComponentAttributeValue(promptParam.description());
             final boolean required = promptParam.required();
             McpSchema.PromptArgument promptArgument = new McpSchema.PromptArgument(name, title, description, required);
             promptArguments.add(promptArgument);
