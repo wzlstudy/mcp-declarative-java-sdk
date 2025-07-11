@@ -7,3 +7,6 @@
 
 # Maven build files
 target/
+
+# MkDocs site files
+docs/site/
