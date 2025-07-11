@@ -1,7 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
-import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
 
-@McpComponentScan
+@McpServerApplication
 public class TestMcpComponentScanDefault {
 }

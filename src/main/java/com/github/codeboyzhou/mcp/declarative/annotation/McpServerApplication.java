@@ -7,10 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-public @interface McpComponentScan {
+public @interface McpServerApplication {
     String basePackage() default StringHelper.EMPTY;
 
     Class<?> basePackageClass() default Object.class;

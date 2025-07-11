@@ -1,9 +1,9 @@
 package com.github.codeboyzhou.mcp.declarative.common;
 
-import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerResourceFactory;
@@ -33,8 +33,8 @@ public final class GuiceInjectorModule extends AbstractModule {
     @Singleton
     @SuppressWarnings("unused")
     public Reflections provideReflections() {
-        McpComponentScan scan = applicationMainClass.getAnnotation(McpComponentScan.class);
-        final String basePackage = determineBasePackage(scan, applicationMainClass);
+        McpServerApplication application = applicationMainClass.getAnnotation(McpServerApplication.class);
+        final String basePackage = determineBasePackage(application, applicationMainClass);
         return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
     }
 
@@ -56,13 +56,13 @@ public final class GuiceInjectorModule extends AbstractModule {
         bind(Boolean.class).annotatedWith(Names.named(VARIABLE_NAME_I18N_ENABLED)).toInstance(i18nEnabled);
     }
 
-    private String determineBasePackage(McpComponentScan scan, Class<?> applicationMainClass) {
-        if (scan != null) {
-            if (!scan.basePackage().trim().isBlank()) {
-                return scan.basePackage();
+    private String determineBasePackage(McpServerApplication application, Class<?> applicationMainClass) {
+        if (application != null) {
+            if (!application.basePackage().trim().isBlank()) {
+                return application.basePackage();
             }
-            if (scan.basePackageClass() != Object.class) {
-                return scan.basePackageClass().getPackageName();
+            if (application.basePackageClass() != Object.class) {
+                return application.basePackageClass().getPackageName();
             }
         }
         return applicationMainClass.getPackageName();
