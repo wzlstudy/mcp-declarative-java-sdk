@@ -7,9 +7,9 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Deprecated
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated(since = "0.6.0", forRemoval = true)
 public @interface McpComponentScan {
     String basePackage() default StringHelper.EMPTY;
 
