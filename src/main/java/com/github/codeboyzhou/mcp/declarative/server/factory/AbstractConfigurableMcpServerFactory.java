@@ -6,29 +6,29 @@ import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfigurati
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
-public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTransportProvider> implements ConfigurableMcpServerFactory<T> {
+public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTransportProvider>
+    implements ConfigurableMcpServerFactory<T> {
 
-    protected final McpServerConfiguration configuration;
+  protected final McpServerConfiguration configuration;
 
-    protected AbstractConfigurableMcpServerFactory(McpServerConfiguration configuration) {
-        this.configuration = configuration;
+  protected AbstractConfigurableMcpServerFactory(McpServerConfiguration configuration) {
+    this.configuration = configuration;
+  }
+
+  @Override
+  public McpSchema.ServerCapabilities serverCapabilities() {
+    McpSchema.ServerCapabilities.Builder capabilities = McpSchema.ServerCapabilities.builder();
+    McpServerCapabilities capabilitiesConfig = configuration.capabilities();
+    McpServerChangeNotification serverChangeNotification = configuration.changeNotification();
+    if (capabilitiesConfig.resource()) {
+      capabilities.resources(true, serverChangeNotification.resource());
     }
-
-    @Override
-    public McpSchema.ServerCapabilities serverCapabilities() {
-        McpSchema.ServerCapabilities.Builder capabilities = McpSchema.ServerCapabilities.builder();
-        McpServerCapabilities capabilitiesConfig = configuration.capabilities();
-        McpServerChangeNotification serverChangeNotification = configuration.changeNotification();
-        if (capabilitiesConfig.resource()) {
-            capabilities.resources(true, serverChangeNotification.resource());
-        }
-        if (capabilitiesConfig.prompt()) {
-            capabilities.prompts(serverChangeNotification.prompt());
-        }
-        if (capabilitiesConfig.tool()) {
-            capabilities.tools(serverChangeNotification.tool());
-        }
-        return capabilities.build();
+    if (capabilitiesConfig.prompt()) {
+      capabilities.prompts(serverChangeNotification.prompt());
     }
-
+    if (capabilitiesConfig.tool()) {
+      capabilities.tools(serverChangeNotification.tool());
+    }
+    return capabilities.build();
+  }
 }

@@ -7,10 +7,9 @@ import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
 public interface McpServerFactory<T extends McpServerTransportProvider, S extends McpServerInfo> {
 
-    T transportProvider(S serverInfo);
+  T transportProvider(S serverInfo);
 
-    McpAsyncServer create(S serverInfo);
+  McpAsyncServer create(S serverInfo);
 
-    McpSchema.ServerCapabilities serverCapabilities();
-
+  McpSchema.ServerCapabilities serverCapabilities();
 }

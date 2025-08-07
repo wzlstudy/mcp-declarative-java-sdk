@@ -23,58 +23,57 @@ import org.slf4j.LoggerFactory;
 
 public class McpServers {
 
-    private static final Logger logger = LoggerFactory.getLogger(McpServers.class);
+  private static final Logger logger = LoggerFactory.getLogger(McpServers.class);
 
-    private static final McpServers INSTANCE = new McpServers();
+  private static final McpServers INSTANCE = new McpServers();
 
-    private static Injector injector;
+  private static Injector injector;
 
-    public static McpServers run(Class<?> applicationMainClass, String[] args) {
-        injector = Guice.createInjector(new GuiceInjectorModule(applicationMainClass));
-        return INSTANCE;
+  public static McpServers run(Class<?> applicationMainClass, String[] args) {
+    injector = Guice.createInjector(new GuiceInjectorModule(applicationMainClass));
+    return INSTANCE;
+  }
+
+  public void startStdioServer(McpServerInfo serverInfo) {
+    McpStdioServerFactory factory = new McpStdioServerFactory();
+    McpAsyncServer server = factory.create(serverInfo);
+    registerComponents(server);
+  }
+
+  public void startSseServer(McpSseServerInfo serverInfo) {
+    McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
+    McpAsyncServer server = factory.create(serverInfo);
+    registerComponents(server);
+  }
+
+  public void startServer(String configFileName) {
+    Assert.notNull(configFileName, "configFileName must not be null");
+    doStartServer(new YAMLConfigurationLoader(configFileName).getConfig());
+  }
+
+  public void startServer() {
+    doStartServer(new YAMLConfigurationLoader().getConfig());
+  }
+
+  private void doStartServer(McpServerConfiguration configuration) {
+    if (!configuration.enabled()) {
+      logger.warn("MCP server is disabled, please check your configuration file.");
+      return;
     }
 
-    public void startStdioServer(McpServerInfo serverInfo) {
-        McpStdioServerFactory factory = new McpStdioServerFactory();
-        McpAsyncServer server = factory.create(serverInfo);
-        registerComponents(server);
+    ConfigurableMcpServerFactory<? extends McpServerTransportProvider> factory;
+    if (configuration.stdio()) {
+      factory = new ConfigurableMcpStdioServerFactory(configuration);
+    } else {
+      factory = new ConfigurableMcpHttpSseServerFactory(configuration);
     }
+    McpAsyncServer server = factory.create();
+    registerComponents(server);
+  }
 
-    public void startSseServer(McpSseServerInfo serverInfo) {
-        McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
-        McpAsyncServer server = factory.create(serverInfo);
-        registerComponents(server);
-    }
-
-    public void startServer(String configFileName) {
-        Assert.notNull(configFileName, "configFileName must not be null");
-        doStartServer(new YAMLConfigurationLoader(configFileName).getConfig());
-    }
-
-    public void startServer() {
-        doStartServer(new YAMLConfigurationLoader().getConfig());
-    }
-
-    private void doStartServer(McpServerConfiguration configuration) {
-        if (!configuration.enabled()) {
-            logger.warn("MCP server is disabled, please check your configuration file.");
-            return;
-        }
-
-        ConfigurableMcpServerFactory<? extends McpServerTransportProvider> factory;
-        if (configuration.stdio()) {
-            factory = new ConfigurableMcpStdioServerFactory(configuration);
-        } else {
-            factory = new ConfigurableMcpHttpSseServerFactory(configuration);
-        }
-        McpAsyncServer server = factory.create();
-        registerComponents(server);
-    }
-
-    private void registerComponents(McpAsyncServer server) {
-        injector.getInstance(McpServerResourceFactory.class).registerTo(server);
-        injector.getInstance(McpServerPromptFactory.class).registerTo(server);
-        injector.getInstance(McpServerToolFactory.class).registerTo(server);
-    }
-
+  private void registerComponents(McpAsyncServer server) {
+    injector.getInstance(McpServerResourceFactory.class).registerTo(server);
+    injector.getInstance(McpServerPromptFactory.class).registerTo(server);
+    injector.getInstance(McpServerToolFactory.class).registerTo(server);
+  }
 }

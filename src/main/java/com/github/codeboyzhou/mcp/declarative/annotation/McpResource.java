@@ -2,7 +2,6 @@ package com.github.codeboyzhou.mcp.declarative.annotation;
 
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import io.modelcontextprotocol.spec.McpSchema;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -11,21 +10,20 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface McpResource {
-    String uri();
+  String uri();
 
-    String name() default StringHelper.EMPTY;
+  String name() default StringHelper.EMPTY;
 
-    String title() default StringHelper.EMPTY;
+  String title() default StringHelper.EMPTY;
 
-    String description() default StringHelper.EMPTY;
+  String description() default StringHelper.EMPTY;
 
-    @Deprecated(since = "0.6.0", forRemoval = true)
-    String descriptionI18nKey() default StringHelper.EMPTY;
+  @Deprecated(since = "0.6.0", forRemoval = true)
+  String descriptionI18nKey() default StringHelper.EMPTY;
 
-    String mimeType() default "text/plain";
+  String mimeType() default "text/plain";
 
-    McpSchema.Role[] roles() default {McpSchema.Role.ASSISTANT, McpSchema.Role.USER};
+  McpSchema.Role[] roles() default {McpSchema.Role.ASSISTANT, McpSchema.Role.USER};
 
-    double priority() default 1.0;
-
+  double priority() default 1.0;
 }

@@ -8,38 +8,39 @@ import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
-
 import java.time.Duration;
 import java.util.concurrent.Executors;
 
-public class ConfigurableMcpHttpSseServerFactory extends AbstractConfigurableMcpServerFactory<HttpServletSseServerTransportProvider> {
+public class ConfigurableMcpHttpSseServerFactory
+    extends AbstractConfigurableMcpServerFactory<HttpServletSseServerTransportProvider> {
 
-    public ConfigurableMcpHttpSseServerFactory(McpServerConfiguration configuration) {
-        super(configuration);
-    }
+  public ConfigurableMcpHttpSseServerFactory(McpServerConfiguration configuration) {
+    super(configuration);
+  }
 
-    @Override
-    public HttpServletSseServerTransportProvider transportProvider() {
-        McpServerSSE sse = configuration.sse();
-        final String baseUrl = sse.baseUrl();
-        final String messageEndpoint = sse.messageEndpoint();
-        final String sseEndpoint = sse.endpoint();
-        return new HttpServletSseServerTransportProvider(JsonHelper.MAPPER, baseUrl, messageEndpoint, sseEndpoint);
-    }
+  @Override
+  public HttpServletSseServerTransportProvider transportProvider() {
+    McpServerSSE sse = configuration.sse();
+    final String baseUrl = sse.baseUrl();
+    final String messageEndpoint = sse.messageEndpoint();
+    final String sseEndpoint = sse.endpoint();
+    return new HttpServletSseServerTransportProvider(
+        JsonHelper.MAPPER, baseUrl, messageEndpoint, sseEndpoint);
+  }
 
-    @Override
-    public McpAsyncServer create() {
-        HttpServletSseServerTransportProvider transportProvider = transportProvider();
-        McpAsyncServer server = McpServer.async(transportProvider)
+  @Override
+  public McpAsyncServer create() {
+    HttpServletSseServerTransportProvider transportProvider = transportProvider();
+    McpAsyncServer server =
+        McpServer.async(transportProvider)
             .serverInfo(configuration.name(), configuration.version())
             .capabilities(serverCapabilities())
             .instructions(configuration.instructions())
             .requestTimeout(Duration.ofMillis(configuration.requestTimeout()))
             .build();
-        McpHttpServer httpServer = new McpHttpServer(transportProvider, configuration.sse().port());
-        NamedThreadFactory threadFactory = new NamedThreadFactory(McpHttpServer.class.getSimpleName());
-        Executors.newSingleThreadExecutor(threadFactory).execute(httpServer::start);
-        return server;
-    }
-
+    McpHttpServer httpServer = new McpHttpServer(transportProvider, configuration.sse().port());
+    NamedThreadFactory threadFactory = new NamedThreadFactory(McpHttpServer.class.getSimpleName());
+    Executors.newSingleThreadExecutor(threadFactory).execute(httpServer::start);
+    return server;
+  }
 }
