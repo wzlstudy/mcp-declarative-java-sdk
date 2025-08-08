@@ -59,25 +59,28 @@ public class McpServerToolFactory
             .inputSchema(paramSchema)
             .build();
     logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
-    return new McpServerFeatures.AsyncToolSpecification(
-        tool,
-        (exchange, params) ->
-            Mono.fromSupplier(
-                () -> {
-                  Object result;
-                  boolean isError = false;
-                  try {
-                    Object instance = injector.getInstance(clazz);
-                    Map<String, Object> typedParameters = asTypedParameters(paramSchema, params);
-                    result = method.invoke(instance, typedParameters.values().toArray());
-                  } catch (Exception e) {
-                    logger.error("Error invoking tool method", e);
-                    result = e + ": " + e.getMessage();
-                    isError = true;
-                  }
-                  McpSchema.Content content = new McpSchema.TextContent(result.toString());
-                  return new McpSchema.CallToolResult(List.of(content), isError);
-                }));
+    return McpServerFeatures.AsyncToolSpecification.builder()
+        .tool(tool)
+        .callHandler(
+            (exchange, request) ->
+                Mono.fromSupplier(
+                    () -> {
+                      Object result;
+                      boolean isError = false;
+                      try {
+                        Object instance = injector.getInstance(clazz);
+                        Map<String, Object> args = request.arguments();
+                        Map<String, Object> typedArgs = asTypedParameters(paramSchema, args);
+                        result = method.invoke(instance, typedArgs.values().toArray());
+                      } catch (Exception e) {
+                        logger.error("Error invoking tool method", e);
+                        result = e + ": " + e.getMessage();
+                        isError = true;
+                      }
+                      McpSchema.Content content = new McpSchema.TextContent(result.toString());
+                      return new McpSchema.CallToolResult(List.of(content), isError);
+                    }))
+        .build();
   }
 
   @Override

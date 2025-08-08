@@ -3,7 +3,6 @@ package com.github.codeboyzhou.mcp.declarative.server.factory;
 import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
@@ -17,8 +16,11 @@ public class McpHttpSseServerFactory
     final String baseUrl = serverInfo.baseUrl();
     final String messageEndpoint = serverInfo.messageEndpoint();
     final String sseEndpoint = serverInfo.sseEndpoint();
-    return new HttpServletSseServerTransportProvider(
-        JsonHelper.MAPPER, baseUrl, messageEndpoint, sseEndpoint);
+    return HttpServletSseServerTransportProvider.builder()
+        .baseUrl(baseUrl)
+        .sseEndpoint(sseEndpoint)
+        .messageEndpoint(messageEndpoint)
+        .build();
   }
 
   @Override

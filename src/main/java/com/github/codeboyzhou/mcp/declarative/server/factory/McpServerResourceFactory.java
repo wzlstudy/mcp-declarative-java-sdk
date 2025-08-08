@@ -38,11 +38,15 @@ public class McpServerResourceFactory
     final String name = StringHelper.defaultIfBlank(res.name(), method.getName());
     final String title = resolveComponentAttributeValue(res.title());
     final String description = resolveComponentAttributeValue(res.description());
-    McpSchema.Annotations annotations =
-        new McpSchema.Annotations(List.of(res.roles()), res.priority());
     McpSchema.Resource resource =
-        new McpSchema.Resource(
-            res.uri(), name, title, description, res.mimeType(), null, annotations);
+        McpSchema.Resource.builder()
+            .uri(res.uri())
+            .name(name)
+            .title(title)
+            .description(description)
+            .mimeType(res.mimeType())
+            .annotations(new McpSchema.Annotations(List.of(res.roles()), res.priority()))
+            .build();
     logger.debug("Registering resource: {}", JsonHelper.toJson(resource));
     return new McpServerFeatures.AsyncResourceSpecification(
         resource,
