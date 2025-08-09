@@ -1,6 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
-import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.VARIABLE_NAME_I18N_ENABLED;
+import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
@@ -35,7 +35,7 @@ public class McpServerPromptFactory
 
   @Inject
   protected McpServerPromptFactory(
-      Injector injector, @Named(VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
+      Injector injector, @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
     super(injector, i18nEnabled);
   }
 

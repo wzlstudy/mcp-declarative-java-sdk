@@ -21,21 +21,20 @@ import org.reflections.Reflections;
 
 public final class GuiceInjectorModule extends AbstractModule {
 
-  public static final String VARIABLE_NAME_I18N_ENABLED = "i18nEnabled";
+  public static final String INJECTED_VARIABLE_NAME_I18N_ENABLED = "i18nEnabled";
 
-  private final Class<?> applicationMainClass;
+  private final Class<?> mainClass;
 
-  public GuiceInjectorModule(Class<?> applicationMainClass) {
-    this.applicationMainClass = applicationMainClass;
+  public GuiceInjectorModule(Class<?> mainClass) {
+    this.mainClass = mainClass;
   }
 
   @Provides
   @Singleton
   @SuppressWarnings("unused")
   public Reflections provideReflections() {
-    McpServerApplication application =
-        applicationMainClass.getAnnotation(McpServerApplication.class);
-    final String basePackage = determineBasePackage(application, applicationMainClass);
+    McpServerApplication application = mainClass.getAnnotation(McpServerApplication.class);
+    final String basePackage = determineBasePackage(application);
     return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
   }
 
@@ -55,14 +54,13 @@ public final class GuiceInjectorModule extends AbstractModule {
     bind(McpServerToolFactory.class).in(SINGLETON);
 
     // Bind for boolean variable: i18nEnabled
-    final boolean i18nEnabled = applicationMainClass.isAnnotationPresent(McpI18nEnabled.class);
+    final boolean i18nEnabled = mainClass.isAnnotationPresent(McpI18nEnabled.class);
     bind(Boolean.class)
-        .annotatedWith(Names.named(VARIABLE_NAME_I18N_ENABLED))
+        .annotatedWith(Names.named(INJECTED_VARIABLE_NAME_I18N_ENABLED))
         .toInstance(i18nEnabled);
   }
 
-  private String determineBasePackage(
-      McpServerApplication application, Class<?> applicationMainClass) {
+  private String determineBasePackage(McpServerApplication application) {
     if (application != null) {
       if (!application.basePackage().trim().isBlank()) {
         return application.basePackage();
@@ -71,6 +69,6 @@ public final class GuiceInjectorModule extends AbstractModule {
         return application.basePackageClass().getPackageName();
       }
     }
-    return applicationMainClass.getPackageName();
+    return mainClass.getPackageName();
   }
 }
