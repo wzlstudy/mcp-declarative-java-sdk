@@ -49,7 +49,9 @@ public class McpServerToolFactory
     McpTool toolMethod = method.getAnnotation(McpTool.class);
     final String name = StringHelper.defaultIfBlank(toolMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(toolMethod.title());
-    final String description = resolveComponentAttributeValue(toolMethod.description());
+    final String description =
+        resolveComponentAttributeValue(
+            StringHelper.defaultIfBlank(toolMethod.description(), toolMethod.descriptionI18nKey()));
     McpSchema.JsonSchema paramSchema = createJsonSchema(method);
     McpSchema.Tool tool =
         McpSchema.Tool.builder()
@@ -117,7 +119,11 @@ public class McpServerToolFactory
 
       if (parameterType.getAnnotation(McpJsonSchemaDefinition.class) == null) {
         property.put("type", parameterType.getSimpleName().toLowerCase());
-        property.put("description", resolveComponentAttributeValue(toolParam.description()));
+        property.put(
+            "description",
+            resolveComponentAttributeValue(
+                StringHelper.defaultIfBlank(
+                    toolParam.description(), toolParam.descriptionI18nKey())));
       } else {
         final String parameterTypeSimpleName = parameterType.getSimpleName();
         property.put("$ref", "#/definitions/" + parameterTypeSimpleName);
@@ -163,7 +169,10 @@ public class McpServerToolFactory
 
       Map<String, Object> fieldProperties = new HashMap<>();
       fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
-      fieldProperties.put("description", resolveComponentAttributeValue(property.description()));
+      fieldProperties.put(
+          "description",
+          resolveComponentAttributeValue(
+              StringHelper.defaultIfBlank(property.description(), property.descriptionI18nKey())));
 
       final String fieldName = StringHelper.defaultIfBlank(property.name(), field.getName());
       properties.put(fieldName, fieldProperties);

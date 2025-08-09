@@ -44,7 +44,10 @@ public class McpServerPromptFactory
     McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
     final String name = StringHelper.defaultIfBlank(promptMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(promptMethod.title());
-    final String description = resolveComponentAttributeValue(promptMethod.description());
+    final String description =
+        resolveComponentAttributeValue(
+            StringHelper.defaultIfBlank(
+                promptMethod.description(), promptMethod.descriptionI18nKey()));
     List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
     McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
     logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
@@ -96,7 +99,10 @@ public class McpServerPromptFactory
       McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
       final String name = promptParam.name();
       final String title = resolveComponentAttributeValue(promptParam.title());
-      final String description = resolveComponentAttributeValue(promptParam.description());
+      final String description =
+          resolveComponentAttributeValue(
+              StringHelper.defaultIfBlank(
+                  promptParam.description(), promptParam.descriptionI18nKey()));
       final boolean required = promptParam.required();
       McpSchema.PromptArgument promptArgument =
           new McpSchema.PromptArgument(name, title, description, required);
