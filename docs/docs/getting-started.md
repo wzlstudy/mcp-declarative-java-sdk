@@ -14,11 +14,11 @@ hide:
 Add the following Maven dependency to your project:
 
 ```xml
-<!-- Internally relies on native MCP Java SDK 0.11.0-SNAPSHOT -->
+<!-- Internally relies on native MCP Java SDK 0.11.1 -->
 <dependency>
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 

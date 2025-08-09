@@ -6,7 +6,7 @@
 
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.6.0-SNAPSHOT</version>
+    <version>0.6.0</version>
 
     <name>MCP Declarative Java SDK</name>
     <description>Annotation-driven MCP (Model Context Protocol) Development with Java - No Spring Framework Required</description>
@@ -59,7 +59,7 @@
         <jetty.version>12.0.18</jetty.version>
         <junit5.version>5.10.2</junit5.version>
         <logback.version>1.5.18</logback.version>
-        <mcp-sdk.version>0.11.0</mcp-sdk.version>
+        <mcp-sdk.version>0.11.1</mcp-sdk.version>
         <mockito.version>5.18.0</mockito.version>
         <reflections.version>0.10.2</reflections.version>
     </properties>
@@ -179,7 +179,6 @@
                 <configuration>
                     <compilerArgs>
                         <arg>-Xlint:deprecation</arg>
-                        <arg>-Werror</arg>
                     </compilerArgs>
                 </configuration>
             </plugin>

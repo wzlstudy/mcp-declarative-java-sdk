@@ -133,11 +133,11 @@ Now it's all set, run your MCP server, choose one MCP client you like and start 
 Add the following Maven dependency to your project:
 
 ```xml
-<!-- Internally relies on native MCP Java SDK 0.10.0 -->
+<!-- Internally relies on native MCP Java SDK 0.11.1 -->
 <dependency>
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.5.0</version>
+    <version>0.6.0</version>
 </dependency>
 ```
 
