@@ -37,9 +37,7 @@ public class McpServerResourceFactory
     McpResource res = method.getAnnotation(McpResource.class);
     final String name = StringHelper.defaultIfBlank(res.name(), method.getName());
     final String title = resolveComponentAttributeValue(res.title());
-    final String description =
-        resolveComponentAttributeValue(
-            StringHelper.defaultIfBlank(res.description(), res.descriptionI18nKey()));
+    final String description = resolveComponentAttributeValue(res.description());
     McpSchema.Resource resource =
         McpSchema.Resource.builder()
             .uri(res.uri())

@@ -18,9 +18,6 @@ public @interface McpResource {
 
   String description() default StringHelper.EMPTY;
 
-  @Deprecated(since = "0.6.0", forRemoval = true)
-  String descriptionI18nKey() default StringHelper.EMPTY;
-
   String mimeType() default "text/plain";
 
   McpSchema.Role[] roles() default {McpSchema.Role.ASSISTANT, McpSchema.Role.USER};

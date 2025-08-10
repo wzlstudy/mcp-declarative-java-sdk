@@ -15,7 +15,4 @@ public @interface McpPrompt {
   String title() default StringHelper.EMPTY;
 
   String description() default StringHelper.EMPTY;
-
-  @Deprecated(since = "0.6.0", forRemoval = true)
-  String descriptionI18nKey() default StringHelper.EMPTY;
 }

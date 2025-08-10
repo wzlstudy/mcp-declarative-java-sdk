@@ -5,7 +5,6 @@ import static org.reflections.scanners.Scanners.FieldsAnnotated;
 import static org.reflections.scanners.Scanners.MethodsAnnotated;
 import static org.reflections.scanners.Scanners.TypesAnnotated;
 
-import com.github.codeboyzhou.mcp.declarative.annotation.McpComponentScan;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
@@ -35,12 +34,6 @@ public final class GuiceInjectorModule extends AbstractModule {
   @SuppressWarnings("unused")
   public Reflections provideReflections() {
     McpServerApplication application = mainClass.getAnnotation(McpServerApplication.class);
-    // Support @McpComponentScan for backward compatibility, will be removed in next version
-    if (application == null) {
-      McpComponentScan scan = mainClass.getAnnotation(McpComponentScan.class);
-      final String basePackage = determineBasePackage(scan);
-      return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
-    }
     final String basePackage = determineBasePackage(application);
     return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
   }
@@ -74,19 +67,6 @@ public final class GuiceInjectorModule extends AbstractModule {
       }
       if (application.basePackageClass() != Object.class) {
         return application.basePackageClass().getPackageName();
-      }
-    }
-    return mainClass.getPackageName();
-  }
-
-  @Deprecated
-  private String determineBasePackage(McpComponentScan scan) {
-    if (scan != null) {
-      if (!scan.basePackage().trim().isBlank()) {
-        return scan.basePackage();
-      }
-      if (scan.basePackageClass() != Object.class) {
-        return scan.basePackageClass().getPackageName();
       }
     }
     return mainClass.getPackageName();
