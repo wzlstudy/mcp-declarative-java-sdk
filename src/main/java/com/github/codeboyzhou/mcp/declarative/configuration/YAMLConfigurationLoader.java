@@ -17,7 +17,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class YAMLConfigurationLoader {
+public final class YAMLConfigurationLoader {
 
   private static final Logger logger = LoggerFactory.getLogger(YAMLConfigurationLoader.class);
 

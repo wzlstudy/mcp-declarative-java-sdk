@@ -51,6 +51,7 @@
         <maven-source-plugin.version>3.3.0</maven-source-plugin.version>
         <maven-surefire-plugin.version>3.2.3</maven-surefire-plugin.version>
         <sortpom-maven-plugin.version>4.0.0</sortpom-maven-plugin.version>
+        <spotbugs-maven-plugin.version>4.9.3.2</spotbugs-maven-plugin.version>
         <spotless-maven-plugin.version>2.46.1</spotless-maven-plugin.version>
         <!--==================== dependency versions ======================-->
         <annotations.version>24.0.0</annotations.version>
@@ -169,6 +170,19 @@
                         <goals>
                             <goal>sort</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>com.github.spotbugs</groupId>
+                <artifactId>spotbugs-maven-plugin</artifactId>
+                <version>${spotbugs-maven-plugin.version}</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>check</goal>
+                        </goals>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>

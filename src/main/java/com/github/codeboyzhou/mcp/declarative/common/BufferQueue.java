@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class BufferQueue<T> {
+public final class BufferQueue<T> {
 
   private static final Logger logger = LoggerFactory.getLogger(BufferQueue.class);
 

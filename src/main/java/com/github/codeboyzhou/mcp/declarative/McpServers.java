@@ -29,6 +29,10 @@ public class McpServers {
 
   private static Injector injector;
 
+  private McpServers() {
+    // Using singleton design pattern should have private constructor
+  }
+
   public static McpServers run(Class<?> applicationMainClass, String[] args) {
     injector = Guice.createInjector(new GuiceInjectorModule(applicationMainClass));
     return INSTANCE;
