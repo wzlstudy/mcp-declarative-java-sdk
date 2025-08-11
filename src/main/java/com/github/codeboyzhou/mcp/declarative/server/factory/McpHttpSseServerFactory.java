@@ -6,6 +6,7 @@ import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class McpHttpSseServerFactory
@@ -33,9 +34,10 @@ public class McpHttpSseServerFactory
             .instructions(serverInfo.instructions())
             .requestTimeout(serverInfo.requestTimeout())
             .build();
-    McpHttpServer httpServer = new McpHttpServer(transportProvider, serverInfo.port());
+    McpHttpServer httpServer = new McpHttpServer(serverInfo.port());
     NamedThreadFactory threadFactory = new NamedThreadFactory(McpHttpServer.class.getSimpleName());
-    Executors.newSingleThreadExecutor(threadFactory).execute(httpServer::start);
+    ExecutorService executor = Executors.newSingleThreadExecutor(threadFactory);
+    executor.execute(() -> httpServer.start(transportProvider));
     return server;
   }
 }

@@ -8,7 +8,7 @@ import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class McpHttpServer {
+public record McpHttpServer(int port) {
 
   private static final Logger logger = LoggerFactory.getLogger(McpHttpServer.class);
 
@@ -16,16 +16,7 @@ public class McpHttpServer {
 
   private static final String DEFAULT_SERVLET_PATH = "/*";
 
-  private final HttpServletSseServerTransportProvider transportProvider;
-
-  private final int port;
-
-  public McpHttpServer(HttpServletSseServerTransportProvider transportProvider, int port) {
-    this.transportProvider = transportProvider;
-    this.port = port;
-  }
-
-  public void start() {
+  public void start(HttpServletSseServerTransportProvider transportProvider) {
     ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     handler.setContextPath(DEFAULT_SERVLET_CONTEXT_PATH);
 
@@ -62,16 +53,16 @@ public class McpHttpServer {
   }
 
   private void addShutdownHook(Server httpserver) {
-    Runtime.getRuntime()
-        .addShutdownHook(
-            new Thread(
-                () -> {
-                  try {
-                    logger.info("Shutting down HTTP server and MCP server");
-                    httpserver.stop();
-                  } catch (Exception e) {
-                    logger.error("Error stopping HTTP server and MCP server", e);
-                  }
-                }));
+    Runnable runnable =
+        () -> {
+          try {
+            logger.info("Shutting down HTTP server and MCP server");
+            httpserver.stop();
+          } catch (Exception e) {
+            logger.error("Error stopping HTTP server and MCP server", e);
+          }
+        };
+    Thread shutdownHook = new Thread(runnable);
+    Runtime.getRuntime().addShutdownHook(shutdownHook);
   }
 }
