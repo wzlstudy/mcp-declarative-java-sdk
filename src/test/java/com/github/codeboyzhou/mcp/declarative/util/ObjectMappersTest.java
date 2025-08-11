@@ -7,14 +7,14 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
 import org.junit.jupiter.api.Test;
 
-class JsonHelperTest {
+class ObjectMappersTest {
 
   record TestClass(String name, int age) {}
 
   @Test
   void testNewInstance() {
     UnsupportedOperationException e =
-        assertThrows(UnsupportedOperationException.class, JsonHelper::new);
+        assertThrows(UnsupportedOperationException.class, ObjectMappers::new);
     assertEquals("Utility class should not be instantiated", e.getMessage());
   }
 
@@ -23,10 +23,10 @@ class JsonHelperTest {
     assertDoesNotThrow(
         () -> {
           TestClass testObject = new TestClass("test", 18);
-          assertEquals("{\"name\":\"test\",\"age\":18}", JsonHelper.toJson(testObject));
+          assertEquals("{\"name\":\"test\",\"age\":18}", ObjectMappers.toJson(testObject));
         });
 
-    McpServerException e = assertThrows(McpServerException.class, () -> JsonHelper.toJson(this));
+    McpServerException e = assertThrows(McpServerException.class, () -> ObjectMappers.toJson(this));
     assertEquals("Error converting object to JSON", e.getMessage());
   }
 }

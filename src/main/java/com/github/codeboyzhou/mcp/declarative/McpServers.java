@@ -52,11 +52,13 @@ public class McpServers {
 
   public void startServer(String configFileName) {
     Assert.notNull(configFileName, "configFileName must not be null");
-    doStartServer(new YAMLConfigurationLoader(configFileName).getConfig());
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader(configFileName);
+    doStartServer(configLoader.loadConfig());
   }
 
   public void startServer() {
-    doStartServer(new YAMLConfigurationLoader().getConfig());
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader();
+    doStartServer(configLoader.loadConfig());
   }
 
   private void doStartServer(McpServerConfiguration configuration) {

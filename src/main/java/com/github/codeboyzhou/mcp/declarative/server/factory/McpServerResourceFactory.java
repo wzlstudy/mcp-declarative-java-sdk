@@ -5,7 +5,7 @@ import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
-import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
@@ -47,7 +47,7 @@ public class McpServerResourceFactory
             .mimeType(res.mimeType())
             .annotations(new McpSchema.Annotations(List.of(res.roles()), res.priority()))
             .build();
-    logger.debug("Registering resource: {}", JsonHelper.toJson(resource));
+    logger.debug("Registering resource: {}", ObjectMappers.toJson(resource));
     return new McpServerFeatures.AsyncResourceSpecification(
         resource,
         (exchange, request) ->

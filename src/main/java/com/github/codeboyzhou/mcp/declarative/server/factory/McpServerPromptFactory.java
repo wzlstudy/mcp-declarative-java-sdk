@@ -6,7 +6,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
-import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
@@ -47,7 +47,7 @@ public class McpServerPromptFactory
     final String description = resolveComponentAttributeValue(promptMethod.description());
     List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
     McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
-    logger.debug("Registering prompt: {}", JsonHelper.toJson(prompt));
+    logger.debug("Registering prompt: {}", ObjectMappers.toJson(prompt));
     return new McpServerFeatures.AsyncPromptSpecification(
         prompt,
         (exchange, request) ->

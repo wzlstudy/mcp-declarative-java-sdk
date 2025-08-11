@@ -9,7 +9,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
-import com.github.codeboyzhou.mcp.declarative.util.JsonHelper;
+import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
 import com.google.inject.Inject;
@@ -58,7 +58,7 @@ public class McpServerToolFactory
             .description(description)
             .inputSchema(paramSchema)
             .build();
-    logger.debug("Registering tool: {}", JsonHelper.toJson(tool));
+    logger.debug("Registering tool: {}", ObjectMappers.toJson(tool));
     return McpServerFeatures.AsyncToolSpecification.builder()
         .tool(tool)
         .callHandler(
