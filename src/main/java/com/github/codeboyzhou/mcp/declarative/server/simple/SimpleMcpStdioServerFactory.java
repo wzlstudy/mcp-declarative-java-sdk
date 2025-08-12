@@ -1,21 +1,19 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.simple;
 
-import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
-import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
 public class SimpleMcpStdioServerFactory
-    extends AbstractMcpServerFactory<McpServerTransportProvider, McpServerInfo> {
+    implements SimpleMcpServerFactory<StdioServerTransportProvider, SimpleMcpServerBaseInfo> {
 
   @Override
-  public McpServerTransportProvider transportProvider(McpServerInfo serverInfo) {
+  public StdioServerTransportProvider transportProvider(SimpleMcpServerBaseInfo serverInfo) {
     return new StdioServerTransportProvider();
   }
 
   @Override
-  public McpAsyncServer create(McpServerInfo serverInfo) {
+  public McpAsyncServer create(SimpleMcpServerBaseInfo serverInfo) {
     return McpServer.async(transportProvider(serverInfo))
         .serverInfo(serverInfo.name(), serverInfo.version())
         .capabilities(serverCapabilities())

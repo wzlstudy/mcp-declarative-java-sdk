@@ -1,8 +1,7 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.simple;
 
 import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
-import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
@@ -10,36 +9,36 @@ import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTrans
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class McpHttpStreamableServerFactory
-    extends AbstractMcpServerFactory<
-        HttpServletStreamableServerTransportProvider, McpStreamableServerInfo> {
+public class SimpleMcpHttpStreamableServerFactory
+    implements SimpleMcpServerFactory<
+        HttpServletStreamableServerTransportProvider, SimpleMcpHttpStreamableServerInfo> {
 
   @Override
   public HttpServletStreamableServerTransportProvider transportProvider(
-      McpStreamableServerInfo serverInfo) {
+      SimpleMcpHttpStreamableServerInfo info) {
     return HttpServletStreamableServerTransportProvider.builder()
         .objectMapper(ObjectMappers.JSON_MAPPER)
-        .mcpEndpoint(serverInfo.mcpEndpoint())
-        .disallowDelete(serverInfo.disallowDelete())
-        .contextExtractor(serverInfo.contextExtractor())
-        .keepAliveInterval(serverInfo.keepAliveInterval())
+        .mcpEndpoint(info.mcpEndpoint())
+        .disallowDelete(info.disallowDelete())
+        .contextExtractor(info.contextExtractor())
+        .keepAliveInterval(info.keepAliveInterval())
         .build();
   }
 
   @Override
-  public McpAsyncServer create(McpStreamableServerInfo serverInfo) {
-    HttpServletStreamableServerTransportProvider transportProvider = transportProvider(serverInfo);
+  public McpAsyncServer create(SimpleMcpHttpStreamableServerInfo info) {
+    HttpServletStreamableServerTransportProvider transportProvider = transportProvider(info);
     McpAsyncServer server =
         McpServer.async(transportProvider)
-            .serverInfo(serverInfo.name(), serverInfo.version())
+            .serverInfo(info.name(), info.version())
             .capabilities(serverCapabilities())
-            .instructions(serverInfo.instructions())
-            .requestTimeout(serverInfo.requestTimeout())
+            .instructions(info.instructions())
+            .requestTimeout(info.requestTimeout())
             .build();
     McpHttpServer httpServer = new McpHttpServer();
     NamedThreadFactory threadFactory = new NamedThreadFactory(McpHttpServer.class.getSimpleName());
     ExecutorService executor = Executors.newSingleThreadExecutor(threadFactory);
-    executor.execute(() -> httpServer.use(transportProvider).bind(serverInfo.port()).start());
+    executor.execute(() -> httpServer.use(transportProvider).bind(info.port()).start());
     return server;
   }
 }

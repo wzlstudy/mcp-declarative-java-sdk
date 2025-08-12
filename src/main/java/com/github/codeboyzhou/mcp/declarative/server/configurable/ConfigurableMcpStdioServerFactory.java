@@ -1,21 +1,20 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.configurable;
 
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
-import io.modelcontextprotocol.spec.McpServerTransportProvider;
 import java.time.Duration;
 
 public class ConfigurableMcpStdioServerFactory
-    extends AbstractConfigurableMcpServerFactory<McpServerTransportProvider> {
+    extends AbstractConfigurableMcpServerFactory<StdioServerTransportProvider> {
 
   public ConfigurableMcpStdioServerFactory(McpServerConfiguration configuration) {
     super(configuration);
   }
 
   @Override
-  public McpServerTransportProvider transportProvider() {
+  public StdioServerTransportProvider transportProvider() {
     return new StdioServerTransportProvider();
   }
 

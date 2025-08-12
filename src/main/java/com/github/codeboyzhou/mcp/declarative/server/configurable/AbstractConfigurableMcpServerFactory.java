@@ -1,12 +1,12 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.configurable;
 
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
 
-public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTransportProvider>
+public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTransportProviderBase>
     implements ConfigurableMcpServerFactory<T> {
 
   protected final McpServerConfiguration configuration;

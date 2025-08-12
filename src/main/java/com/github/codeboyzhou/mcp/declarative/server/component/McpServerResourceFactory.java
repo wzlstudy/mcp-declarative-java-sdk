@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 

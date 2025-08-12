@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import io.modelcontextprotocol.server.McpAsyncServer;
 import java.lang.reflect.Method;

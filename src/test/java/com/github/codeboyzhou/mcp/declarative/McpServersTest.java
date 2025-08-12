@@ -8,9 +8,6 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
-import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageClass;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageString;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanDefault;
@@ -18,6 +15,9 @@ import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanIsNull;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpPrompts;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpResources;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpTools;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpStreamableServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpServerBaseInfo;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import java.time.Duration;
@@ -80,8 +80,8 @@ class McpServersTest {
     assertDoesNotThrow(
         () -> {
           McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
-          McpServerInfo serverInfo =
-              McpServerInfo.builder()
+          SimpleMcpServerBaseInfo serverInfo =
+              SimpleMcpServerBaseInfo.builder()
                   .instructions("test-mcp-sync-stdio-server-instructions")
                   .requestTimeout(Duration.ofSeconds(20))
                   .name("test-mcp-sync-stdio-server")
@@ -96,8 +96,8 @@ class McpServersTest {
     McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
     assertDoesNotThrow(
         () -> {
-          McpSseServerInfo serverInfo =
-              McpSseServerInfo.builder()
+          SimpleMcpHttpSseServerInfo serverInfo =
+              SimpleMcpHttpSseServerInfo.builder()
                   .instructions("test-mcp-sync-sse-server-instructions")
                   .requestTimeout(Duration.ofSeconds(20))
                   .baseUrl("http://127.0.0.1:8080")
@@ -116,8 +116,8 @@ class McpServersTest {
     McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
     assertDoesNotThrow(
         () -> {
-          McpStreamableServerInfo serverInfo =
-              McpStreamableServerInfo.builder()
+          SimpleMcpHttpStreamableServerInfo serverInfo =
+              SimpleMcpHttpStreamableServerInfo.builder()
                   .instructions("test-mcp-sync-sse-server-instructions")
                   .requestTimeout(Duration.ofSeconds(20))
                   .name("test-mcp-sync-sse-server")

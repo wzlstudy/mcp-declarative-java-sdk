@@ -3,18 +3,18 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
-import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpHttpSseServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.SimpleMcpHttpSseServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpStreamableServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerPromptFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerResourceFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerToolFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.SimpleMcpStdioServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
+import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpStdioServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpStreamableServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpStreamableServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpServerBaseInfo;
+import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpStdioServerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpAsyncServer;
@@ -40,20 +40,20 @@ public class McpServers {
     return INSTANCE;
   }
 
-  public void startStdioServer(McpServerInfo serverInfo) {
+  public void startStdioServer(SimpleMcpServerBaseInfo serverInfo) {
     SimpleMcpStdioServerFactory factory = new SimpleMcpStdioServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
     registerComponents(server);
   }
 
-  public void startSseServer(McpSseServerInfo serverInfo) {
+  public void startSseServer(SimpleMcpHttpSseServerInfo serverInfo) {
     SimpleMcpHttpSseServerFactory factory = new SimpleMcpHttpSseServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
     registerComponents(server);
   }
 
-  public void startStreamableServer(McpStreamableServerInfo serverInfo) {
-    McpHttpStreamableServerFactory factory = new McpHttpStreamableServerFactory();
+  public void startStreamableServer(SimpleMcpHttpStreamableServerInfo serverInfo) {
+    SimpleMcpHttpStreamableServerFactory factory = new SimpleMcpHttpStreamableServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
     registerComponents(server);
   }

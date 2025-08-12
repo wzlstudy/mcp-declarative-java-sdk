@@ -1,10 +1,10 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.simple;
 
 import io.modelcontextprotocol.server.McpTransportContextExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
 
-public class McpStreamableServerInfo extends McpServerInfo {
+public class SimpleMcpHttpStreamableServerInfo extends SimpleMcpServerBaseInfo {
 
   private final int port;
 
@@ -16,7 +16,7 @@ public class McpStreamableServerInfo extends McpServerInfo {
 
   private final Duration keepAliveInterval;
 
-  private McpStreamableServerInfo(McpStreamableServerInfo.Builder builder) {
+  private SimpleMcpHttpStreamableServerInfo(SimpleMcpHttpStreamableServerInfo.Builder builder) {
     super(builder);
     this.port = builder.port;
     this.mcpEndpoint = builder.mcpEndpoint;
@@ -25,8 +25,8 @@ public class McpStreamableServerInfo extends McpServerInfo {
     this.keepAliveInterval = builder.keepAliveInterval;
   }
 
-  public static McpStreamableServerInfo.Builder builder() {
-    return new McpStreamableServerInfo.Builder();
+  public static SimpleMcpHttpStreamableServerInfo.Builder builder() {
+    return new SimpleMcpHttpStreamableServerInfo.Builder();
   }
 
   public int port() {
@@ -49,9 +49,10 @@ public class McpStreamableServerInfo extends McpServerInfo {
     return keepAliveInterval;
   }
 
-  public static class Builder extends McpServerInfo.Builder<McpStreamableServerInfo.Builder> {
+  public static class Builder
+      extends SimpleMcpServerBaseInfo.Builder<SimpleMcpHttpStreamableServerInfo.Builder> {
 
-    private int port;
+    private int port = 8080;
 
     private String mcpEndpoint = "/mcp";
 
@@ -63,37 +64,37 @@ public class McpStreamableServerInfo extends McpServerInfo {
     private Duration keepAliveInterval;
 
     @Override
-    protected McpStreamableServerInfo.Builder self() {
+    protected SimpleMcpHttpStreamableServerInfo.Builder self() {
       return this;
     }
 
     @Override
-    public McpStreamableServerInfo build() {
-      return new McpStreamableServerInfo(this);
+    public SimpleMcpHttpStreamableServerInfo build() {
+      return new SimpleMcpHttpStreamableServerInfo(this);
     }
 
-    public McpStreamableServerInfo.Builder port(int port) {
+    public SimpleMcpHttpStreamableServerInfo.Builder port(int port) {
       this.port = port;
       return self();
     }
 
-    public McpStreamableServerInfo.Builder mcpEndpoint(String mcpEndpoint) {
+    public SimpleMcpHttpStreamableServerInfo.Builder mcpEndpoint(String mcpEndpoint) {
       this.mcpEndpoint = mcpEndpoint;
       return self();
     }
 
-    public McpStreamableServerInfo.Builder disallowDelete(boolean disallowDelete) {
+    public SimpleMcpHttpStreamableServerInfo.Builder disallowDelete(boolean disallowDelete) {
       this.disallowDelete = disallowDelete;
       return self();
     }
 
-    public McpStreamableServerInfo.Builder contextExtractor(
+    public SimpleMcpHttpStreamableServerInfo.Builder contextExtractor(
         McpTransportContextExtractor<HttpServletRequest> contextExtractor) {
       this.contextExtractor = contextExtractor;
       return self();
     }
 
-    public McpStreamableServerInfo.Builder keepAliveInterval(Duration keepAliveInterval) {
+    public SimpleMcpHttpStreamableServerInfo.Builder keepAliveInterval(Duration keepAliveInterval) {
       this.keepAliveInterval = keepAliveInterval;
       return self();
     }

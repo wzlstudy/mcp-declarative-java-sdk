@@ -1,9 +1,9 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.simple;
 
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 import java.time.Duration;
 
-public class McpServerInfo {
+public class SimpleMcpServerBaseInfo {
 
   private final String name;
 
@@ -13,7 +13,7 @@ public class McpServerInfo {
 
   private final Duration requestTimeout;
 
-  protected McpServerInfo(Builder<?> builder) {
+  protected SimpleMcpServerBaseInfo(Builder<?> builder) {
     this.name = builder.name;
     this.version = builder.version;
     this.instructions = builder.instructions;
@@ -55,8 +55,8 @@ public class McpServerInfo {
       return (T) this;
     }
 
-    public McpServerInfo build() {
-      return new McpServerInfo(this);
+    public SimpleMcpServerBaseInfo build() {
+      return new SimpleMcpServerBaseInfo(this);
     }
 
     public T name(String name) {

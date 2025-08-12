@@ -1,8 +1,8 @@
-package com.github.codeboyzhou.mcp.declarative.server;
+package com.github.codeboyzhou.mcp.declarative.server.simple;
 
 import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
 
-public class McpSseServerInfo extends McpServerInfo {
+public class SimpleMcpHttpSseServerInfo extends SimpleMcpServerBaseInfo {
 
   private final String baseUrl;
 
@@ -12,7 +12,7 @@ public class McpSseServerInfo extends McpServerInfo {
 
   private final int port;
 
-  private McpSseServerInfo(McpSseServerInfo.Builder builder) {
+  private SimpleMcpHttpSseServerInfo(SimpleMcpHttpSseServerInfo.Builder builder) {
     super(builder);
     this.baseUrl = builder.baseUrl;
     this.messageEndpoint = builder.messageEndpoint;
@@ -20,8 +20,8 @@ public class McpSseServerInfo extends McpServerInfo {
     this.port = builder.port;
   }
 
-  public static McpSseServerInfo.Builder builder() {
-    return new McpSseServerInfo.Builder();
+  public static SimpleMcpHttpSseServerInfo.Builder builder() {
+    return new SimpleMcpHttpSseServerInfo.Builder();
   }
 
   public String baseUrl() {
@@ -40,7 +40,8 @@ public class McpSseServerInfo extends McpServerInfo {
     return port;
   }
 
-  public static class Builder extends McpServerInfo.Builder<McpSseServerInfo.Builder> {
+  public static class Builder
+      extends SimpleMcpServerBaseInfo.Builder<SimpleMcpHttpSseServerInfo.Builder> {
 
     private String baseUrl = StringHelper.EMPTY;
 
@@ -51,31 +52,31 @@ public class McpSseServerInfo extends McpServerInfo {
     private int port = 8080;
 
     @Override
-    protected McpSseServerInfo.Builder self() {
+    protected SimpleMcpHttpSseServerInfo.Builder self() {
       return this;
     }
 
     @Override
-    public McpSseServerInfo build() {
-      return new McpSseServerInfo(this);
+    public SimpleMcpHttpSseServerInfo build() {
+      return new SimpleMcpHttpSseServerInfo(this);
     }
 
-    public McpSseServerInfo.Builder baseUrl(String baseUrl) {
+    public SimpleMcpHttpSseServerInfo.Builder baseUrl(String baseUrl) {
       this.baseUrl = baseUrl;
       return self();
     }
 
-    public McpSseServerInfo.Builder messageEndpoint(String messageEndpoint) {
+    public SimpleMcpHttpSseServerInfo.Builder messageEndpoint(String messageEndpoint) {
       this.messageEndpoint = messageEndpoint;
       return self();
     }
 
-    public McpSseServerInfo.Builder sseEndpoint(String sseEndpoint) {
+    public SimpleMcpHttpSseServerInfo.Builder sseEndpoint(String sseEndpoint) {
       this.sseEndpoint = sseEndpoint;
       return self();
     }
 
-    public McpSseServerInfo.Builder port(int port) {
+    public SimpleMcpHttpSseServerInfo.Builder port(int port) {
       this.port = port;
       return self();
     }

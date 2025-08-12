@@ -1,8 +1,7 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server.configurable;
 
 import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
-import com.github.codeboyzhou.mcp.declarative.configuration.McpServerSSE;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
@@ -20,14 +19,10 @@ public class ConfigurableMcpHttpSseServerFactory
 
   @Override
   public HttpServletSseServerTransportProvider transportProvider() {
-    McpServerSSE sse = configuration.sse();
-    final String baseUrl = sse.baseUrl();
-    final String messageEndpoint = sse.messageEndpoint();
-    final String sseEndpoint = sse.endpoint();
     return HttpServletSseServerTransportProvider.builder()
-        .baseUrl(baseUrl)
-        .sseEndpoint(sseEndpoint)
-        .messageEndpoint(messageEndpoint)
+        .baseUrl(configuration.sse().baseUrl())
+        .sseEndpoint(configuration.sse().endpoint())
+        .messageEndpoint(configuration.sse().messageEndpoint())
         .build();
   }
 
