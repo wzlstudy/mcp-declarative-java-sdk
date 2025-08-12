@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.server.simple;
 
 import io.modelcontextprotocol.server.McpAsyncServer;
+import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
 
@@ -15,7 +16,16 @@ public interface SimpleMcpServerFactory<
         .build();
   }
 
-  T transportProvider(S serverInfo);
+  default McpAsyncServer create(S serverInfo) {
+    return specification(serverInfo)
+        .serverInfo(serverInfo.name(), serverInfo.version())
+        .capabilities(serverCapabilities())
+        .instructions(serverInfo.instructions())
+        .requestTimeout(serverInfo.requestTimeout())
+        .build();
+  }
 
-  McpAsyncServer create(S serverInfo);
+  McpServer.AsyncSpecification<?> specification(S serverInfo);
+
+  T transportProvider(S serverInfo);
 }
