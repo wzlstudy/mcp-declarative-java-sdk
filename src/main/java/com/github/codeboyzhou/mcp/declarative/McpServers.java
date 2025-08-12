@@ -3,11 +3,13 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
+import com.github.codeboyzhou.mcp.declarative.enums.HttpMode;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
 import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpHttpStreamableServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerFactory;
@@ -19,7 +21,7 @@ import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpStdioServer
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpAsyncServer;
-import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ public class McpServers {
   public void startStdioServer(SimpleMcpServerBaseInfo serverInfo) {
     SimpleMcpStdioServerFactory factory = new SimpleMcpStdioServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
-    registerComponents(server);
+    registerComponentsTo(server);
   }
 
   public void startSseServer(SimpleMcpHttpSseServerInfo serverInfo) {
@@ -52,7 +54,7 @@ public class McpServers {
     McpAsyncServer server = factory.create(serverInfo);
     McpHttpServer httpserver = new McpHttpServer();
     httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
-    registerComponents(server);
+    registerComponentsTo(server);
   }
 
   public void startStreamableServer(SimpleMcpHttpStreamableServerInfo serverInfo) {
@@ -60,7 +62,7 @@ public class McpServers {
     McpAsyncServer server = factory.create(serverInfo);
     McpHttpServer httpserver = new McpHttpServer();
     httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
-    registerComponents(server);
+    registerComponentsTo(server);
   }
 
   public void startServer(String configFileName) {
@@ -80,17 +82,24 @@ public class McpServers {
       return;
     }
 
-    ConfigurableMcpServerFactory<? extends McpServerTransportProvider> factory;
+    ConfigurableMcpServerFactory<? extends McpServerTransportProviderBase> factory;
     if (configuration.stdio()) {
       factory = new ConfigurableMcpStdioServerFactory(configuration);
     } else {
-      factory = new ConfigurableMcpHttpSseServerFactory(configuration);
+      final String httpMode = configuration.httpMode().name();
+      if (HttpMode.SSE.name().equalsIgnoreCase(httpMode)) {
+        factory = new ConfigurableMcpHttpSseServerFactory(configuration);
+      } else if (HttpMode.STREAMABLE.name().equalsIgnoreCase(httpMode)) {
+        factory = new ConfigurableMcpHttpStreamableServerFactory(configuration);
+      } else {
+        throw new NullPointerException("factory is null, please check your configuration");
+      }
     }
     McpAsyncServer server = factory.create();
-    registerComponents(server);
+    registerComponentsTo(server);
   }
 
-  private void registerComponents(McpAsyncServer server) {
+  private void registerComponentsTo(McpAsyncServer server) {
     injector.getInstance(McpServerResourceFactory.class).registerTo(server);
     injector.getInstance(McpServerPromptFactory.class).registerTo(server);
     injector.getInstance(McpServerToolFactory.class).registerTo(server);

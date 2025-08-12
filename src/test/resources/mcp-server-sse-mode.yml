@@ -1,5 +1,6 @@
 enabled: true
 stdio: false
+http-mode: sse
 name: mcp-server
 version: 1.0.0
 type: SYNC
