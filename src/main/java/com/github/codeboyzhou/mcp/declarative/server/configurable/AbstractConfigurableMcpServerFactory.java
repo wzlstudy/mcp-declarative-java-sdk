@@ -3,8 +3,10 @@ package com.github.codeboyzhou.mcp.declarative.server.configurable;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
+import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
+import java.time.Duration;
 
 public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTransportProviderBase>
     implements ConfigurableMcpServerFactory<T> {
@@ -30,5 +32,15 @@ public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTr
       capabilities.tools(serverChangeNotification.tool());
     }
     return capabilities.build();
+  }
+
+  @Override
+  public McpAsyncServer create() {
+    return specification()
+        .serverInfo(configuration.name(), configuration.version())
+        .capabilities(serverCapabilities())
+        .instructions(configuration.instructions())
+        .requestTimeout(Duration.ofMillis(configuration.requestTimeout()))
+        .build();
   }
 }
