@@ -3,6 +3,7 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
+import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
@@ -49,12 +50,16 @@ public class McpServers {
   public void startSseServer(SimpleMcpHttpSseServerInfo serverInfo) {
     SimpleMcpHttpSseServerFactory factory = new SimpleMcpHttpSseServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
+    McpHttpServer httpserver = new McpHttpServer();
+    httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
     registerComponents(server);
   }
 
   public void startStreamableServer(SimpleMcpHttpStreamableServerInfo serverInfo) {
     SimpleMcpHttpStreamableServerFactory factory = new SimpleMcpHttpStreamableServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
+    McpHttpServer httpserver = new McpHttpServer();
+    httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
     registerComponents(server);
   }
 
