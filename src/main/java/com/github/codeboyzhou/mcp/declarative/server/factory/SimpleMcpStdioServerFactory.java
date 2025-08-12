@@ -6,7 +6,7 @@ import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 import io.modelcontextprotocol.spec.McpServerTransportProvider;
 
-public class McpStdioServerFactory
+public class SimpleMcpStdioServerFactory
     extends AbstractMcpServerFactory<McpServerTransportProvider, McpServerInfo> {
 
   @Override

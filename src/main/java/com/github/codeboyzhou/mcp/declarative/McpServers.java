@@ -9,12 +9,12 @@ import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpHttpSseServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.SimpleMcpHttpSseServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpStreamableServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerToolFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.SimpleMcpStdioServerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpAsyncServer;
@@ -41,13 +41,13 @@ public class McpServers {
   }
 
   public void startStdioServer(McpServerInfo serverInfo) {
-    McpStdioServerFactory factory = new McpStdioServerFactory();
+    SimpleMcpStdioServerFactory factory = new SimpleMcpStdioServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
     registerComponents(server);
   }
 
   public void startSseServer(McpSseServerInfo serverInfo) {
-    McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
+    SimpleMcpHttpSseServerFactory factory = new SimpleMcpHttpSseServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
     registerComponents(server);
   }

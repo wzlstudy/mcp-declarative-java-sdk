@@ -9,7 +9,7 @@ import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportPro
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class McpHttpSseServerFactory
+public class SimpleMcpHttpSseServerFactory
     extends AbstractMcpServerFactory<HttpServletSseServerTransportProvider, McpSseServerInfo> {
 
   @Override
