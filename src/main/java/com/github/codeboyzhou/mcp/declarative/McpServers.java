@@ -5,10 +5,12 @@ import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfigurati
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpHttpSseServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.ConfigurableMcpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpHttpStreamableServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpServerToolFactory;
@@ -46,6 +48,12 @@ public class McpServers {
 
   public void startSseServer(McpSseServerInfo serverInfo) {
     McpHttpSseServerFactory factory = new McpHttpSseServerFactory();
+    McpAsyncServer server = factory.create(serverInfo);
+    registerComponents(server);
+  }
+
+  public void startStreamableServer(McpStreamableServerInfo serverInfo) {
+    McpHttpStreamableServerFactory factory = new McpHttpStreamableServerFactory();
     McpAsyncServer server = factory.create(serverInfo);
     registerComponents(server);
   }

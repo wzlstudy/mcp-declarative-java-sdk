@@ -2,10 +2,10 @@ package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import io.modelcontextprotocol.spec.McpSchema;
-import io.modelcontextprotocol.spec.McpServerTransportProvider;
+import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
 
 public abstract class AbstractMcpServerFactory<
-        T extends McpServerTransportProvider, S extends McpServerInfo>
+        T extends McpServerTransportProviderBase, S extends McpServerInfo>
     implements McpServerFactory<T, S> {
 
   @Override

@@ -10,6 +10,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageClass;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanBasePackageString;
 import com.github.codeboyzhou.mcp.declarative.server.TestMcpComponentScanDefault;
@@ -107,6 +108,26 @@ class McpServersTest {
                   .version("1.0.0")
                   .build();
           servers.startSseServer(serverInfo);
+        });
+  }
+
+  @Test
+  void testStartStreamableServer() {
+    McpServers servers = McpServers.run(TestMcpComponentScanIsNull.class, EMPTY_ARGS);
+    assertDoesNotThrow(
+        () -> {
+          McpStreamableServerInfo serverInfo =
+              McpStreamableServerInfo.builder()
+                  .instructions("test-mcp-sync-sse-server-instructions")
+                  .requestTimeout(Duration.ofSeconds(20))
+                  .name("test-mcp-sync-sse-server")
+                  .version("1.0.0")
+                  .port(8080)
+                  .mcpEndpoint("/mcp")
+                  .disallowDelete(true)
+                  .keepAliveInterval(Duration.ofSeconds(60))
+                  .build();
+          servers.startStreamableServer(serverInfo);
         });
   }
 

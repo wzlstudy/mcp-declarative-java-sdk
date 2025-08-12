@@ -1,6 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
-import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
+import jakarta.servlet.http.HttpServlet;
 import java.time.Duration;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -8,7 +8,7 @@ import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public record McpHttpServer(int port) {
+public class McpHttpServer {
 
   private static final Logger logger = LoggerFactory.getLogger(McpHttpServer.class);
 
@@ -16,11 +16,25 @@ public record McpHttpServer(int port) {
 
   private static final String DEFAULT_SERVLET_PATH = "/*";
 
-  public void start(HttpServletSseServerTransportProvider transportProvider) {
+  private HttpServlet servlet;
+
+  private int port;
+
+  public McpHttpServer use(HttpServlet servlet) {
+    this.servlet = servlet;
+    return this;
+  }
+
+  public McpHttpServer bind(int port) {
+    this.port = port;
+    return this;
+  }
+
+  public void start() {
     ServletContextHandler handler = new ServletContextHandler(ServletContextHandler.SESSIONS);
     handler.setContextPath(DEFAULT_SERVLET_CONTEXT_PATH);
 
-    ServletHolder servletHolder = new ServletHolder(transportProvider);
+    ServletHolder servletHolder = new ServletHolder(servlet);
     handler.addServlet(servletHolder, DEFAULT_SERVLET_PATH);
 
     Server httpserver = new Server(port);

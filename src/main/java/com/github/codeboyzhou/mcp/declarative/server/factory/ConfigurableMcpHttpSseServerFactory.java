@@ -41,10 +41,11 @@ public class ConfigurableMcpHttpSseServerFactory
             .instructions(configuration.instructions())
             .requestTimeout(Duration.ofMillis(configuration.requestTimeout()))
             .build();
-    McpHttpServer httpServer = new McpHttpServer(configuration.sse().port());
+    McpHttpServer httpServer = new McpHttpServer();
     NamedThreadFactory threadFactory = new NamedThreadFactory(McpHttpServer.class.getSimpleName());
     ExecutorService executor = Executors.newSingleThreadExecutor(threadFactory);
-    executor.execute(() -> httpServer.start(transportProvider));
+    executor.execute(
+        () -> httpServer.use(transportProvider).bind(configuration.sse().port()).start());
     return server;
   }
 }

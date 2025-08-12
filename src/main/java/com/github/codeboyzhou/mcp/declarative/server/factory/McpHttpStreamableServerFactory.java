@@ -2,31 +2,33 @@ package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
-import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
+import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServer;
-import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
+import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class McpHttpSseServerFactory
-    extends AbstractMcpServerFactory<HttpServletSseServerTransportProvider, McpSseServerInfo> {
+public class McpHttpStreamableServerFactory
+    extends AbstractMcpServerFactory<
+        HttpServletStreamableServerTransportProvider, McpStreamableServerInfo> {
 
   @Override
-  public HttpServletSseServerTransportProvider transportProvider(McpSseServerInfo serverInfo) {
-    final String baseUrl = serverInfo.baseUrl();
-    final String messageEndpoint = serverInfo.messageEndpoint();
-    final String sseEndpoint = serverInfo.sseEndpoint();
-    return HttpServletSseServerTransportProvider.builder()
-        .baseUrl(baseUrl)
-        .sseEndpoint(sseEndpoint)
-        .messageEndpoint(messageEndpoint)
+  public HttpServletStreamableServerTransportProvider transportProvider(
+      McpStreamableServerInfo serverInfo) {
+    return HttpServletStreamableServerTransportProvider.builder()
+        .objectMapper(ObjectMappers.JSON_MAPPER)
+        .mcpEndpoint(serverInfo.mcpEndpoint())
+        .disallowDelete(serverInfo.disallowDelete())
+        .contextExtractor(serverInfo.contextExtractor())
+        .keepAliveInterval(serverInfo.keepAliveInterval())
         .build();
   }
 
   @Override
-  public McpAsyncServer create(McpSseServerInfo serverInfo) {
-    HttpServletSseServerTransportProvider transportProvider = transportProvider(serverInfo);
+  public McpAsyncServer create(McpStreamableServerInfo serverInfo) {
+    HttpServletStreamableServerTransportProvider transportProvider = transportProvider(serverInfo);
     McpAsyncServer server =
         McpServer.async(transportProvider)
             .serverInfo(serverInfo.name(), serverInfo.version())
