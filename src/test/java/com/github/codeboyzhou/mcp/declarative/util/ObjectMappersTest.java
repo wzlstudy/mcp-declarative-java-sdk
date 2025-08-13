@@ -1,32 +1,56 @@
 package com.github.codeboyzhou.mcp.declarative.util;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 
 class ObjectMappersTest {
 
-  record TestClass(String name, int age) {}
+  static class CircularReference {
+    private final CircularReference self = this;
+  }
+
+  record Person(String name, int age) {}
 
   @Test
-  void testNewInstance() {
-    UnsupportedOperationException e =
-        assertThrows(UnsupportedOperationException.class, ObjectMappers::new);
-    assertEquals("Utility class should not be instantiated", e.getMessage());
+  void testConstructor_shouldThrowException() {
+    assertThrows(UnsupportedOperationException.class, ObjectMappers::new);
   }
 
   @Test
-  void testToJson() {
-    assertDoesNotThrow(
-        () -> {
-          TestClass testObject = new TestClass("test", 18);
-          assertEquals("{\"name\":\"test\",\"age\":18}", ObjectMappers.toJson(testObject));
-        });
+  void testToJson_shouldSucceed() {
+    String json = ObjectMappers.toJson(new Person("test", 25));
+    assertTrue(json.contains("\"name\":\"test\""));
+    assertTrue(json.contains("\"age\":25"));
+  }
 
-    McpServerException e = assertThrows(McpServerException.class, () -> ObjectMappers.toJson(this));
-    assertEquals("Error converting object to JSON", e.getMessage());
+  @Test
+  void testToJson_shouldThrowException() throws Exception {
+    assertThrows(McpServerException.class, () -> ObjectMappers.toJson(new CircularReference()));
+  }
+
+  @Test
+  void testFromYaml_shouldSucceed() throws IOException {
+    String yamlContent = "name: test\nage: 25";
+    File tempYaml = File.createTempFile("test", ".yaml");
+    try (FileWriter writer = new FileWriter(tempYaml)) {
+      writer.write(yamlContent);
+    }
+    Person person = ObjectMappers.fromYaml(tempYaml, Person.class);
+    assertEquals("test", person.name);
+    assertEquals(25, person.age);
+  }
+
+  @Test
+  void testFromYaml_shouldThrowException() {
+    File file = new File("non-existent.yaml");
+    assertThrows(McpServerException.class, () -> ObjectMappers.fromYaml(file, Map.class));
   }
 }

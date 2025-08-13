@@ -10,8 +10,8 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
-import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
-import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
+import com.github.codeboyzhou.mcp.declarative.util.Strings;
+import com.github.codeboyzhou.mcp.declarative.util.Types;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -45,9 +45,9 @@ public class McpServerToolFactory
   }
 
   @Override
-  public McpServerFeatures.AsyncToolSpecification create(Class<?> clazz, Method method) {
+  public McpServerFeatures.AsyncToolSpecification createComponent(Class<?> clazz, Method method) {
     McpTool toolMethod = method.getAnnotation(McpTool.class);
-    final String name = StringHelper.defaultIfBlank(toolMethod.name(), method.getName());
+    final String name = Strings.defaultIfBlank(toolMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(toolMethod.title());
     final String description = resolveComponentAttributeValue(toolMethod.description());
     McpSchema.JsonSchema paramSchema = createJsonSchema(method);
@@ -93,7 +93,7 @@ public class McpServerToolFactory
       List<Method> methods =
           toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
       for (Method method : methods) {
-        McpServerFeatures.AsyncToolSpecification tool = create(toolClass, method);
+        McpServerFeatures.AsyncToolSpecification tool = createComponent(toolClass, method);
         queue.submit(tool);
       }
     }
@@ -165,7 +165,7 @@ public class McpServerToolFactory
       fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
       fieldProperties.put("description", resolveComponentAttributeValue(property.description()));
 
-      final String fieldName = StringHelper.defaultIfBlank(property.name(), field.getName());
+      final String fieldName = Strings.defaultIfBlank(property.name(), field.getName());
       properties.put(fieldName, fieldProperties);
 
       if (property.required()) {
@@ -191,8 +191,8 @@ public class McpServerToolFactory
           // Fill in a default value when the parameter is not specified
           // to ensure that the parameter type is correct when calling method.invoke()
           Map<String, Object> map = (Map<String, Object>) parameterProperties;
-          final String jsonSchemaType = map.getOrDefault("type", StringHelper.EMPTY).toString();
-          Object typedParameterValue = TypeConverter.convert(parameterValue, jsonSchemaType);
+          final String jsonSchemaType = map.getOrDefault("type", Strings.EMPTY).toString();
+          Object typedParameterValue = Types.convert(parameterValue, jsonSchemaType);
           typedParameters.put(parameterName, typedParameterValue);
         });
 

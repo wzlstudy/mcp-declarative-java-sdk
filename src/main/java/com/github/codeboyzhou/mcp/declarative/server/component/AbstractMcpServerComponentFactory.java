@@ -2,7 +2,7 @@ package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
-import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
+import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import java.util.Locale;
@@ -36,7 +36,7 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
     if (i18nEnabled && bundle != null && bundle.containsKey(attributeLiteralValue)) {
       return bundle.getString(attributeLiteralValue);
     }
-    return StringHelper.defaultIfBlank(attributeLiteralValue, NOT_SPECIFIED);
+    return Strings.defaultIfBlank(attributeLiteralValue, NOT_SPECIFIED);
   }
 
   private ResourceBundle loadResourceBundle() {

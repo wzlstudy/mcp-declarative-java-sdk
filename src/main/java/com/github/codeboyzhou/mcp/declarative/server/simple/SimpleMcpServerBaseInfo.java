@@ -1,6 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server.simple;
 
-import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
+import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import java.time.Duration;
 
 public class SimpleMcpServerBaseInfo {
@@ -47,7 +47,7 @@ public class SimpleMcpServerBaseInfo {
 
     protected String version = "1.0.0";
 
-    protected String instructions = StringHelper.EMPTY;
+    protected String instructions = Strings.EMPTY;
 
     protected Duration requestTimeout = Duration.ofSeconds(20);
 

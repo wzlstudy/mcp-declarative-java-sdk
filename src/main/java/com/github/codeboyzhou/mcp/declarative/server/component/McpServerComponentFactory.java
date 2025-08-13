@@ -5,7 +5,7 @@ import java.lang.reflect.Method;
 
 public interface McpServerComponentFactory<T> {
 
-  T create(Class<?> clazz, Method method);
+  T createComponent(Class<?> clazz, Method method);
 
   void registerTo(McpAsyncServer server);
 }

@@ -6,7 +6,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
-import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
+import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -33,9 +33,10 @@ public class McpServerResourceFactory
   }
 
   @Override
-  public McpServerFeatures.AsyncResourceSpecification create(Class<?> clazz, Method method) {
+  public McpServerFeatures.AsyncResourceSpecification createComponent(
+      Class<?> clazz, Method method) {
     McpResource res = method.getAnnotation(McpResource.class);
-    final String name = StringHelper.defaultIfBlank(res.name(), method.getName());
+    final String name = Strings.defaultIfBlank(res.name(), method.getName());
     final String title = resolveComponentAttributeValue(res.title());
     final String description = resolveComponentAttributeValue(res.description());
     McpSchema.Resource resource =
@@ -78,7 +79,8 @@ public class McpServerResourceFactory
       List<Method> methods =
           resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
       for (Method method : methods) {
-        McpServerFeatures.AsyncResourceSpecification resource = create(resourceClass, method);
+        McpServerFeatures.AsyncResourceSpecification resource =
+            createComponent(resourceClass, method);
         queue.submit(resource);
       }
     }

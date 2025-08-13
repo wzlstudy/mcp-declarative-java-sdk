@@ -45,24 +45,24 @@ public class McpServers {
 
   public void startStdioServer(SimpleMcpServerBaseInfo serverInfo) {
     SimpleMcpStdioServerFactory factory = new SimpleMcpStdioServerFactory();
-    McpAsyncServer server = factory.create(serverInfo);
+    McpAsyncServer server = factory.createServer(serverInfo);
     registerComponentsTo(server);
   }
 
   public void startSseServer(SimpleMcpHttpSseServerInfo serverInfo) {
     SimpleMcpHttpSseServerFactory factory = new SimpleMcpHttpSseServerFactory();
-    McpAsyncServer server = factory.create(serverInfo);
+    McpAsyncServer server = factory.createServer(serverInfo);
+    registerComponentsTo(server);
     McpHttpServer httpserver = new McpHttpServer();
     httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
-    registerComponentsTo(server);
   }
 
   public void startStreamableServer(SimpleMcpHttpStreamableServerInfo serverInfo) {
     SimpleMcpHttpStreamableServerFactory factory = new SimpleMcpHttpStreamableServerFactory();
-    McpAsyncServer server = factory.create(serverInfo);
+    McpAsyncServer server = factory.createServer(serverInfo);
+    registerComponentsTo(server);
     McpHttpServer httpserver = new McpHttpServer();
     httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
-    registerComponentsTo(server);
   }
 
   public void startServer(String configFileName) {
@@ -95,13 +95,16 @@ public class McpServers {
         throw new NullPointerException("factory is null, please check your configuration");
       }
     }
-    McpAsyncServer server = factory.create();
+    McpAsyncServer server = factory.createServer();
     registerComponentsTo(server);
   }
 
   private void registerComponentsTo(McpAsyncServer server) {
-    injector.getInstance(McpServerResourceFactory.class).registerTo(server);
-    injector.getInstance(McpServerPromptFactory.class).registerTo(server);
-    injector.getInstance(McpServerToolFactory.class).registerTo(server);
+    McpServerResourceFactory resource = injector.getInstance(McpServerResourceFactory.class);
+    McpServerPromptFactory prompt = injector.getInstance(McpServerPromptFactory.class);
+    McpServerToolFactory tool = injector.getInstance(McpServerToolFactory.class);
+    resource.registerTo(server);
+    prompt.registerTo(server);
+    tool.registerTo(server);
   }
 }

@@ -16,7 +16,7 @@ public interface SimpleMcpServerFactory<
         .build();
   }
 
-  default McpAsyncServer create(S serverInfo) {
+  default McpAsyncServer createServer(S serverInfo) {
     return specification(serverInfo)
         .serverInfo(serverInfo.name(), serverInfo.version())
         .capabilities(serverCapabilities())

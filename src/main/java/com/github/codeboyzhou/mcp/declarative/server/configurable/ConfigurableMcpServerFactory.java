@@ -13,5 +13,5 @@ public interface ConfigurableMcpServerFactory<T extends McpServerTransportProvid
 
   McpSchema.ServerCapabilities serverCapabilities();
 
-  McpAsyncServer create();
+  McpAsyncServer createServer();
 }

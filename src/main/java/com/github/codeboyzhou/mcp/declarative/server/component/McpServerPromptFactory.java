@@ -7,8 +7,8 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
-import com.github.codeboyzhou.mcp.declarative.util.StringHelper;
-import com.github.codeboyzhou.mcp.declarative.util.TypeConverter;
+import com.github.codeboyzhou.mcp.declarative.util.Strings;
+import com.github.codeboyzhou.mcp.declarative.util.Types;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
@@ -40,9 +40,9 @@ public class McpServerPromptFactory
   }
 
   @Override
-  public McpServerFeatures.AsyncPromptSpecification create(Class<?> clazz, Method method) {
+  public McpServerFeatures.AsyncPromptSpecification createComponent(Class<?> clazz, Method method) {
     McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
-    final String name = StringHelper.defaultIfBlank(promptMethod.name(), method.getName());
+    final String name = Strings.defaultIfBlank(promptMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(promptMethod.title());
     final String description = resolveComponentAttributeValue(promptMethod.description());
     List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
@@ -80,7 +80,7 @@ public class McpServerPromptFactory
       List<Method> methods =
           promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
       for (Method method : methods) {
-        McpServerFeatures.AsyncPromptSpecification prompt = create(promptClass, method);
+        McpServerFeatures.AsyncPromptSpecification prompt = createComponent(promptClass, method);
         queue.submit(prompt);
       }
     }
@@ -115,7 +115,7 @@ public class McpServerPromptFactory
       final Object parameterValue = parameters.get(parameterName);
       // Fill in a default value when the parameter is not specified
       // to ensure that the parameter type is correct when calling method.invoke()
-      Object typedParameterValue = TypeConverter.convert(parameterValue, parameterTypes[i]);
+      Object typedParameterValue = Types.convert(parameterValue, parameterTypes[i]);
       typedParameters.put(parameterName, typedParameterValue);
     }
 

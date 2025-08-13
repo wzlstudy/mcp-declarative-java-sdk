@@ -35,7 +35,7 @@ public abstract class AbstractConfigurableMcpServerFactory<T extends McpServerTr
   }
 
   @Override
-  public McpAsyncServer create() {
+  public McpAsyncServer createServer() {
     return specification()
         .serverInfo(configuration.name(), configuration.version())
         .capabilities(serverCapabilities())

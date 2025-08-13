@@ -49,16 +49,6 @@ public class McpHttpServer {
       // Add a shutdown hook to stop the HTTP server and MCP server gracefully
       addShutdownHook(httpserver);
 
-      // Check if the server is running in test mode
-      final boolean testing =
-          Boolean.parseBoolean(System.getProperty("mcp.declarative.java.sdk.testing"));
-      if (testing) {
-        logger.debug(
-            "Jetty-based HTTP server is running in test mode, not waiting for HTTP server to stop");
-        httpserver.stop();
-        return;
-      }
-
       // Wait for the HTTP server to stop
       httpserver.join();
     } catch (Exception e) {
