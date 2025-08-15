@@ -7,6 +7,10 @@
 
 Declarative [MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) Development with Java Annotations.
 
+Documentation site is here: https://codeboyzhou.github.io/mcp-declarative-java-sdk.
+
+Please feel free to feed back what's helpful and what's not.
+
 ## Advantages
 
 - 🚫 No Spring Framework Required.
