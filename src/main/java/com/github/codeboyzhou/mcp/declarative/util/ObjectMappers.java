@@ -4,7 +4,8 @@ import com.fasterxml.jackson.core.JsonFactory;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationException;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerJsonProcessingException;
 import java.io.File;
 import java.io.IOException;
 import org.jetbrains.annotations.VisibleForTesting;
@@ -24,7 +25,7 @@ public final class ObjectMappers {
     try {
       return JSON_MAPPER.writeValueAsString(object);
     } catch (JsonProcessingException e) {
-      throw new McpServerException("Error converting object to JSON", e);
+      throw new McpServerJsonProcessingException("Error converting object to JSON", e);
     }
   }
 
@@ -32,7 +33,8 @@ public final class ObjectMappers {
     try {
       return YAML_MAPPER.readValue(yamlFile, valueType);
     } catch (IOException e) {
-      throw new McpServerException("Error reading YAML file: " + yamlFile.getAbsolutePath(), e);
+      final String path = yamlFile.getAbsolutePath();
+      throw new McpServerConfigurationException("Error reading YAML file: " + path, e);
     }
   }
 }

@@ -1,8 +1,16 @@
 package com.github.codeboyzhou.mcp.declarative;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
+import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
+import com.github.codeboyzhou.mcp.declarative.enums.ServerMode;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationException;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.test.TestSimpleMcpStdioServer;
@@ -92,6 +100,57 @@ class McpServersTest {
     try (McpSyncClient client = McpClient.sync(transport).build()) {
       verify(client);
     }
+  }
+
+  @Test
+  void testStartServer_disabledMCP_shouldSucceed() {
+    String configFileName = "test-mcp-server-disabled.yml";
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader(configFileName);
+    McpServerConfiguration configuration = configLoader.loadConfig();
+    assertDoesNotThrow(() -> servers.startServer(configFileName));
+    assertFalse(configuration.enabled());
+  }
+
+  @Test
+  void testStartServer_enableStdioMode_shouldSucceed() {
+    String configFileName = "test-mcp-server-enable-stdio-mode.yml";
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader(configFileName);
+    McpServerConfiguration configuration = configLoader.loadConfig();
+    assertDoesNotThrow(() -> servers.startServer(configFileName));
+    assertSame(ServerMode.STDIO, configuration.mode());
+  }
+
+  @Test
+  void testStartServer_enableHttpSseMode_shouldSucceed() {
+    String configFileName = "test-mcp-server-enable-http-sse-mode.yml";
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader(configFileName);
+    McpServerConfiguration configuration = configLoader.loadConfig();
+    assertDoesNotThrow(() -> servers.startServer(configFileName));
+    assertSame(ServerMode.SSE, configuration.mode());
+  }
+
+  @Test
+  void testStartServer_enableStreamableHttpMode_shouldSucceed() {
+    String configFileName = "test-mcp-server-enable-streamable-http-mode.yml";
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader(configFileName);
+    McpServerConfiguration configuration = configLoader.loadConfig();
+    assertDoesNotThrow(() -> servers.startServer(configFileName));
+    assertSame(ServerMode.STREAMABLE, configuration.mode());
+  }
+
+  @Test
+  void testStartServer_enableUnknownMode_shouldThrowException() {
+    String configFileName = "test-mcp-server-enable-unknown-mode.yml";
+    assertThrows(McpServerConfigurationException.class, () -> servers.startServer(configFileName));
+  }
+
+  @Test
+  void testStartServer_useDefaultConfigFileName_shouldSucceed() {
+    String configFileName = "mcp-server.yml";
+    YAMLConfigurationLoader configLoader = new YAMLConfigurationLoader(configFileName);
+    McpServerConfiguration configuration = configLoader.loadConfig();
+    assertSame(ServerMode.STREAMABLE, configuration.mode());
+    assertDoesNotThrow(() -> servers.startServer());
   }
 
   private void verify(McpSyncClient client) {

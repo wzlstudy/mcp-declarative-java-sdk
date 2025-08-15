@@ -1,7 +1,8 @@
 package com.github.codeboyzhou.mcp.declarative.configuration;
 
-import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationException;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
+import java.io.File;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -9,26 +10,20 @@ import java.nio.file.Paths;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public final class YAMLConfigurationLoader {
+public record YAMLConfigurationLoader(String configFileName) {
 
   private static final Logger logger = LoggerFactory.getLogger(YAMLConfigurationLoader.class);
 
-  private static final String CONFIG_FILE_NAME = "mcp-server.yml";
-
-  private final String configFileName;
-
-  public YAMLConfigurationLoader(String configFileName) {
-    this.configFileName = configFileName;
-  }
+  private static final String DEFAULT_CONFIG_FILE_NAME = "mcp-server.yml";
 
   public YAMLConfigurationLoader() {
-    this(CONFIG_FILE_NAME);
+    this(DEFAULT_CONFIG_FILE_NAME);
   }
 
   public McpServerConfiguration loadConfig() {
     Path configFilePath = getConfigFilePath(configFileName);
-    McpServerConfiguration config =
-        ObjectMappers.fromYaml(configFilePath.toFile(), McpServerConfiguration.class);
+    File file = configFilePath.toFile();
+    McpServerConfiguration config = ObjectMappers.fromYaml(file, McpServerConfiguration.class);
     logger.info("Configuration loaded successfully from file: {}", configFileName);
     return config;
   }
@@ -38,12 +33,12 @@ public final class YAMLConfigurationLoader {
       ClassLoader classLoader = YAMLConfigurationLoader.class.getClassLoader();
       URL configFileUrl = classLoader.getResource(fileName);
       if (configFileUrl == null) {
-        throw new McpServerException("Configuration file not found: " + fileName);
+        throw new McpServerConfigurationException("Configuration file not found: " + fileName);
       }
       return Paths.get(configFileUrl.toURI());
     } catch (URISyntaxException e) {
       // should never happen
-      throw new McpServerException("Invalid configuration file path: " + fileName, e);
+      throw new McpServerConfigurationException("Invalid configuration file: " + fileName, e);
     }
   }
 }

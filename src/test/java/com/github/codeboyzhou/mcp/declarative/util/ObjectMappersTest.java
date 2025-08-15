@@ -4,7 +4,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.github.codeboyzhou.mcp.declarative.exception.McpServerException;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationException;
+import com.github.codeboyzhou.mcp.declarative.exception.McpServerJsonProcessingException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,8 +33,9 @@ class ObjectMappersTest {
   }
 
   @Test
-  void testToJson_shouldThrowException() throws Exception {
-    assertThrows(McpServerException.class, () -> ObjectMappers.toJson(new CircularReference()));
+  void testToJson_shouldThrowException() {
+    CircularReference circularRef = new CircularReference();
+    assertThrows(McpServerJsonProcessingException.class, () -> ObjectMappers.toJson(circularRef));
   }
 
   @Test
@@ -50,7 +52,7 @@ class ObjectMappersTest {
 
   @Test
   void testFromYaml_shouldThrowException() {
-    File file = new File("non-existent.yaml");
-    assertThrows(McpServerException.class, () -> ObjectMappers.fromYaml(file, Map.class));
+    File f = new File("non-existent.yaml");
+    assertThrows(McpServerConfigurationException.class, () -> ObjectMappers.fromYaml(f, Map.class));
   }
 }

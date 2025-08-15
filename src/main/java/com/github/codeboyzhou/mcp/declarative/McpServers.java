@@ -3,7 +3,6 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
-import com.github.codeboyzhou.mcp.declarative.enums.ServerMode;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
@@ -76,17 +75,16 @@ public class McpServers {
       return;
     }
 
-    AbstractConfigurableMcpServerFactory factory;
-    final String mode = configuration.mode().name();
+    AbstractConfigurableMcpServerFactory factory =
+        switch (configuration.mode()) {
+          case STDIO -> new ConfigurableMcpStdioServerFactory(configuration);
+          case SSE -> new ConfigurableMcpSseServerFactory(configuration);
+          case STREAMABLE -> new ConfigurableMcpStreamableServerFactory(configuration);
+        };
 
-    if (configuration.stdio() || ServerMode.STDIO.name().equalsIgnoreCase(mode)) {
+    // Ensure backward compatibility
+    if (configuration.stdio()) {
       factory = new ConfigurableMcpStdioServerFactory(configuration);
-    } else if (ServerMode.SSE.name().equalsIgnoreCase(mode)) {
-      factory = new ConfigurableMcpSseServerFactory(configuration);
-    } else if (ServerMode.STREAMABLE.name().equalsIgnoreCase(mode)) {
-      factory = new ConfigurableMcpStreamableServerFactory(configuration);
-    } else {
-      throw new NullPointerException("factory is null, please check your configuration");
     }
 
     McpSyncServer server = factory.create();
