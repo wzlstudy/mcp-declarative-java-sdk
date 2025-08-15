@@ -144,7 +144,7 @@ For the method `startSseServer`, you can specify the server information by using
 | `baseUrl`         | String   | The base URL of the MCP server         | (empty string) |
 | `messageEndpoint` | String   | The endpoint of the MCP server message | `/mcp/message` |
 | `sseEndpoint`     | String   | The endpoint for HTTP SSE mode         | `/sse`         |
-| `port`            | int      | The port for HTTP SSE mode             | `8080`         |
+| `port`            | int      | The port for HTTP Server               | `8080`         |
 
 #### How to run
 
@@ -171,6 +171,25 @@ public class McpStreamableServer {
 
 }
 ```
+
+#### Server Info
+
+For the method `startStreamableServer`, you can specify the server information by using `McpStreamableServerInfo`:
+
+| Field               | Type     | Description                                                                  | Default Value  |
+|---------------------|----------|------------------------------------------------------------------------------|----------------|
+| `name`              | String   | The name of the MCP server                                                   | `mcp-server`   |
+| `version`           | String   | The version of the MCP server                                                | `1.0.0`        |
+| `instructions`      | String   | The instructions of the MCP server                                           | (empty string) |
+| `requestTimeout`    | Duration | The timeout of the MCP server request                                        | `20` seconds   |
+| `mcpEndpoint`       | String   | The endpoint of the MCP server message                                       | `/mcp`         |
+| `disallowDelete`    | boolean  | Whether to disable the DELETE method of HTTP                                 | `false`        |
+| `keepAliveInterval` | Duration | The interval for keep-alive pings. No keep-alive will be scheduled if `null` | `null`         |
+| `port`              | int      | The port for HTTP server                                                     | `8080`         |
+
+#### How to run
+
+Just run the main class like you would launch a web application, and then it's all set.
 
 ## MCP Component
 
