@@ -33,7 +33,7 @@ Now you can create a simple MCP server with just one line of core code.
 ```java
 import com.github.codeboyzhou.mcp.declarative.McpServers;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpServerBaseInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 
 @McpServerApplication
 public class McpStdioServer {
@@ -117,7 +117,7 @@ There is a Maven plugin that can handle this, just place the following configura
 ```java
 import com.github.codeboyzhou.mcp.declarative.McpServers;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 
 @McpServerApplication
 public class McpSseServer {

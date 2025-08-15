@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.enums;
 
-public enum HttpMode {
+public enum ServerMode {
+  STDIO,
   SSE,
   STREAMABLE
 }

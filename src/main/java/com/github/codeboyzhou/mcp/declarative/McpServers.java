@@ -3,25 +3,23 @@ package com.github.codeboyzhou.mcp.declarative;
 import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
-import com.github.codeboyzhou.mcp.declarative.enums.HttpMode;
-import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
+import com.github.codeboyzhou.mcp.declarative.enums.ServerMode;
+import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
-import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpHttpSseServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpHttpStreamableServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.configurable.ConfigurableMcpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpStreamableServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpHttpStreamableServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpServerBaseInfo;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpStdioServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.AbstractConfigurableMcpServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpStdioServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpStreamableServerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.modelcontextprotocol.server.McpAsyncServer;
-import io.modelcontextprotocol.spec.McpServerTransportProviderBase;
+import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,26 +41,22 @@ public class McpServers {
     return INSTANCE;
   }
 
-  public void startStdioServer(SimpleMcpServerBaseInfo serverInfo) {
-    SimpleMcpStdioServerFactory factory = new SimpleMcpStdioServerFactory();
-    McpAsyncServer server = factory.createServer(serverInfo);
-    registerComponentsTo(server);
+  public void startStdioServer(McpServerInfo serverInfo) {
+    McpStdioServerFactory factory = new McpStdioServerFactory();
+    McpSyncServer server = factory.create(serverInfo);
+    registerComponents(server);
   }
 
-  public void startSseServer(SimpleMcpHttpSseServerInfo serverInfo) {
-    SimpleMcpHttpSseServerFactory factory = new SimpleMcpHttpSseServerFactory();
-    McpAsyncServer server = factory.createServer(serverInfo);
-    registerComponentsTo(server);
-    McpHttpServer httpserver = new McpHttpServer();
-    httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
+  public void startSseServer(McpSseServerInfo serverInfo) {
+    McpSseServerFactory factory = new McpSseServerFactory();
+    McpSyncServer server = factory.create(serverInfo);
+    registerComponents(server);
   }
 
-  public void startStreamableServer(SimpleMcpHttpStreamableServerInfo serverInfo) {
-    SimpleMcpHttpStreamableServerFactory factory = new SimpleMcpHttpStreamableServerFactory();
-    McpAsyncServer server = factory.createServer(serverInfo);
-    registerComponentsTo(server);
-    McpHttpServer httpserver = new McpHttpServer();
-    httpserver.use(factory.transportProvider(serverInfo)).bind(serverInfo.port()).start();
+  public void startStreamableServer(McpStreamableServerInfo serverInfo) {
+    McpStreamableServerFactory factory = new McpStreamableServerFactory();
+    McpSyncServer server = factory.create(serverInfo);
+    registerComponents(server);
   }
 
   public void startServer(String configFileName) {
@@ -82,29 +76,26 @@ public class McpServers {
       return;
     }
 
-    ConfigurableMcpServerFactory<? extends McpServerTransportProviderBase> factory;
-    if (configuration.stdio()) {
+    AbstractConfigurableMcpServerFactory factory;
+    final String mode = configuration.mode().name();
+
+    if (configuration.stdio() || ServerMode.STDIO.name().equalsIgnoreCase(mode)) {
       factory = new ConfigurableMcpStdioServerFactory(configuration);
+    } else if (ServerMode.SSE.name().equalsIgnoreCase(mode)) {
+      factory = new ConfigurableMcpSseServerFactory(configuration);
+    } else if (ServerMode.STREAMABLE.name().equalsIgnoreCase(mode)) {
+      factory = new ConfigurableMcpStreamableServerFactory(configuration);
     } else {
-      final String httpMode = configuration.httpMode().name();
-      if (HttpMode.SSE.name().equalsIgnoreCase(httpMode)) {
-        factory = new ConfigurableMcpHttpSseServerFactory(configuration);
-      } else if (HttpMode.STREAMABLE.name().equalsIgnoreCase(httpMode)) {
-        factory = new ConfigurableMcpHttpStreamableServerFactory(configuration);
-      } else {
-        throw new NullPointerException("factory is null, please check your configuration");
-      }
+      throw new NullPointerException("factory is null, please check your configuration");
     }
-    McpAsyncServer server = factory.createServer();
-    registerComponentsTo(server);
+
+    McpSyncServer server = factory.create();
+    registerComponents(server);
   }
 
-  private void registerComponentsTo(McpAsyncServer server) {
-    McpServerResourceFactory resource = injector.getInstance(McpServerResourceFactory.class);
-    McpServerPromptFactory prompt = injector.getInstance(McpServerPromptFactory.class);
-    McpServerToolFactory tool = injector.getInstance(McpServerToolFactory.class);
-    resource.registerTo(server);
-    prompt.registerTo(server);
-    tool.registerTo(server);
+  private void registerComponents(McpSyncServer server) {
+    injector.getInstance(McpServerResourceFactory.class).register(server);
+    injector.getInstance(McpServerPromptFactory.class).register(server);
+    injector.getInstance(McpServerToolFactory.class).register(server);
   }
 }

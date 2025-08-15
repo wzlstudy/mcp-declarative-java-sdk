@@ -7,7 +7,6 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
-import com.github.codeboyzhou.mcp.declarative.common.BufferQueue;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
@@ -15,8 +14,8 @@ import com.github.codeboyzhou.mcp.declarative.util.Types;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
-import io.modelcontextprotocol.server.McpAsyncServer;
 import io.modelcontextprotocol.server.McpServerFeatures;
+import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -31,10 +30,9 @@ import java.util.stream.Stream;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import reactor.core.publisher.Mono;
 
 public class McpServerToolFactory
-    extends AbstractMcpServerComponentFactory<McpServerFeatures.AsyncToolSpecification> {
+    extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncToolSpecification> {
 
   private static final Logger logger = LoggerFactory.getLogger(McpServerToolFactory.class);
 
@@ -45,7 +43,7 @@ public class McpServerToolFactory
   }
 
   @Override
-  public McpServerFeatures.AsyncToolSpecification createComponent(Class<?> clazz, Method method) {
+  public McpServerFeatures.SyncToolSpecification create(Class<?> clazz, Method method) {
     McpTool toolMethod = method.getAnnotation(McpTool.class);
     final String name = Strings.defaultIfBlank(toolMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(toolMethod.title());
@@ -59,45 +57,41 @@ public class McpServerToolFactory
             .inputSchema(paramSchema)
             .build();
     logger.debug("Registering tool: {}", ObjectMappers.toJson(tool));
-    return McpServerFeatures.AsyncToolSpecification.builder()
+    return McpServerFeatures.SyncToolSpecification.builder()
         .tool(tool)
         .callHandler(
-            (exchange, request) ->
-                Mono.fromSupplier(
-                    () -> {
-                      Object result;
-                      boolean isError = false;
-                      try {
-                        Object instance = injector.getInstance(clazz);
-                        Map<String, Object> args = request.arguments();
-                        Map<String, Object> typedArgs = asTypedParameters(paramSchema, args);
-                        result = method.invoke(instance, typedArgs.values().toArray());
-                      } catch (Exception e) {
-                        logger.error("Error invoking tool method", e);
-                        result = e + ": " + e.getMessage();
-                        isError = true;
-                      }
-                      McpSchema.Content content = new McpSchema.TextContent(result.toString());
-                      return new McpSchema.CallToolResult(List.of(content), isError);
-                    }))
+            (exchange, request) -> {
+              Object result;
+              boolean isError = false;
+              try {
+                Object instance = injector.getInstance(clazz);
+                Map<String, Object> args = request.arguments();
+                Map<String, Object> typedArgs = asTypedParameters(paramSchema, args);
+                result = method.invoke(instance, typedArgs.values().toArray());
+              } catch (Exception e) {
+                logger.error("Error invoking tool method", e);
+                result = e + ": " + e.getMessage();
+                isError = true;
+              }
+              McpSchema.Content content = new McpSchema.TextContent(result.toString());
+              return new McpSchema.CallToolResult(List.of(content), isError);
+            })
         .build();
   }
 
   @Override
-  public void registerTo(McpAsyncServer server) {
+  public void register(McpSyncServer server) {
     Reflections reflections = injector.getInstance(Reflections.class);
     Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
-    BufferQueue<McpServerFeatures.AsyncToolSpecification> queue = new BufferQueue<>();
     for (Class<?> toolClass : toolClasses) {
       Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
       List<Method> methods =
           toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
       for (Method method : methods) {
-        McpServerFeatures.AsyncToolSpecification tool = createComponent(toolClass, method);
-        queue.submit(tool);
+        McpServerFeatures.SyncToolSpecification tool = create(toolClass, method);
+        server.addTool(tool);
       }
     }
-    queue.consume(tool -> server.addTool(tool).subscribe());
   }
 
   private McpSchema.JsonSchema createJsonSchema(Method method) {

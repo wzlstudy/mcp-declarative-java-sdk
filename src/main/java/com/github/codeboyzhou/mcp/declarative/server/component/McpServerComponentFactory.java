@@ -1,11 +1,11 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import io.modelcontextprotocol.server.McpAsyncServer;
+import io.modelcontextprotocol.server.McpSyncServer;
 import java.lang.reflect.Method;
 
 public interface McpServerComponentFactory<T> {
 
-  T createComponent(Class<?> clazz, Method method);
+  T create(Class<?> clazz, Method method);
 
-  void registerTo(McpAsyncServer server);
+  void register(McpSyncServer server);
 }

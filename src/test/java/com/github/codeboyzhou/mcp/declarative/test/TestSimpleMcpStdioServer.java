@@ -1,14 +1,14 @@
 package com.github.codeboyzhou.mcp.declarative.test;
 
 import com.github.codeboyzhou.mcp.declarative.McpServers;
-import com.github.codeboyzhou.mcp.declarative.server.simple.SimpleMcpServerBaseInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import java.time.Duration;
 
 public class TestSimpleMcpStdioServer {
 
   public static void main(String[] args) {
-    SimpleMcpServerBaseInfo info =
-        SimpleMcpServerBaseInfo.builder()
+    McpServerInfo info =
+        McpServerInfo.builder()
             .name("mcp-server")
             .version("1.0.0")
             .instructions("test")

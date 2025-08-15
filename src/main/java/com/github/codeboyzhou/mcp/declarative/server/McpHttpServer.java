@@ -44,15 +44,16 @@ public class McpHttpServer {
 
     try {
       httpserver.start();
-      logger.info("Jetty-based HTTP server started on http://127.0.0.1:{}", port);
-
-      // Add a shutdown hook to stop the HTTP server and MCP server gracefully
       addShutdownHook(httpserver);
-
-      // Wait for the HTTP server to stop
-      httpserver.join();
+      logger.info("Jetty-based HTTP server started on http://127.0.0.1:{}", port);
     } catch (Exception e) {
       logger.error("Error starting HTTP server on http://127.0.0.1:{}", port, e);
+    }
+
+    try {
+      httpserver.join();
+    } catch (InterruptedException e) {
+      logger.error("Error joining HTTP server", e);
     }
   }
 

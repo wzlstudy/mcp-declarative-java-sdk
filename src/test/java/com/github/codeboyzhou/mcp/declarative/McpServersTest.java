@@ -3,76 +3,139 @@ package com.github.codeboyzhou.mcp.declarative;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.test.TestSimpleMcpStdioServer;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
+import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
+import io.modelcontextprotocol.client.transport.HttpClientStreamableHttpTransport;
 import io.modelcontextprotocol.client.transport.ServerParameters;
 import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import io.modelcontextprotocol.spec.McpSchema;
+import java.time.Duration;
 import java.util.List;
+import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 class McpServersTest {
 
-  String classpath = System.getProperty("java.class.path");
-
-  ServerParameters stdioServerParameters =
-      ServerParameters.builder("java")
-          .args("-cp", classpath, TestSimpleMcpStdioServer.class.getName())
-          .build();
-
-  StdioClientTransport stdioClientTransport = new StdioClientTransport(stdioServerParameters);
+  McpServers servers = McpServers.run(McpServersTest.class, new String[] {});
 
   @Test
   void testStartStdioServer_shouldSucceed() {
+    TestSimpleMcpStdioServer.main(new String[] {}); // just for jacoco coverage report
+
+    String classpath = System.getProperty("java.class.path");
+
+    ServerParameters serverParameters =
+        ServerParameters.builder("java")
+            .args("-cp", classpath, TestSimpleMcpStdioServer.class.getName())
+            .build();
+
+    StdioClientTransport stdioClientTransport = new StdioClientTransport(serverParameters);
+
     try (McpSyncClient client = McpClient.sync(stdioClientTransport).build()) {
-      McpSchema.InitializeResult initialized = client.initialize();
-      assertEquals("mcp-server", initialized.serverInfo().name());
-      assertEquals("1.0.0", initialized.serverInfo().version());
-      assertEquals("test", initialized.instructions());
+      verify(client);
     }
   }
 
   @Test
-  void testStartStdioServer_shouldRegisteredResources() {
-    try (McpSyncClient client = McpClient.sync(stdioClientTransport).build()) {
-      client.initialize();
-      List<McpSchema.Resource> resources = client.listResources().resources();
-      assertEquals(1, resources.size());
-      McpSchema.Resource resource = resources.get(0);
-      assertEquals("test://resource1", resource.uri());
-      assertEquals("resource1_name", resource.name());
-      assertEquals("resource1_title", resource.title());
-      assertEquals("resource1_description", resource.description());
-      assertEquals("text/plain", resource.mimeType());
+  void testStartSseServer_shouldSucceed() {
+    final int port = new Random().nextInt(8000, 9000);
+
+    McpSseServerInfo serverInfo =
+        McpSseServerInfo.builder()
+            .name("mcp-server")
+            .version("1.0.0")
+            .instructions("test")
+            .requestTimeout(Duration.ofSeconds(10))
+            .baseUrl("http://localhost:" + port)
+            .port(port)
+            .sseEndpoint("/sse")
+            .messageEndpoint("/mcp/message")
+            .build();
+
+    HttpClientSseClientTransport transport =
+        HttpClientSseClientTransport.builder("http://localhost:" + port)
+            .sseEndpoint("/sse")
+            .build();
+
+    servers.startSseServer(serverInfo);
+
+    try (McpSyncClient client = McpClient.sync(transport).build()) {
+      verify(client);
     }
   }
 
   @Test
-  void testStartStdioServer_shouldRegisteredPrompts() {
-    try (McpSyncClient client = McpClient.sync(stdioClientTransport).build()) {
-      client.initialize();
-      List<McpSchema.Prompt> prompts = client.listPrompts().prompts();
-      assertEquals(1, prompts.size());
-      McpSchema.Prompt prompt = prompts.get(0);
-      assertEquals("prompt1_name", prompt.name());
-      assertEquals("prompt1_title", prompt.title());
-      assertEquals("prompt1_description", prompt.description());
-      assertTrue(prompt.arguments().isEmpty());
+  void testStartStreamableServer_shouldSucceed() {
+    final int port = new Random().nextInt(8000, 9000);
+
+    McpStreamableServerInfo serverInfo =
+        McpStreamableServerInfo.builder()
+            .name("mcp-server")
+            .version("1.0.0")
+            .instructions("test")
+            .requestTimeout(Duration.ofSeconds(10))
+            .port(port)
+            .mcpEndpoint("/mcp/message")
+            .build();
+
+    HttpClientStreamableHttpTransport transport =
+        HttpClientStreamableHttpTransport.builder("http://localhost:" + port)
+            .endpoint("/mcp/message")
+            .build();
+
+    servers.startStreamableServer(serverInfo);
+
+    try (McpSyncClient client = McpClient.sync(transport).build()) {
+      verify(client);
     }
   }
 
-  @Test
-  void testStartStdioServer_shouldRegisteredTools() {
-    try (McpSyncClient client = McpClient.sync(stdioClientTransport).build()) {
-      client.initialize();
-      List<McpSchema.Tool> tools = client.listTools().tools();
-      assertEquals(1, tools.size());
-      McpSchema.Tool tool = tools.get(0);
-      assertEquals("tool1_name", tool.name());
-      assertEquals("tool1_title", tool.title());
-      assertEquals("tool1_description", tool.description());
-      assertTrue(tool.inputSchema().properties().isEmpty());
-    }
+  private void verify(McpSyncClient client) {
+    verifyServerInfo(client);
+    verifyResourcesRegistered(client);
+    verifyPromptsRegistered(client);
+    verifyToolsRegistered(client);
+  }
+
+  private void verifyServerInfo(McpSyncClient client) {
+    McpSchema.InitializeResult initialized = client.initialize();
+    assertEquals("mcp-server", initialized.serverInfo().name());
+    assertEquals("1.0.0", initialized.serverInfo().version());
+    assertEquals("test", initialized.instructions());
+  }
+
+  private void verifyResourcesRegistered(McpSyncClient client) {
+    List<McpSchema.Resource> resources = client.listResources().resources();
+    assertEquals(1, resources.size());
+    McpSchema.Resource resource = resources.get(0);
+    assertEquals("test://resource1", resource.uri());
+    assertEquals("resource1_name", resource.name());
+    assertEquals("resource1_title", resource.title());
+    assertEquals("resource1_description", resource.description());
+    assertEquals("text/plain", resource.mimeType());
+  }
+
+  private void verifyPromptsRegistered(McpSyncClient client) {
+    List<McpSchema.Prompt> prompts = client.listPrompts().prompts();
+    assertEquals(1, prompts.size());
+    McpSchema.Prompt prompt = prompts.get(0);
+    assertEquals("prompt1_name", prompt.name());
+    assertEquals("prompt1_title", prompt.title());
+    assertEquals("prompt1_description", prompt.description());
+    assertTrue(prompt.arguments().isEmpty());
+  }
+
+  private void verifyToolsRegistered(McpSyncClient client) {
+    List<McpSchema.Tool> tools = client.listTools().tools();
+    assertEquals(1, tools.size());
+    McpSchema.Tool tool = tools.get(0);
+    assertEquals("tool1_name", tool.name());
+    assertEquals("tool1_title", tool.title());
+    assertEquals("tool1_description", tool.description());
+    assertTrue(tool.inputSchema().properties().isEmpty());
   }
 }
