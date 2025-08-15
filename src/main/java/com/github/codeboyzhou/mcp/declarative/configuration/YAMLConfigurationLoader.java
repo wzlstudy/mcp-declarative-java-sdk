@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public record YAMLConfigurationLoader(String configFileName) {
 
-  private static final Logger logger = LoggerFactory.getLogger(YAMLConfigurationLoader.class);
+  private static final Logger log = LoggerFactory.getLogger(YAMLConfigurationLoader.class);
 
   private static final String DEFAULT_CONFIG_FILE_NAME = "mcp-server.yml";
 
@@ -24,7 +24,7 @@ public record YAMLConfigurationLoader(String configFileName) {
     Path configFilePath = getConfigFilePath(configFileName);
     File file = configFilePath.toFile();
     McpServerConfiguration config = ObjectMappers.fromYaml(file, McpServerConfiguration.class);
-    logger.info("Configuration loaded successfully from file: {}", configFileName);
+    log.info("Configuration loaded successfully from file: {}", configFileName);
     return config;
   }
 

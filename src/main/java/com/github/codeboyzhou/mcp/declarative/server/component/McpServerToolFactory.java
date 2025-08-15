@@ -34,7 +34,7 @@ import org.slf4j.LoggerFactory;
 public class McpServerToolFactory
     extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncToolSpecification> {
 
-  private static final Logger logger = LoggerFactory.getLogger(McpServerToolFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(McpServerToolFactory.class);
 
   @Inject
   protected McpServerToolFactory(
@@ -56,7 +56,7 @@ public class McpServerToolFactory
             .description(description)
             .inputSchema(paramSchema)
             .build();
-    logger.debug("Registering tool: {}", ObjectMappers.toJson(tool));
+    log.debug("Registering tool: {}", ObjectMappers.toJson(tool));
     return McpServerFeatures.SyncToolSpecification.builder()
         .tool(tool)
         .callHandler(
@@ -69,7 +69,7 @@ public class McpServerToolFactory
                 Map<String, Object> typedArgs = asTypedParameters(paramSchema, args);
                 result = method.invoke(instance, typedArgs.values().toArray());
               } catch (Exception e) {
-                logger.error("Error invoking tool method", e);
+                log.error("Error invoking tool method", e);
                 result = e + ": " + e.getMessage();
                 isError = true;
               }

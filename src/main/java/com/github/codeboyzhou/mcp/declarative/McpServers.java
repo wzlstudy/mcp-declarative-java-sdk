@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
 
 public class McpServers {
 
-  private static final Logger logger = LoggerFactory.getLogger(McpServers.class);
+  private static final Logger log = LoggerFactory.getLogger(McpServers.class);
 
   private static final McpServers INSTANCE = new McpServers();
 
@@ -71,7 +71,7 @@ public class McpServers {
 
   private void doStartServer(McpServerConfiguration configuration) {
     if (!configuration.enabled()) {
-      logger.warn("MCP server is disabled, please check your configuration file.");
+      log.warn("MCP server is disabled, please check your configuration file.");
       return;
     }
 

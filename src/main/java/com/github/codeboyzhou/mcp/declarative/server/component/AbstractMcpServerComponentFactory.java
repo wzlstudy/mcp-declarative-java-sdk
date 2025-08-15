@@ -12,7 +12,7 @@ import org.slf4j.LoggerFactory;
 
 public abstract class AbstractMcpServerComponentFactory<T> implements McpServerComponentFactory<T> {
 
-  private static final Logger logger =
+  private static final Logger log =
       LoggerFactory.getLogger(AbstractMcpServerComponentFactory.class);
 
   private static final String RESOURCE_BUNDLE_BASE_NAME = "i18n/mcp_server_component_descriptions";
@@ -44,7 +44,7 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
     try {
       return ResourceBundle.getBundle(RESOURCE_BUNDLE_BASE_NAME, locale);
     } catch (Exception e) {
-      logger.warn(
+      log.warn(
           "Can't find resource bundle for base name: {}, locale {}, i18n will be unsupported",
           RESOURCE_BUNDLE_BASE_NAME,
           locale);

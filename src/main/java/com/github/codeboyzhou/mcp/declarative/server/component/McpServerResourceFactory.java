@@ -22,7 +22,7 @@ import org.slf4j.LoggerFactory;
 public class McpServerResourceFactory
     extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncResourceSpecification> {
 
-  private static final Logger logger = LoggerFactory.getLogger(McpServerResourceFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(McpServerResourceFactory.class);
 
   @Inject
   protected McpServerResourceFactory(
@@ -45,7 +45,7 @@ public class McpServerResourceFactory
             .mimeType(res.mimeType())
             .annotations(new McpSchema.Annotations(List.of(res.roles()), res.priority()))
             .build();
-    logger.debug("Registering resource: {}", ObjectMappers.toJson(resource));
+    log.debug("Registering resource: {}", ObjectMappers.toJson(resource));
     return new McpServerFeatures.SyncResourceSpecification(
         resource,
         (exchange, request) -> {
@@ -54,7 +54,7 @@ public class McpServerResourceFactory
             Object instance = injector.getInstance(clazz);
             result = method.invoke(instance);
           } catch (Exception e) {
-            logger.error("Error invoking resource method", e);
+            log.error("Error invoking resource method", e);
             result = e + ": " + e.getMessage();
           }
           McpSchema.ResourceContents contents =

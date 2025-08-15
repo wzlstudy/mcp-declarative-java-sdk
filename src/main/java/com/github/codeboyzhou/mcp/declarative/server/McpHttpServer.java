@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 public class McpHttpServer {
 
-  private static final Logger logger = LoggerFactory.getLogger(McpHttpServer.class);
+  private static final Logger log = LoggerFactory.getLogger(McpHttpServer.class);
 
   private static final String DEFAULT_SERVLET_CONTEXT_PATH = "/";
 
@@ -45,15 +45,15 @@ public class McpHttpServer {
     try {
       httpserver.start();
       addShutdownHook(httpserver);
-      logger.info("Jetty-based HTTP server started on http://127.0.0.1:{}", port);
+      log.info("Jetty-based HTTP server started on http://127.0.0.1:{}", port);
     } catch (Exception e) {
-      logger.error("Error starting HTTP server on http://127.0.0.1:{}", port, e);
+      log.error("Error starting HTTP server on http://127.0.0.1:{}", port, e);
     }
 
     try {
       httpserver.join();
     } catch (InterruptedException e) {
-      logger.error("Error joining HTTP server", e);
+      log.error("Error joining HTTP server", e);
     }
   }
 
@@ -61,10 +61,10 @@ public class McpHttpServer {
     Runnable runnable =
         () -> {
           try {
-            logger.info("Shutting down HTTP server and MCP server");
+            log.info("Shutting down HTTP server and MCP server");
             httpserver.stop();
           } catch (Exception e) {
-            logger.error("Error stopping HTTP server and MCP server", e);
+            log.error("Error stopping HTTP server and MCP server", e);
           }
         };
     Thread shutdownHook = new Thread(runnable);

@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 public class McpServerPromptFactory
     extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncPromptSpecification> {
 
-  private static final Logger logger = LoggerFactory.getLogger(McpServerPromptFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(McpServerPromptFactory.class);
 
   @Inject
   protected McpServerPromptFactory(
@@ -45,7 +45,7 @@ public class McpServerPromptFactory
     final String description = resolveComponentAttributeValue(promptMethod.description());
     List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
     McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
-    logger.debug("Registering prompt: {}", ObjectMappers.toJson(prompt));
+    log.debug("Registering prompt: {}", ObjectMappers.toJson(prompt));
     return new McpServerFeatures.SyncPromptSpecification(
         prompt,
         (exchange, request) -> {
@@ -56,7 +56,7 @@ public class McpServerPromptFactory
                 asTypedParameters(method, promptArguments, request.arguments());
             result = method.invoke(instance, typedParameters.values().toArray());
           } catch (Exception e) {
-            logger.error("Error invoking prompt method", e);
+            log.error("Error invoking prompt method", e);
             result = e + ": " + e.getMessage();
           }
           McpSchema.Content content = new McpSchema.TextContent(result.toString());
