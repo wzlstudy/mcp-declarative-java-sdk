@@ -32,15 +32,17 @@ Now you can create a simple MCP server with just one line of core code.
 
 ```java
 import com.github.codeboyzhou.mcp.declarative.McpServers;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 
+@McpI18nEnabled
 @McpServerApplication
 public class McpStdioServer {
 
-    public static void main(String[] args) {
-        McpServers.run(McpStdioServer.class, args).startStdioServer(McpServerInfo.builder().build());
-    }
+  public static void main(String[] args) {
+    McpServers.run(McpStdioServer.class, args).startStdioServer(McpServerInfo.builder().build());
+  }
 
 }
 ```
@@ -83,48 +85,48 @@ For a MCP stdio server to run, you need to package your project into an executab
 There is a Maven plugin that can handle this, just place the following configuration into your root `pom.xml`:
 
 ```xml
-
 <plugins>
-    <!-- Your other plugins ... -->
-    <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>${maven-shade-plugin.version}</version>
-        <executions>
-            <execution>
-                <goals>
-                    <goal>shade</goal>
-                </goals>
-                <phase>package</phase>
-                <configuration>
-                    <transformers>
-                        <transformer
-                            implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-                            <mainClass>com.github.codeboyzhou.mcp.server.examples.McpStdioServer</mainClass>
-                        </transformer>
-                    </transformers>
-                </configuration>
-            </execution>
-        </executions>
-    </plugin>
+  <!-- Your other plugins ... -->
+  <plugin>
+    <groupId>org.apache.maven.plugins</groupId>
+    <artifactId>maven-shade-plugin</artifactId>
+    <version>${maven-shade-plugin.version}</version>
+    <executions>
+      <execution>
+        <goals>
+          <goal>shade</goal>
+        </goals>
+        <phase>package</phase>
+        <configuration>
+          <transformers>
+            <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+              <mainClass>com.github.codeboyzhou.mcp.server.examples.McpStdioServer</mainClass>
+            </transformer>
+          </transformers>
+        </configuration>
+      </execution>
+    </executions>
+  </plugin>
 </plugins>
 ```
 
-### HTTP SSE Server
+### HTTP SSE Server (Deprecated)
 
 #### Quick Start
 
 ```java
 import com.github.codeboyzhou.mcp.declarative.McpServers;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 
+@McpI18nEnabled
 @McpServerApplication
 public class McpSseServer {
 
-    public static void main(String[] args) {
-        McpServers.run(McpSseServer.class, args).startSseServer(McpSseServerInfo.builder().build());
-    }
+  public static void main(String[] args) {
+    McpServers.run(McpSseServer.class, args).startSseServer(McpSseServerInfo.builder().build());
+  }
 
 }
 ```
@@ -148,6 +150,28 @@ For the method `startSseServer`, you can specify the server information by using
 
 Just run the main class like you would launch a web application, and then it's all set.
 
+### Streamable HTTP Server
+
+#### Quick Start
+
+```java
+import com.github.codeboyzhou.mcp.declarative.McpServers;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
+
+@McpI18nEnabled
+@McpServerApplication
+public class McpStreamableServer {
+
+  public static void main(String[] args) {
+    McpStreamableServerInfo serverInfo = McpStreamableServerInfo.builder().build();
+    McpServers.run(McpStreamableServer.class, args).startStreamableServer(serverInfo);
+  }
+
+}
+```
+
 ## MCP Component
 
 In the previous section, we have learned how to create a MCP server, but the server still has no usable components, like
@@ -164,16 +188,16 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 @McpResources
 public class MyMcpResources {
 
-    /**
-     * This method defines a MCP resource to expose the OS env variables.
-     */
-    @McpResource(uri = "system://env", description = "OS env variables")
-    public String getSystemEnv() {
-        // Just put your logic code here, forget about the native MCP SDK details.
-        return System.getenv().toString();
-    }
+  /**
+   * This method defines a MCP resource to expose the OS env variables.
+   */
+  @McpResource(uri = "system://env", description = "OS env variables")
+  public String getSystemEnv() {
+    // Just put your logic code here, forget about the native MCP SDK details.
+    return System.getenv().toString();
+  }
 
-    // Your other MCP resources here...
+  // Your other MCP resources here...
 }
 ```
 
@@ -187,16 +211,16 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 @McpPrompts
 public class MyMcpPrompts {
 
-    /**
-     * This method defines a MCP prompt to read a file.
-     */
-    @McpPrompt(description = "A simple prompt to read a file")
-    public String readFile(@McpPromptParam(name = "path", description = "filepath", required = true) String path) {
-        // Just put your logic code here, forget about the native MCP SDK details.
-        return String.format("What is the complete contents of the file: %s", path);
-    }
+  /**
+   * This method defines a MCP prompt to read a file.
+   */
+  @McpPrompt(description = "A simple prompt to read a file")
+  public String readFile(@McpPromptParam(name = "path", description = "filepath", required = true) String path) {
+    // Just put your logic code here, forget about the native MCP SDK details.
+    return String.format("What is the complete contents of the file: %s", path);
+  }
 
-    // Your other MCP prompts here...
+  // Your other MCP prompts here...
 }
 ```
 
@@ -210,16 +234,16 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 @McpTools
 public class MyMcpTools {
 
-    /**
-     * This method defines a MCP tool to read a file.
-     */
-    @McpTool(description = "Read complete file contents with UTF-8 encoding")
-    public String readFile(@McpToolParam(name = "path", description = "filepath", required = true) String path) {
-        // Just put your logic code here, forget about the native MCP SDK details.
-        return Files.readString(Path.of(path));
-    }
+  /**
+   * This method defines a MCP tool to read a file.
+   */
+  @McpTool(description = "Read complete file contents with UTF-8 encoding")
+  public String readFile(@McpToolParam(name = "path", description = "filepath", required = true) String path) {
+    // Just put your logic code here, forget about the native MCP SDK details.
+    return Files.readString(Path.of(path));
+  }
 
-    // Your other MCP tools here...
+  // Your other MCP tools here...
 }
 ```
 

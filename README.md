@@ -49,10 +49,10 @@ This is a yaml configuration file example (named `mcp-server.yml` by default) on
 
 ```yaml
 enabled: true
-stdio: false
+mode: STREAMABLE
 name: mcp-server
 version: 1.0.0
-type: ASYNC
+type: SYNC
 request-timeout: 20000
 capabilities:
   resource: true
@@ -62,10 +62,10 @@ change-notification:
   resource: true
   prompt: true
   tool: true
-sse:
-  message-endpoint: /mcp/message
-  endpoint: /sse
-  base-url: http://localhost:8080
+streamable:
+  mcp-endpoint: /mcp/message
+  disallow-delete: true
+  keep-alive-interval: 30000
   port: 8080
 ```
 
