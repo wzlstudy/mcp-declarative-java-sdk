@@ -15,4 +15,5 @@ public record McpServerConfiguration(
     @JsonProperty("request-timeout") long requestTimeout,
     @JsonProperty("capabilities") McpServerCapabilities capabilities,
     @JsonProperty("change-notification") McpServerChangeNotification changeNotification,
-    @JsonProperty("sse") McpServerSSE sse) {}
+    @JsonProperty("sse") McpServerSSE sse,
+    @JsonProperty("streamable") McpServerStreamable streamable) {}

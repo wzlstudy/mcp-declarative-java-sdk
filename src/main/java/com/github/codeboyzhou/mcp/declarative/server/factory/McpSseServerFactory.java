@@ -13,7 +13,8 @@ public class McpSseServerFactory extends AbstractMcpServerFactory<McpSseServerIn
             .sseEndpoint(info.sseEndpoint())
             .messageEndpoint(info.messageEndpoint())
             .build();
-    threadPool.execute(() -> new McpHttpServer().use(transportProvider).bind(info.port()).start());
+    McpHttpServer httpserver = new McpHttpServer();
+    threadPool.execute(() -> httpserver.use(transportProvider).bind(info.port()).start());
     return McpServer.sync(transportProvider);
   }
 }

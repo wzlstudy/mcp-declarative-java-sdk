@@ -12,8 +12,8 @@ change-notification:
   resource: true
   prompt: true
   tool: true
-sse:
-  message-endpoint: /mcp/message
-  endpoint: /sse
-  base-url: http://localhost:8080
+streamable:
+  mcp-endpoint: /mcp/message
+  disallow-delete: true
+  keep-alive-interval: 30000
   port: 8080

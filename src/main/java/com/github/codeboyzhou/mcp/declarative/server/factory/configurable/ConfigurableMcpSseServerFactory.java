@@ -21,7 +21,8 @@ public class ConfigurableMcpSseServerFactory extends AbstractConfigurableMcpServ
             .sseEndpoint(sse.endpoint())
             .messageEndpoint(sse.messageEndpoint())
             .build();
-    threadPool.execute(() -> new McpHttpServer().use(transportProvider).bind(sse.port()).start());
+    McpHttpServer httpserver = new McpHttpServer();
+    threadPool.execute(() -> httpserver.use(transportProvider).bind(sse.port()).start());
     return McpServer.sync(transportProvider);
   }
 }

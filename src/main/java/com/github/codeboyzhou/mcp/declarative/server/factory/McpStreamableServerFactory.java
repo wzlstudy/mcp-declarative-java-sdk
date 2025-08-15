@@ -16,7 +16,8 @@ public class McpStreamableServerFactory extends AbstractMcpServerFactory<McpStre
             .contextExtractor(info.contextExtractor())
             .keepAliveInterval(info.keepAliveInterval())
             .build();
-    threadPool.execute(() -> new McpHttpServer().use(transportProvider).bind(info.port()).start());
+    McpHttpServer httpserver = new McpHttpServer();
+    threadPool.execute(() -> httpserver.use(transportProvider).bind(info.port()).start());
     return McpServer.sync(transportProvider);
   }
 }
