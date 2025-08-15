@@ -9,19 +9,13 @@ Declarative [MCP Java SDK](https://github.com/modelcontextprotocol/java-sdk) Dev
 
 ## Advantages
 
-🚫 No Spring Framework Required.
-
-⚡  Instant MCP Java server in 1 LOC.
-
-🎉 No need to write more SDK low-level code.
-
-👏 Get rid of complex and lengthy JSON schema definitions.
-
-🎯 Just focus on your core logic (resources/prompts/tools).
-
-🔌 Configuration file compatible with the Spring AI Framework.
-
-🌍 Built-in multi-languages support for MCP server (resources/prompts/tools).
+- 🚫 No Spring Framework Required.
+- ⚡  Instant MCP Java server in 1 LOC.
+- 🎉 No need to write more SDK low-level code.
+- 👏 Get rid of complex and lengthy JSON schema definitions.
+- 🎯 Just focus on your core logic (resources/prompts/tools).
+- 🔌 Configuration file compatible with the Spring AI Framework.
+- 🌍 Built-in multi-languages support for MCP components (resources/prompts/tools).
 
 ## Showcase
 
