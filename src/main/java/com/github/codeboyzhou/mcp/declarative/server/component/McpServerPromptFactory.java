@@ -4,7 +4,6 @@ import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
@@ -12,7 +11,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -20,9 +18,7 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Stream;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,21 +60,6 @@ public class McpServerPromptFactory
               new McpSchema.PromptMessage(McpSchema.Role.USER, content);
           return new McpSchema.GetPromptResult(description, List.of(message));
         });
-  }
-
-  @Override
-  public void register(McpSyncServer server) {
-    Reflections reflections = injector.getInstance(Reflections.class);
-    Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
-    for (Class<?> promptClass : promptClasses) {
-      Set<Method> promptMethods = reflections.getMethodsAnnotatedWith(McpPrompt.class);
-      List<Method> methods =
-          promptMethods.stream().filter(m -> m.getDeclaringClass() == promptClass).toList();
-      for (Method method : methods) {
-        McpServerFeatures.SyncPromptSpecification prompt = create(promptClass, method);
-        server.addPrompt(prompt);
-      }
-    }
   }
 
   private List<McpSchema.PromptArgument> createPromptArguments(Method method) {

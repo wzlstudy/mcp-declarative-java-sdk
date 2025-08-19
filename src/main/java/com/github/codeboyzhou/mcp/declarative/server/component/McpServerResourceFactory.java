@@ -3,19 +3,15 @@ package com.github.codeboyzhou.mcp.declarative.server.component;
 import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Method;
 import java.util.List;
-import java.util.Set;
-import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,20 +57,5 @@ public class McpServerResourceFactory
               new McpSchema.TextResourceContents(res.uri(), res.mimeType(), result.toString());
           return new McpSchema.ReadResourceResult(List.of(contents));
         });
-  }
-
-  @Override
-  public void register(McpSyncServer server) {
-    Reflections reflections = injector.getInstance(Reflections.class);
-    Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
-    for (Class<?> resourceClass : resourceClasses) {
-      Set<Method> resourceMethods = reflections.getMethodsAnnotatedWith(McpResource.class);
-      List<Method> methods =
-          resourceMethods.stream().filter(m -> m.getDeclaringClass() == resourceClass).toList();
-      for (Method method : methods) {
-        McpServerFeatures.SyncResourceSpecification resource = create(resourceClass, method);
-        server.addResource(resource);
-      }
-    }
   }
 }

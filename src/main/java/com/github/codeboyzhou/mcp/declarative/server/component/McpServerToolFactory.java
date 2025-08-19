@@ -6,7 +6,6 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
@@ -15,7 +14,6 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -77,21 +75,6 @@ public class McpServerToolFactory
               return new McpSchema.CallToolResult(List.of(content), isError);
             })
         .build();
-  }
-
-  @Override
-  public void register(McpSyncServer server) {
-    Reflections reflections = injector.getInstance(Reflections.class);
-    Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);
-    for (Class<?> toolClass : toolClasses) {
-      Set<Method> toolMethods = reflections.getMethodsAnnotatedWith(McpTool.class);
-      List<Method> methods =
-          toolMethods.stream().filter(m -> m.getDeclaringClass() == toolClass).toList();
-      for (Method method : methods) {
-        McpServerFeatures.SyncToolSpecification tool = create(toolClass, method);
-        server.addTool(tool);
-      }
-    }
   }
 
   private McpSchema.JsonSchema createJsonSchema(Method method) {

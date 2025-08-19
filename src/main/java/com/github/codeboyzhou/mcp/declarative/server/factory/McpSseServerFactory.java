@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
+import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
 import org.slf4j.Logger;
@@ -9,6 +10,14 @@ import org.slf4j.LoggerFactory;
 public class McpSseServerFactory extends AbstractMcpServerFactory<McpSseServerInfo> {
 
   private static final Logger log = LoggerFactory.getLogger(McpSseServerFactory.class);
+
+  protected McpSseServerFactory(Injector injector) {
+    super(injector);
+  }
+
+  public static McpSseServerFactory from(Injector injector) {
+    return new McpSseServerFactory(injector);
+  }
 
   @Override
   public McpServer.SyncSpecification<?> sync(McpSseServerInfo info) {

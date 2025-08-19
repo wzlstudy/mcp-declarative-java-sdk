@@ -4,9 +4,6 @@ import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
-import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
-import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
@@ -18,7 +15,6 @@ import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.Config
 import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpStreamableServerFactory;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
-import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -41,21 +37,15 @@ public class McpServers {
   }
 
   public void startStdioServer(McpServerInfo serverInfo) {
-    McpStdioServerFactory factory = new McpStdioServerFactory();
-    McpSyncServer server = factory.create(serverInfo);
-    registerComponents(server);
+    McpStdioServerFactory.from(injector).create(serverInfo).start();
   }
 
   public void startSseServer(McpSseServerInfo serverInfo) {
-    McpSseServerFactory factory = new McpSseServerFactory();
-    McpSyncServer server = factory.create(serverInfo);
-    registerComponents(server);
+    McpSseServerFactory.from(injector).create(serverInfo).start();
   }
 
   public void startStreamableServer(McpStreamableServerInfo serverInfo) {
-    McpStreamableServerFactory factory = new McpStreamableServerFactory();
-    McpSyncServer server = factory.create(serverInfo);
-    registerComponents(server);
+    McpStreamableServerFactory.from(injector).create(serverInfo).start();
   }
 
   public void startServer(String configFileName) {
@@ -87,13 +77,6 @@ public class McpServers {
       factory = new ConfigurableMcpStdioServerFactory(configuration);
     }
 
-    McpSyncServer server = factory.create();
-    registerComponents(server);
-  }
-
-  private void registerComponents(McpSyncServer server) {
-    injector.getInstance(McpServerResourceFactory.class).register(server);
-    injector.getInstance(McpServerPromptFactory.class).register(server);
-    injector.getInstance(McpServerToolFactory.class).register(server);
+    factory.create();
   }
 }
