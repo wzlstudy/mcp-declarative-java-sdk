@@ -37,15 +37,15 @@ public class McpServers {
   }
 
   public void startStdioServer(McpServerInfo serverInfo) {
-    McpStdioServerFactory.from(injector).create(serverInfo).start();
+    McpStdioServerFactory.of(injector).startServer(serverInfo);
   }
 
   public void startSseServer(McpSseServerInfo serverInfo) {
-    McpSseServerFactory.from(injector).create(serverInfo).start();
+    McpSseServerFactory.of(injector).startServer(serverInfo);
   }
 
   public void startStreamableServer(McpStreamableServerInfo serverInfo) {
-    McpStreamableServerFactory.from(injector).create(serverInfo).start();
+    McpStreamableServerFactory.of(injector).startServer(serverInfo);
   }
 
   public void startServer(String configFileName) {
@@ -67,16 +67,16 @@ public class McpServers {
 
     AbstractConfigurableMcpServerFactory factory =
         switch (configuration.mode()) {
-          case STDIO -> new ConfigurableMcpStdioServerFactory(configuration);
-          case SSE -> new ConfigurableMcpSseServerFactory(configuration);
-          case STREAMABLE -> new ConfigurableMcpStreamableServerFactory(configuration);
+          case STDIO -> ConfigurableMcpStdioServerFactory.of(injector, configuration);
+          case SSE -> ConfigurableMcpSseServerFactory.of(injector, configuration);
+          case STREAMABLE -> ConfigurableMcpStreamableServerFactory.of(injector, configuration);
         };
 
     // Ensure backward compatibility
     if (configuration.stdio()) {
-      factory = new ConfigurableMcpStdioServerFactory(configuration);
+      factory = ConfigurableMcpStdioServerFactory.of(injector, configuration);
     }
 
-    factory.create();
+    factory.startServer();
   }
 }

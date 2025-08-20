@@ -15,7 +15,7 @@ public class McpSseServerFactory extends AbstractMcpServerFactory<McpSseServerIn
     super(injector);
   }
 
-  public static McpSseServerFactory from(Injector injector) {
+  public static McpSseServerFactory of(Injector injector) {
     return new McpSseServerFactory(injector);
   }
 

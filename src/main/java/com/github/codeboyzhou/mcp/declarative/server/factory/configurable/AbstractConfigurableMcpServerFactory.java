@@ -4,6 +4,8 @@ import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerComponentRegister;
+import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.time.Duration;
@@ -12,28 +14,33 @@ import java.util.concurrent.Executors;
 
 public abstract class AbstractConfigurableMcpServerFactory implements ConfigurableMcpServerFactory {
 
-  protected final McpServerConfiguration configuration;
+  protected final Injector injector;
+
+  protected final McpServerConfiguration config;
 
   protected final ExecutorService threadPool =
       Executors.newSingleThreadExecutor(new NamedThreadFactory("configurable-mcp-http-server"));
 
-  protected AbstractConfigurableMcpServerFactory(McpServerConfiguration configuration) {
-    this.configuration = configuration;
+  protected AbstractConfigurableMcpServerFactory(Injector injector, McpServerConfiguration config) {
+    this.injector = injector;
+    this.config = config;
   }
 
-  public McpSyncServer create() {
-    return specification()
-        .serverInfo(configuration.name(), configuration.version())
-        .capabilities(serverCapabilities())
-        .instructions(configuration.instructions())
-        .requestTimeout(Duration.ofMillis(configuration.requestTimeout()))
-        .build();
+  public void startServer() {
+    McpSyncServer server =
+        sync()
+            .serverInfo(config.name(), config.version())
+            .capabilities(serverCapabilities())
+            .instructions(config.instructions())
+            .requestTimeout(Duration.ofMillis(config.requestTimeout()))
+            .build();
+    McpServerComponentRegister.of(injector, server).registerComponents();
   }
 
   private McpSchema.ServerCapabilities serverCapabilities() {
     McpSchema.ServerCapabilities.Builder capabilities = McpSchema.ServerCapabilities.builder();
-    McpServerCapabilities capabilitiesConfig = configuration.capabilities();
-    McpServerChangeNotification serverChangeNotification = configuration.changeNotification();
+    McpServerCapabilities capabilitiesConfig = config.capabilities();
+    McpServerChangeNotification serverChangeNotification = config.changeNotification();
     if (capabilitiesConfig.resource()) {
       capabilities.resources(true, serverChangeNotification.resource());
     }

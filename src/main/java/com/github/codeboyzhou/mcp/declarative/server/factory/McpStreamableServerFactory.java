@@ -11,7 +11,7 @@ public class McpStreamableServerFactory extends AbstractMcpServerFactory<McpStre
     super(injector);
   }
 
-  public static McpStreamableServerFactory from(Injector injector) {
+  public static McpStreamableServerFactory of(Injector injector) {
     return new McpStreamableServerFactory(injector);
   }
 

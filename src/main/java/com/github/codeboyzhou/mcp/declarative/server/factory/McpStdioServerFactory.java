@@ -10,7 +10,7 @@ public class McpStdioServerFactory extends AbstractMcpServerFactory<McpServerInf
     super(injector);
   }
 
-  public static McpStdioServerFactory from(Injector injector) {
+  public static McpStdioServerFactory of(Injector injector) {
     return new McpStdioServerFactory(injector);
   }
 
