@@ -26,27 +26,29 @@ public class McpServers {
 
   private static final McpServers INSTANCE = new McpServers();
 
-  private static Injector injector;
-
   private McpServers() {
     // Using singleton design pattern should have private constructor
   }
 
   public static McpServers run(Class<?> applicationMainClass, String[] args) {
-    injector = Guice.createInjector(new InjectorModule(applicationMainClass));
+    InjectorModule module = new InjectorModule(applicationMainClass);
+    Injector injector = Guice.createInjector(module);
     InjectorProvider.initialize(injector);
     return INSTANCE;
   }
 
   public void startStdioServer(McpServerInfo serverInfo) {
+    Injector injector = InjectorProvider.getInstance().getInjector();
     injector.getInstance(McpStdioServerFactory.class).startServer(serverInfo);
   }
 
   public void startSseServer(McpSseServerInfo serverInfo) {
+    Injector injector = InjectorProvider.getInstance().getInjector();
     injector.getInstance(McpSseServerFactory.class).startServer(serverInfo);
   }
 
   public void startStreamableServer(McpStreamableServerInfo serverInfo) {
+    Injector injector = InjectorProvider.getInstance().getInjector();
     injector.getInstance(McpStreamableServerFactory.class).startServer(serverInfo);
   }
 
