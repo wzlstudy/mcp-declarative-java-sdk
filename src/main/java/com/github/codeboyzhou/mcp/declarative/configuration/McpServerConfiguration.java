@@ -6,7 +6,6 @@ import com.github.codeboyzhou.mcp.declarative.enums.ServerType;
 
 public record McpServerConfiguration(
     @JsonProperty("enabled") boolean enabled,
-    @Deprecated(since = "0.7.0", forRemoval = true) @JsonProperty("stdio") boolean stdio,
     @JsonProperty("mode") ServerMode mode,
     @JsonProperty("name") String name,
     @JsonProperty("version") String version,
