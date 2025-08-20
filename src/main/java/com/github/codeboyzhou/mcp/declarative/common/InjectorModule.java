@@ -17,8 +17,6 @@ import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
 import com.google.inject.AbstractModule;
-import com.google.inject.Provides;
-import com.google.inject.Singleton;
 import com.google.inject.name.Names;
 import java.util.Set;
 import org.reflections.Reflections;
@@ -31,15 +29,6 @@ public final class InjectorModule extends AbstractModule {
 
   public InjectorModule(Class<?> mainClass) {
     this.mainClass = mainClass;
-  }
-
-  @Provides
-  @Singleton
-  @SuppressWarnings("unused")
-  public Reflections provideReflections() {
-    McpServerApplication application = mainClass.getAnnotation(McpServerApplication.class);
-    final String basePackage = determineBasePackage(application);
-    return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
   }
 
   @Override
@@ -68,6 +57,12 @@ public final class InjectorModule extends AbstractModule {
     bind(Boolean.class)
         .annotatedWith(Names.named(INJECTED_VARIABLE_NAME_I18N_ENABLED))
         .toInstance(i18nEnabled);
+  }
+
+  private Reflections provideReflections() {
+    McpServerApplication application = mainClass.getAnnotation(McpServerApplication.class);
+    final String basePackage = determineBasePackage(application);
+    return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
   }
 
   private String determineBasePackage(McpServerApplication application) {
