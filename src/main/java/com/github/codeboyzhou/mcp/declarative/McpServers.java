@@ -1,6 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative;
 
-import com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule;
+import com.github.codeboyzhou.mcp.declarative.common.InjectorModule;
+import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
@@ -32,20 +33,21 @@ public class McpServers {
   }
 
   public static McpServers run(Class<?> applicationMainClass, String[] args) {
-    injector = Guice.createInjector(new GuiceInjectorModule(applicationMainClass));
+    injector = Guice.createInjector(new InjectorModule(applicationMainClass));
+    InjectorProvider.initialize(injector);
     return INSTANCE;
   }
 
   public void startStdioServer(McpServerInfo serverInfo) {
-    McpStdioServerFactory.of(injector).startServer(serverInfo);
+    injector.getInstance(McpStdioServerFactory.class).startServer(serverInfo);
   }
 
   public void startSseServer(McpSseServerInfo serverInfo) {
-    McpSseServerFactory.of(injector).startServer(serverInfo);
+    injector.getInstance(McpSseServerFactory.class).startServer(serverInfo);
   }
 
   public void startStreamableServer(McpStreamableServerInfo serverInfo) {
-    McpStreamableServerFactory.of(injector).startServer(serverInfo);
+    injector.getInstance(McpStreamableServerFactory.class).startServer(serverInfo);
   }
 
   public void startServer(String configFileName) {
@@ -67,14 +69,14 @@ public class McpServers {
 
     AbstractConfigurableMcpServerFactory factory =
         switch (configuration.mode()) {
-          case STDIO -> ConfigurableMcpStdioServerFactory.of(injector, configuration);
-          case SSE -> ConfigurableMcpSseServerFactory.of(injector, configuration);
-          case STREAMABLE -> ConfigurableMcpStreamableServerFactory.of(injector, configuration);
+          case STDIO -> ConfigurableMcpStdioServerFactory.of(configuration);
+          case SSE -> ConfigurableMcpSseServerFactory.of(configuration);
+          case STREAMABLE -> ConfigurableMcpStreamableServerFactory.of(configuration);
         };
 
     // Ensure backward compatibility
     if (configuration.stdio()) {
-      factory = ConfigurableMcpStdioServerFactory.of(injector, configuration);
+      factory = ConfigurableMcpStdioServerFactory.of(configuration);
     }
 
     factory.startServer();

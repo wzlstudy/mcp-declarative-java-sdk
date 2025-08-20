@@ -1,17 +1,17 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
+import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
+import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -35,9 +35,8 @@ public class McpServerToolFactory
   private static final Logger log = LoggerFactory.getLogger(McpServerToolFactory.class);
 
   @Inject
-  protected McpServerToolFactory(
-      Injector injector, @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
-    super(injector, i18nEnabled);
+  protected McpServerToolFactory(@Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
+    super(i18nEnabled);
   }
 
   @Override
@@ -62,7 +61,7 @@ public class McpServerToolFactory
               Object result;
               boolean isError = false;
               try {
-                Object instance = injector.getInstance(clazz);
+                Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
                 Map<String, Object> args = request.arguments();
                 Map<String, Object> typedArgs = asTypedParameters(paramSchema, args);
                 result = method.invoke(instance, typedArgs.values().toArray());
@@ -125,7 +124,8 @@ public class McpServerToolFactory
     Map<String, Object> properties = new LinkedHashMap<>();
     List<String> required = new ArrayList<>();
 
-    Reflections reflections = injector.getInstance(Reflections.class);
+    Reflections reflections =
+        InjectorProvider.getInstance().getInjector().getInstance(Reflections.class);
     Set<Field> definitionFields =
         reflections.getFieldsAnnotatedWith(McpJsonSchemaDefinitionProperty.class);
     List<Field> fields =

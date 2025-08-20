@@ -1,9 +1,8 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
+import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
-import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -19,15 +18,12 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
 
   protected static final String NOT_SPECIFIED = "Not Specified";
 
-  protected final Injector injector;
-
   protected final Boolean i18nEnabled;
 
   private final ResourceBundle bundle;
 
   protected AbstractMcpServerComponentFactory(
-      Injector injector, @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
-    this.injector = injector;
+      @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
     this.i18nEnabled = i18nEnabled;
     this.bundle = loadResourceBundle();
   }

@@ -7,6 +7,7 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 import com.github.codeboyzhou.mcp.declarative.common.Immutable;
+import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -17,17 +18,14 @@ import org.reflections.Reflections;
 
 public final class McpServerComponentRegister {
 
-  private final Injector injector;
-
   private final McpSyncServer server;
 
-  public McpServerComponentRegister(Injector injector, McpSyncServer server) {
-    this.injector = injector;
+  public McpServerComponentRegister(McpSyncServer server) {
     this.server = Immutable.of(server);
   }
 
-  public static McpServerComponentRegister of(Injector injector, McpSyncServer server) {
-    return new McpServerComponentRegister(injector, server);
+  public static McpServerComponentRegister of(McpSyncServer server) {
+    return new McpServerComponentRegister(server);
   }
 
   public void registerComponents() {
@@ -37,6 +35,7 @@ public final class McpServerComponentRegister {
   }
 
   private void registerResources() {
+    Injector injector = InjectorProvider.getInstance().getInjector();
     McpServerResourceFactory resourceFactory = injector.getInstance(McpServerResourceFactory.class);
     Reflections reflections = injector.getInstance(Reflections.class);
     Set<Class<?>> resourceClasses = reflections.getTypesAnnotatedWith(McpResources.class);
@@ -53,6 +52,7 @@ public final class McpServerComponentRegister {
   }
 
   private void registerPrompts() {
+    Injector injector = InjectorProvider.getInstance().getInjector();
     McpServerPromptFactory promptFactory = injector.getInstance(McpServerPromptFactory.class);
     Reflections reflections = injector.getInstance(Reflections.class);
     Set<Class<?>> promptClasses = reflections.getTypesAnnotatedWith(McpPrompts.class);
@@ -69,6 +69,7 @@ public final class McpServerComponentRegister {
   }
 
   private void registerTools() {
+    Injector injector = InjectorProvider.getInstance().getInjector();
     McpServerToolFactory toolFactory = injector.getInstance(McpServerToolFactory.class);
     Reflections reflections = injector.getInstance(Reflections.class);
     Set<Class<?>> toolClasses = reflections.getTypesAnnotatedWith(McpTools.class);

@@ -1,12 +1,12 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import static com.github.codeboyzhou.mcp.declarative.common.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
+import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
+import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
@@ -22,8 +22,8 @@ public class McpServerResourceFactory
 
   @Inject
   protected McpServerResourceFactory(
-      Injector injector, @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
-    super(injector, i18nEnabled);
+      @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
+    super(i18nEnabled);
   }
 
   @Override
@@ -47,7 +47,7 @@ public class McpServerResourceFactory
         (exchange, request) -> {
           Object result;
           try {
-            Object instance = injector.getInstance(clazz);
+            Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
             result = method.invoke(instance);
           } catch (Exception e) {
             log.error("Error invoking resource method", e);
