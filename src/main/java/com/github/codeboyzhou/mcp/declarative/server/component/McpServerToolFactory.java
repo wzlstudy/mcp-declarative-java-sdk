@@ -130,7 +130,7 @@ public class McpServerToolFactory
       }
 
       Map<String, Object> fieldProperties = new HashMap<>();
-      fieldProperties.put("type", field.getType().getSimpleName().toLowerCase());
+      fieldProperties.put("type", JsonSchemaDataType.fromJavaType(field.getType()).getType());
       fieldProperties.put("description", resolveComponentAttributeValue(property.description()));
 
       final String fieldName = Strings.defaultIfBlank(property.name(), field.getName());
