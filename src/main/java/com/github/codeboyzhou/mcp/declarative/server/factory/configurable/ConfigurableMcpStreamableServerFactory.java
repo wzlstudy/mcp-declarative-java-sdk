@@ -14,10 +14,6 @@ public class ConfigurableMcpStreamableServerFactory extends AbstractConfigurable
     super(configuration);
   }
 
-  public static ConfigurableMcpStreamableServerFactory of(McpServerConfiguration configuration) {
-    return new ConfigurableMcpStreamableServerFactory(configuration);
-  }
-
   @Override
   public McpServer.SyncSpecification<?> sync() {
     McpServerStreamable streamable = configuration.streamable();

@@ -10,10 +10,6 @@ public class ConfigurableMcpStdioServerFactory extends AbstractConfigurableMcpSe
     super(configuration);
   }
 
-  public static ConfigurableMcpStdioServerFactory of(McpServerConfiguration configuration) {
-    return new ConfigurableMcpStdioServerFactory(configuration);
-  }
-
   @Override
   public McpServer.SyncSpecification<?> sync() {
     StdioServerTransportProvider transportProvider = new StdioServerTransportProvider();

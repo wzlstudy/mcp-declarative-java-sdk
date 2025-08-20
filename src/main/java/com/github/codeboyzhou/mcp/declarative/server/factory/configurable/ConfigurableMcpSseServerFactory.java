@@ -16,10 +16,6 @@ public class ConfigurableMcpSseServerFactory extends AbstractConfigurableMcpServ
     super(configuration);
   }
 
-  public static ConfigurableMcpSseServerFactory of(McpServerConfiguration configuration) {
-    return new ConfigurableMcpSseServerFactory(configuration);
-  }
-
   @Override
   public McpServer.SyncSpecification<?> sync() {
     log.warn("HTTP SSE mode has been deprecated, recommend to use Stream HTTP server instead.");

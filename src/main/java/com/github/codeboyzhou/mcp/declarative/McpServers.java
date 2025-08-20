@@ -10,10 +10,7 @@ import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.AbstractConfigurableMcpServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpSseServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpStreamableServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpServerFactories;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import io.modelcontextprotocol.util.Assert;
@@ -64,23 +61,10 @@ public class McpServers {
   }
 
   private void doStartServer(McpServerConfiguration configuration) {
-    if (!configuration.enabled()) {
+    if (configuration.enabled()) {
+      ConfigurableMcpServerFactories.getFactory(configuration).startServer();
+    } else {
       log.warn("MCP server is disabled, please check your configuration file.");
-      return;
     }
-
-    AbstractConfigurableMcpServerFactory factory =
-        switch (configuration.mode()) {
-          case STDIO -> ConfigurableMcpStdioServerFactory.of(configuration);
-          case SSE -> ConfigurableMcpSseServerFactory.of(configuration);
-          case STREAMABLE -> ConfigurableMcpStreamableServerFactory.of(configuration);
-        };
-
-    // Ensure backward compatibility
-    if (configuration.stdio()) {
-      factory = ConfigurableMcpStdioServerFactory.of(configuration);
-    }
-
-    factory.startServer();
   }
 }
