@@ -1,15 +1,11 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
-
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Method;
@@ -26,12 +22,6 @@ public class McpServerPromptFactory
     extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncPromptSpecification> {
 
   private static final Logger log = LoggerFactory.getLogger(McpServerPromptFactory.class);
-
-  @Inject
-  protected McpServerPromptFactory(
-      @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
-    super(i18nEnabled);
-  }
 
   @Override
   public McpServerFeatures.SyncPromptSpecification create(Class<?> clazz, Method method) {

@@ -1,7 +1,5 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
-
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
@@ -11,8 +9,6 @@ import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
-import com.google.inject.Inject;
-import com.google.inject.name.Named;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Field;
@@ -33,11 +29,6 @@ public class McpServerToolFactory
     extends AbstractMcpServerComponentFactory<McpServerFeatures.SyncToolSpecification> {
 
   private static final Logger log = LoggerFactory.getLogger(McpServerToolFactory.class);
-
-  @Inject
-  protected McpServerToolFactory(@Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
-    super(i18nEnabled);
-  }
 
   @Override
   public McpServerFeatures.SyncToolSpecification create(Class<?> clazz, Method method) {

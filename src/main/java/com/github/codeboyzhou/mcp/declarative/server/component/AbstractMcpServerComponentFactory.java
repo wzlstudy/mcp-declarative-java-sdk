@@ -2,8 +2,10 @@ package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
+import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
-import com.google.inject.name.Named;
+import com.google.inject.Key;
+import com.google.inject.name.Names;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import org.slf4j.Logger;
@@ -18,17 +20,15 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
 
   protected static final String NOT_SPECIFIED = "Not Specified";
 
-  protected final Boolean i18nEnabled;
-
   private final ResourceBundle bundle;
 
-  protected AbstractMcpServerComponentFactory(
-      @Named(INJECTED_VARIABLE_NAME_I18N_ENABLED) Boolean i18nEnabled) {
-    this.i18nEnabled = i18nEnabled;
+  protected AbstractMcpServerComponentFactory() {
     this.bundle = loadResourceBundle();
   }
 
   protected String resolveComponentAttributeValue(String attributeLiteralValue) {
+    Key<Boolean> key = Key.get(Boolean.class, Names.named(INJECTED_VARIABLE_NAME_I18N_ENABLED));
+    final Boolean i18nEnabled = InjectorProvider.getInstance().getInjector().getInstance(key);
     if (i18nEnabled && bundle != null && bundle.containsKey(attributeLiteralValue)) {
       return bundle.getString(attributeLiteralValue);
     }
