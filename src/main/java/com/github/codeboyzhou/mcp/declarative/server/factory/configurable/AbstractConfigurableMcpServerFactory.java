@@ -1,6 +1,5 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory.configurable;
 
-import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
@@ -8,15 +7,10 @@ import com.github.codeboyzhou.mcp.declarative.server.component.McpServerComponen
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.time.Duration;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 public abstract class AbstractConfigurableMcpServerFactory implements ConfigurableMcpServerFactory {
 
   protected final McpServerConfiguration configuration;
-
-  protected final ExecutorService threadPool =
-      Executors.newSingleThreadExecutor(new NamedThreadFactory("configurable-mcp-http-server"));
 
   protected AbstractConfigurableMcpServerFactory(McpServerConfiguration configuration) {
     this.configuration = configuration;

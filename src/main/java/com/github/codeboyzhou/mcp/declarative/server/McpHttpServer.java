@@ -1,7 +1,10 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
+import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
 import jakarta.servlet.http.HttpServlet;
 import java.time.Duration;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
@@ -16,9 +19,15 @@ public class McpHttpServer {
 
   private static final String DEFAULT_SERVLET_PATH = "/*";
 
+  private final ExecutorService threadPool;
+
   private HttpServlet servlet;
 
   private int port;
+
+  public McpHttpServer() {
+    this.threadPool = Executors.newSingleThreadExecutor(new NamedThreadFactory("mcp-http-server"));
+  }
 
   public McpHttpServer use(HttpServlet servlet) {
     this.servlet = servlet;
@@ -40,7 +49,7 @@ public class McpHttpServer {
     Server httpserver = new Server(port);
     httpserver.setHandler(handler);
     httpserver.setStopAtShutdown(true);
-    httpserver.setStopTimeout(Duration.ofSeconds(5).getSeconds());
+    httpserver.setStopTimeout(Duration.ofSeconds(5).toMillis());
 
     try {
       httpserver.start();
@@ -50,6 +59,10 @@ public class McpHttpServer {
       log.error("Error starting HTTP server on http://127.0.0.1:{}", port, e);
     }
 
+    threadPool.submit(() -> await(httpserver));
+  }
+
+  private void await(Server httpserver) {
     try {
       httpserver.join();
     } catch (InterruptedException e) {
@@ -58,16 +71,18 @@ public class McpHttpServer {
   }
 
   private void addShutdownHook(Server httpserver) {
-    Runnable runnable =
-        () -> {
-          try {
-            log.info("Shutting down HTTP server and MCP server");
-            httpserver.stop();
-          } catch (Exception e) {
-            log.error("Error stopping HTTP server and MCP server", e);
-          }
-        };
-    Thread shutdownHook = new Thread(runnable);
-    Runtime.getRuntime().addShutdownHook(shutdownHook);
+    Runnable runnable = () -> shutdown(httpserver);
+    Thread shutdownHookThread = new Thread(runnable);
+    Runtime.getRuntime().addShutdownHook(shutdownHookThread);
+  }
+
+  private void shutdown(Server httpserver) {
+    try {
+      log.info("Shutting down HTTP server and MCP server");
+      httpserver.stop();
+      threadPool.shutdown();
+    } catch (Exception e) {
+      log.error("Error stopping HTTP server and MCP server", e);
+    }
   }
 }

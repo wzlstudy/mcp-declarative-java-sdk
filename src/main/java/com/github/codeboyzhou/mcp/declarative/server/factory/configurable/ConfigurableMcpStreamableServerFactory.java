@@ -25,7 +25,7 @@ public class ConfigurableMcpStreamableServerFactory extends AbstractConfigurable
             .keepAliveInterval(Duration.ofMillis(streamable.keepAliveInterval()))
             .build();
     McpHttpServer httpserver = new McpHttpServer();
-    threadPool.execute(() -> httpserver.use(transportProvider).bind(streamable.port()).start());
+    httpserver.use(transportProvider).bind(streamable.port()).start();
     return McpServer.sync(transportProvider);
   }
 }
