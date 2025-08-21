@@ -16,4 +16,4 @@ streamable:
   mcp-endpoint: /mcp/message
   disallow-delete: true
   keep-alive-interval: 30000
-  port: 8080
+  port: 9000
