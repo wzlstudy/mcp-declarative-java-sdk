@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfiguration;
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
@@ -161,6 +160,7 @@ class McpServersTest {
     verifyPromptsRegistered(client);
     verifyToolsRegistered(client);
     verifyPromptsCalled(client);
+    verifyToolsCalled(client);
   }
 
   private void verifyServerInfo(McpSyncClient client) {
@@ -217,6 +217,15 @@ class McpServersTest {
     assertEquals("tool1_name", tool.name());
     assertEquals("tool1_title", tool.title());
     assertEquals("tool1_description", tool.description());
-    assertTrue(tool.inputSchema().properties().isEmpty());
+  }
+
+  private void verifyToolsCalled(McpSyncClient client) {
+    String name1 = "tool1_name";
+    Map<String, Object> args1 = Map.of("param1", "value1", "param2", "value2");
+    McpSchema.CallToolRequest request1 = new McpSchema.CallToolRequest(name1, args1);
+    McpSchema.CallToolResult result1 = client.callTool(request1);
+    McpSchema.TextContent content = (McpSchema.TextContent) result1.content().get(0);
+    assertEquals(ObjectMappers.toJson(args1), content.text());
+    assertFalse(result1.isError());
   }
 }

@@ -53,9 +53,8 @@ public class McpServerToolFactory
               boolean isError = false;
               try {
                 Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
-                Map<String, Object> args = request.arguments();
-                Map<String, Object> typedArgs = asTypedParameters(paramSchema, args);
-                result = method.invoke(instance, typedArgs.values().toArray());
+                List<Object> typedValues = asTypedParameterValues(method, request.arguments());
+                result = method.invoke(instance, typedValues.toArray());
               } catch (Exception e) {
                 log.error("Error invoking tool method", e);
                 result = e + ": " + e.getMessage();
@@ -147,23 +146,23 @@ public class McpServerToolFactory
     return definitionJsonSchema;
   }
 
-  @SuppressWarnings("unchecked")
-  private Map<String, Object> asTypedParameters(
-      McpSchema.JsonSchema schema, Map<String, Object> parameters) {
-    Map<String, Object> properties = schema.properties();
-    Map<String, Object> typedParameters = new LinkedHashMap<>(properties.size());
+  private List<Object> asTypedParameterValues(Method method, Map<String, Object> parameters) {
+    Parameter[] methodParams = method.getParameters();
+    List<Object> typedValues = new ArrayList<>(methodParams.length);
 
-    properties.forEach(
-        (parameterName, parameterProperties) -> {
-          Object parameterValue = parameters.get(parameterName);
-          // Fill in a default value when the parameter is not specified
-          // to ensure that the parameter type is correct when calling method.invoke()
-          Map<String, Object> map = (Map<String, Object>) parameterProperties;
-          final String jsonSchemaType = map.getOrDefault("type", Strings.EMPTY).toString();
-          Object typedParameterValue = Types.convert(parameterValue, jsonSchemaType);
-          typedParameters.put(parameterName, typedParameterValue);
-        });
+    for (Parameter param : methodParams) {
+      Object rawValue = null;
+      if (param.isAnnotationPresent(McpToolParam.class)) {
+        McpToolParam toolParam = param.getAnnotation(McpToolParam.class);
+        rawValue = parameters.get(toolParam.name());
+      }
+      // Fill in a default value when the parameter is not specified or unannotated
+      // to ensure that the parameter type is correct when calling method.invoke()
+      Class<?> targetType = param.getType();
+      Object typed = Types.convert(rawValue, targetType);
+      typedValues.add(typed);
+    }
 
-    return typedParameters;
+    return typedValues;
   }
 }
