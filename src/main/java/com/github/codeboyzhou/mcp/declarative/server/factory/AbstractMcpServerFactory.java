@@ -1,6 +1,8 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
 import com.github.codeboyzhou.mcp.declarative.common.NamedThreadFactory;
+import com.github.codeboyzhou.mcp.declarative.configuration.McpServerCapabilities;
+import com.github.codeboyzhou.mcp.declarative.configuration.McpServerChangeNotification;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerComponentRegister;
 import io.modelcontextprotocol.server.McpSyncServer;
@@ -18,18 +20,26 @@ public abstract class AbstractMcpServerFactory<S extends McpServerInfo>
     McpSyncServer server =
         sync(serverInfo)
             .serverInfo(serverInfo.name(), serverInfo.version())
-            .capabilities(serverCapabilities())
+            .capabilities(serverCapabilities(serverInfo))
             .instructions(serverInfo.instructions())
             .requestTimeout(serverInfo.requestTimeout())
             .build();
     McpServerComponentRegister.of(server).registerComponents();
   }
 
-  private McpSchema.ServerCapabilities serverCapabilities() {
-    return McpSchema.ServerCapabilities.builder()
-        .resources(true, true)
-        .prompts(true)
-        .tools(true)
-        .build();
+  private McpSchema.ServerCapabilities serverCapabilities(S serverInfo) {
+    McpSchema.ServerCapabilities.Builder capabilities = McpSchema.ServerCapabilities.builder();
+    McpServerCapabilities capabilitiesConfig = serverInfo.capabilities();
+    McpServerChangeNotification serverChangeNotification = serverInfo.changeNotification();
+    if (capabilitiesConfig.resource()) {
+      capabilities.resources(true, serverChangeNotification.resource());
+    }
+    if (capabilitiesConfig.prompt()) {
+      capabilities.prompts(serverChangeNotification.prompt());
+    }
+    if (capabilitiesConfig.tool()) {
+      capabilities.tools(serverChangeNotification.tool());
+    }
+    return capabilities.build();
   }
 }
