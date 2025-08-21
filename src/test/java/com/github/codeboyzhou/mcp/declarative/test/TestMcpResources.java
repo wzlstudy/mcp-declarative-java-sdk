@@ -1,9 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.test;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 
-@McpResources
 public class TestMcpResources {
 
   @McpResource(

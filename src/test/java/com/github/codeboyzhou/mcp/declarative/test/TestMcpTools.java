@@ -1,9 +1,7 @@
 package com.github.codeboyzhou.mcp.declarative.test;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 
-@McpTools
 public class TestMcpTools {
 
   @McpTool(name = "tool1_name", title = "tool1_title", description = "tool1_description")

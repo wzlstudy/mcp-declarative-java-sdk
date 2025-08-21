@@ -1,15 +1,15 @@
 package com.github.codeboyzhou.mcp.declarative.common;
 
 import static com.google.inject.Scopes.SINGLETON;
+import static java.util.stream.Collectors.toSet;
 import static org.reflections.scanners.Scanners.FieldsAnnotated;
 import static org.reflections.scanners.Scanners.MethodsAnnotated;
-import static org.reflections.scanners.Scanners.TypesAnnotated;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
+import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
@@ -17,7 +17,11 @@ import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
 import com.google.inject.AbstractModule;
+import com.google.inject.Provides;
+import com.google.inject.Singleton;
 import com.google.inject.name.Names;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.Set;
 import org.reflections.Reflections;
 
@@ -34,13 +38,9 @@ public final class InjectorModule extends AbstractModule {
   @Override
   protected void configure() {
     // Bind classes annotated by McpResources, McpPrompts, McpTools
-    Reflections reflections = provideReflections();
-    Set<Class<?>> resources = reflections.getTypesAnnotatedWith(McpResources.class);
-    resources.forEach(clazz -> bind(clazz).in(SINGLETON));
-    Set<Class<?>> prompts = reflections.getTypesAnnotatedWith(McpPrompts.class);
-    prompts.forEach(clazz -> bind(clazz).in(SINGLETON));
-    Set<Class<?>> tools = reflections.getTypesAnnotatedWith(McpTools.class);
-    tools.forEach(clazz -> bind(clazz).in(SINGLETON));
+    bindClassesOfMethodsAnnotatedWith(McpResource.class);
+    bindClassesOfMethodsAnnotatedWith(McpPrompt.class);
+    bindClassesOfMethodsAnnotatedWith(McpTool.class);
 
     // Bind all implementations of McpServerComponentFactory
     bind(McpServerResourceFactory.class).in(SINGLETON);
@@ -59,10 +59,12 @@ public final class InjectorModule extends AbstractModule {
         .toInstance(i18nEnabled);
   }
 
-  private Reflections provideReflections() {
+  @Provides
+  @Singleton
+  public Reflections provideReflections() {
     McpServerApplication application = mainClass.getAnnotation(McpServerApplication.class);
     final String basePackage = determineBasePackage(application);
-    return new Reflections(basePackage, TypesAnnotated, MethodsAnnotated, FieldsAnnotated);
+    return new Reflections(basePackage, MethodsAnnotated, FieldsAnnotated);
   }
 
   private String determineBasePackage(McpServerApplication application) {
@@ -75,5 +77,12 @@ public final class InjectorModule extends AbstractModule {
       }
     }
     return mainClass.getPackageName();
+  }
+
+  private void bindClassesOfMethodsAnnotatedWith(Class<? extends Annotation> annotation) {
+    Reflections reflections = provideReflections();
+    Set<Method> methods = reflections.getMethodsAnnotatedWith(annotation);
+    Set<Class<?>> classes = methods.stream().map(Method::getDeclaringClass).collect(toSet());
+    classes.forEach(clazz -> bind(clazz).in(SINGLETON));
   }
 }

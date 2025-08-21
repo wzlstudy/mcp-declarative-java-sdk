@@ -7,4 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
+@Deprecated(since = "0.8.0", forRemoval = true)
 public @interface McpResources {}
