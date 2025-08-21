@@ -11,9 +11,9 @@ import org.eclipse.jetty.server.Server;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class McpHttpServer {
+public class EmbeddedJettyServer {
 
-  private static final Logger log = LoggerFactory.getLogger(McpHttpServer.class);
+  private static final Logger log = LoggerFactory.getLogger(EmbeddedJettyServer.class);
 
   private static final String DEFAULT_SERVLET_CONTEXT_PATH = "/";
 
@@ -25,16 +25,16 @@ public class McpHttpServer {
 
   private int port;
 
-  public McpHttpServer() {
+  public EmbeddedJettyServer() {
     this.threadPool = Executors.newSingleThreadExecutor(new NamedThreadFactory("mcp-http-server"));
   }
 
-  public McpHttpServer use(HttpServlet servlet) {
+  public EmbeddedJettyServer use(HttpServlet servlet) {
     this.servlet = servlet;
     return this;
   }
 
-  public McpHttpServer bind(int port) {
+  public EmbeddedJettyServer bind(int port) {
     this.port = port;
     return this;
   }
@@ -54,9 +54,9 @@ public class McpHttpServer {
     try {
       httpserver.start();
       addShutdownHook(httpserver);
-      log.info("Jetty-based HTTP server started on http://127.0.0.1:{}", port);
+      log.info("Embedded Jetty server started on http://127.0.0.1:{}", port);
     } catch (Exception e) {
-      log.error("Error starting HTTP server on http://127.0.0.1:{}", port, e);
+      log.error("Error starting embedded Jetty server on http://127.0.0.1:{}", port, e);
     }
 
     threadPool.submit(() -> await(httpserver));
@@ -66,7 +66,7 @@ public class McpHttpServer {
     try {
       httpserver.join();
     } catch (InterruptedException e) {
-      log.error("Error joining HTTP server", e);
+      log.error("Error joining embedded Jetty server", e);
     }
   }
 
@@ -78,11 +78,12 @@ public class McpHttpServer {
 
   private void shutdown(Server httpserver) {
     try {
-      log.info("Shutting down HTTP server and MCP server");
+      log.info("Shutting down embedded Jetty server");
       httpserver.stop();
+      servlet.destroy();
       threadPool.shutdown();
     } catch (Exception e) {
-      log.error("Error stopping HTTP server and MCP server", e);
+      log.error("Error stopping Jetty server", e);
     }
   }
 }

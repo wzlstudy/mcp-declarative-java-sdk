@@ -14,6 +14,6 @@ public final class Strings {
   }
 
   public static String defaultIfBlank(String str, String defaultValue) {
-    return str == null || str.trim().isBlank() ? defaultValue : str;
+    return str == null || str.isBlank() ? defaultValue : str;
   }
 }

@@ -22,13 +22,15 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
 
   private final ResourceBundle bundle;
 
+  private final boolean i18nEnabled;
+
   protected AbstractMcpServerComponentFactory() {
     this.bundle = loadResourceBundle();
+    Key<Boolean> key = Key.get(Boolean.class, Names.named(INJECTED_VARIABLE_NAME_I18N_ENABLED));
+    this.i18nEnabled = InjectorProvider.getInstance().getInjector().getInstance(key);
   }
 
   protected String resolveComponentAttributeValue(String attributeLiteralValue) {
-    Key<Boolean> key = Key.get(Boolean.class, Names.named(INJECTED_VARIABLE_NAME_I18N_ENABLED));
-    final Boolean i18nEnabled = InjectorProvider.getInstance().getInjector().getInstance(key);
     if (i18nEnabled && bundle != null && bundle.containsKey(attributeLiteralValue)) {
       return bundle.getString(attributeLiteralValue);
     }

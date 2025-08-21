@@ -1,6 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
-import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
+import com.github.codeboyzhou.mcp.declarative.server.EmbeddedJettyServer;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
@@ -16,7 +16,7 @@ public class McpStreamableServerFactory extends AbstractMcpServerFactory<McpStre
             .contextExtractor(info.contextExtractor())
             .keepAliveInterval(info.keepAliveInterval())
             .build();
-    McpHttpServer httpserver = new McpHttpServer();
+    EmbeddedJettyServer httpserver = new EmbeddedJettyServer();
     httpserver.use(transportProvider).bind(info.port()).start();
     return McpServer.sync(transportProvider);
   }

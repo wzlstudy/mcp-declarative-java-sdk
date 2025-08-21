@@ -85,16 +85,16 @@ public final class Types {
   }
 
   private static Object getDefaultValue(String jsonSchemaType) {
-    if (String.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+    if (JsonSchemaDataType.STRING.getType().equalsIgnoreCase(jsonSchemaType)) {
       return Strings.EMPTY;
     }
-    if (Integer.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+    if (JsonSchemaDataType.INTEGER.getType().equalsIgnoreCase(jsonSchemaType)) {
       return 0;
     }
-    if (Number.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+    if (JsonSchemaDataType.NUMBER.getType().equalsIgnoreCase(jsonSchemaType)) {
       return 0.0;
     }
-    if (Boolean.class.getSimpleName().equalsIgnoreCase(jsonSchemaType)) {
+    if (JsonSchemaDataType.BOOLEAN.getType().equalsIgnoreCase(jsonSchemaType)) {
       return false;
     }
     return null;

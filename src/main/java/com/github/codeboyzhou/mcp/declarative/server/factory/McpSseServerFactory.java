@@ -1,6 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server.factory;
 
-import com.github.codeboyzhou.mcp.declarative.server.McpHttpServer;
+import com.github.codeboyzhou.mcp.declarative.server.EmbeddedJettyServer;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportProvider;
 import org.slf4j.Logger;
@@ -19,7 +19,7 @@ public class McpSseServerFactory extends AbstractMcpServerFactory<McpSseServerIn
             .sseEndpoint(info.sseEndpoint())
             .messageEndpoint(info.messageEndpoint())
             .build();
-    McpHttpServer httpserver = new McpHttpServer();
+    EmbeddedJettyServer httpserver = new EmbeddedJettyServer();
     httpserver.use(transportProvider).bind(info.port()).start();
     return McpServer.sync(transportProvider);
   }
