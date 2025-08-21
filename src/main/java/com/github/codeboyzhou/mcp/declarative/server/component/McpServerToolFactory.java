@@ -81,14 +81,14 @@ public class McpServerToolFactory
       Class<?> parameterType = param.getType();
       Map<String, String> property = new HashMap<>();
 
-      if (parameterType.getAnnotation(McpJsonSchemaDefinition.class) == null) {
-        property.put("type", parameterType.getSimpleName().toLowerCase());
-        property.put("description", resolveComponentAttributeValue(toolParam.description()));
-      } else {
+      if (parameterType.isAnnotationPresent(McpJsonSchemaDefinition.class)) {
         final String parameterTypeSimpleName = parameterType.getSimpleName();
         property.put("$ref", "#/definitions/" + parameterTypeSimpleName);
         Map<String, Object> definition = createJsonSchemaDefinition(parameterType);
         definitions.put(parameterTypeSimpleName, definition);
+      } else {
+        property.put("type", parameterType.getSimpleName().toLowerCase());
+        property.put("description", resolveComponentAttributeValue(toolParam.description()));
       }
       properties.put(parameterName, property);
 
