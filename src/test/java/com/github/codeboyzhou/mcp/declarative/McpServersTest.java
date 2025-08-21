@@ -14,6 +14,7 @@ import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationEx
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.test.TestSimpleMcpStdioServer;
+import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -23,6 +24,7 @@ import io.modelcontextprotocol.client.transport.StdioClientTransport;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.time.Duration;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import org.junit.jupiter.api.Test;
 
@@ -158,6 +160,7 @@ class McpServersTest {
     verifyResourcesRegistered(client);
     verifyPromptsRegistered(client);
     verifyToolsRegistered(client);
+    verifyPromptsCalled(client);
   }
 
   private void verifyServerInfo(McpSyncClient client) {
@@ -181,11 +184,30 @@ class McpServersTest {
   private void verifyPromptsRegistered(McpSyncClient client) {
     List<McpSchema.Prompt> prompts = client.listPrompts().prompts();
     assertEquals(1, prompts.size());
+
     McpSchema.Prompt prompt = prompts.get(0);
     assertEquals("prompt1_name", prompt.name());
     assertEquals("prompt1_title", prompt.title());
     assertEquals("prompt1_description", prompt.description());
-    assertTrue(prompt.arguments().isEmpty());
+
+    List<McpSchema.PromptArgument> arguments = prompt.arguments();
+    assertEquals(2, arguments.size());
+    assertEquals("param1", arguments.get(0).name());
+    assertEquals("param1_title", arguments.get(0).title());
+    assertEquals("param1_description", arguments.get(0).description());
+    assertEquals("param2", arguments.get(1).name());
+    assertEquals("param2_title", arguments.get(1).title());
+    assertEquals("param2_description", arguments.get(1).description());
+  }
+
+  private void verifyPromptsCalled(McpSyncClient client) {
+    String name1 = "prompt1_name";
+    Map<String, Object> args1 = Map.of("param1", "value1", "param2", "value2");
+    McpSchema.GetPromptRequest request1 = new McpSchema.GetPromptRequest(name1, args1);
+    McpSchema.GetPromptResult result1 = client.getPrompt(request1);
+    McpSchema.TextContent content = (McpSchema.TextContent) result1.messages().get(0).content();
+    assertEquals(ObjectMappers.toJson(args1), content.text());
+    assertEquals("prompt1_description", result1.description());
   }
 
   private void verifyToolsRegistered(McpSyncClient client) {

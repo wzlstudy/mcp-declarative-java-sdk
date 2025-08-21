@@ -11,7 +11,6 @@ import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -38,9 +37,8 @@ public class McpServerPromptFactory
           Object result;
           try {
             Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
-            Map<String, Object> typedParameters =
-                asTypedParameters(method, promptArguments, request.arguments());
-            result = method.invoke(instance, typedParameters.values().toArray());
+            List<Object> typedValues = asTypedParameterValues(method, request.arguments());
+            result = method.invoke(instance, typedValues.toArray());
           } catch (Exception e) {
             log.error("Error invoking prompt method", e);
             result = e + ": " + e.getMessage();
@@ -70,20 +68,23 @@ public class McpServerPromptFactory
     return promptArguments;
   }
 
-  private Map<String, Object> asTypedParameters(
-      Method method, List<McpSchema.PromptArgument> arguments, Map<String, Object> parameters) {
-    Class<?>[] parameterTypes = method.getParameterTypes();
-    Map<String, Object> typedParameters = new LinkedHashMap<>(parameters.size());
+  private List<Object> asTypedParameterValues(Method method, Map<String, Object> parameters) {
+    Parameter[] methodParams = method.getParameters();
+    List<Object> typedValues = new ArrayList<>(methodParams.length);
 
-    for (int i = 0, size = arguments.size(); i < size; i++) {
-      final String parameterName = arguments.get(i).name();
-      final Object parameterValue = parameters.get(parameterName);
-      // Fill in a default value when the parameter is not specified
+    for (Parameter param : methodParams) {
+      Object rawValue = null;
+      if (param.isAnnotationPresent(McpPromptParam.class)) {
+        McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
+        rawValue = parameters.get(promptParam.name());
+      }
+      // Fill in a default value when the parameter is not specified or unannotated
       // to ensure that the parameter type is correct when calling method.invoke()
-      Object typedParameterValue = Types.convert(parameterValue, parameterTypes[i]);
-      typedParameters.put(parameterName, typedParameterValue);
+      Class<?> targetType = param.getType();
+      Object typed = Types.convert(rawValue, targetType);
+      typedValues.add(typed);
     }
 
-    return typedParameters;
+    return typedValues;
   }
 }
