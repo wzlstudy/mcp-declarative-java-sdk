@@ -2,8 +2,6 @@ package com.github.codeboyzhou.mcp.declarative.test;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
-import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
-import java.util.Map;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +17,6 @@ public class TestMcpPrompts {
           String param2,
       String param3) {
     log.debug("prompt1 called with params: {}, {}, {}", param1, param2, param3);
-    return ObjectMappers.toJson(Map.of("param1", param1, "param2", param2));
+    return param1 + param2;
   }
 }

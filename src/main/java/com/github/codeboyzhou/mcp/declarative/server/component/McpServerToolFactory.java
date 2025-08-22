@@ -20,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Stream;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -71,29 +70,28 @@ public class McpServerToolFactory
     Map<String, Object> definitions = new LinkedHashMap<>();
     List<String> required = new ArrayList<>();
 
-    Stream<Parameter> parameters = Stream.of(method.getParameters());
-    List<Parameter> params =
-        parameters.filter(p -> p.isAnnotationPresent(McpToolParam.class)).toList();
+    Parameter[] methodParams = method.getParameters();
+    for (Parameter param : methodParams) {
+      if (param.isAnnotationPresent(McpToolParam.class)) {
+        McpToolParam toolParam = param.getAnnotation(McpToolParam.class);
+        final String parameterName = toolParam.name();
+        Class<?> definitionClass = param.getType();
+        Map<String, String> property = new HashMap<>();
 
-    for (Parameter param : params) {
-      McpToolParam toolParam = param.getAnnotation(McpToolParam.class);
-      final String parameterName = toolParam.name();
-      Class<?> parameterType = param.getType();
-      Map<String, String> property = new HashMap<>();
+        if (definitionClass.isAnnotationPresent(McpJsonSchemaDefinition.class)) {
+          final String definitionClassName = definitionClass.getSimpleName();
+          property.put("$ref", "#/definitions/" + definitionClassName);
+          Map<String, Object> definition = createJsonSchemaDefinition(definitionClass);
+          definitions.put(definitionClassName, definition);
+        } else {
+          property.put("type", definitionClass.getSimpleName().toLowerCase());
+          property.put("description", resolveComponentAttributeValue(toolParam.description()));
+        }
+        properties.put(parameterName, property);
 
-      if (parameterType.isAnnotationPresent(McpJsonSchemaDefinition.class)) {
-        final String parameterTypeSimpleName = parameterType.getSimpleName();
-        property.put("$ref", "#/definitions/" + parameterTypeSimpleName);
-        Map<String, Object> definition = createJsonSchemaDefinition(parameterType);
-        definitions.put(parameterTypeSimpleName, definition);
-      } else {
-        property.put("type", parameterType.getSimpleName().toLowerCase());
-        property.put("description", resolveComponentAttributeValue(toolParam.description()));
-      }
-      properties.put(parameterName, property);
-
-      if (toolParam.required()) {
-        required.add(parameterName);
+        if (toolParam.required()) {
+          required.add(parameterName);
+        }
       }
     }
 
@@ -146,23 +144,21 @@ public class McpServerToolFactory
     return definitionJsonSchema;
   }
 
-  private List<Object> asTypedParameterValues(Method method, Map<String, Object> parameters) {
+  private List<Object> asTypedParameterValues(Method method, Map<String, Object> arguments) {
     Parameter[] methodParams = method.getParameters();
     List<Object> typedValues = new ArrayList<>(methodParams.length);
-
     for (Parameter param : methodParams) {
       Object rawValue = null;
       if (param.isAnnotationPresent(McpToolParam.class)) {
         McpToolParam toolParam = param.getAnnotation(McpToolParam.class);
-        rawValue = parameters.get(toolParam.name());
+        rawValue = arguments.get(toolParam.name());
       }
       // Fill in a default value when the parameter is not specified or unannotated
       // to ensure that the parameter type is correct when calling method.invoke()
       Class<?> targetType = param.getType();
-      Object typed = Types.convert(rawValue, targetType);
-      typedValues.add(typed);
+      Object typedValue = Types.convert(rawValue, targetType);
+      typedValues.add(typedValue);
     }
-
     return typedValues;
   }
 }

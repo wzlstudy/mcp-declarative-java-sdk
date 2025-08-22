@@ -13,7 +13,6 @@ import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationEx
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.test.TestSimpleMcpStdioServer;
-import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;
 import io.modelcontextprotocol.client.transport.HttpClientSseClientTransport;
@@ -206,7 +205,7 @@ class McpServersTest {
     McpSchema.GetPromptRequest request1 = new McpSchema.GetPromptRequest(name1, args1);
     McpSchema.GetPromptResult result1 = client.getPrompt(request1);
     McpSchema.TextContent content = (McpSchema.TextContent) result1.messages().get(0).content();
-    assertEquals(ObjectMappers.toJson(args1), content.text());
+    assertEquals(args1.get("param1") + args1.get("param2").toString(), content.text());
     assertEquals("prompt1_description", result1.description());
   }
 
@@ -225,7 +224,7 @@ class McpServersTest {
     McpSchema.CallToolRequest request1 = new McpSchema.CallToolRequest(name1, args1);
     McpSchema.CallToolResult result1 = client.callTool(request1);
     McpSchema.TextContent content = (McpSchema.TextContent) result1.content().get(0);
-    assertEquals(ObjectMappers.toJson(args1), content.text());
+    assertEquals(args1.get("param1") + args1.get("param2").toString(), content.text());
     assertFalse(result1.isError());
   }
 }

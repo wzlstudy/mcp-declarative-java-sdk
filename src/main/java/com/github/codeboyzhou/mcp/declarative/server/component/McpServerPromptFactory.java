@@ -13,7 +13,6 @@ import java.lang.reflect.Parameter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,40 +50,36 @@ public class McpServerPromptFactory
   }
 
   private List<McpSchema.PromptArgument> createPromptArguments(Method method) {
-    Stream<Parameter> parameters = Stream.of(method.getParameters());
-    List<Parameter> params =
-        parameters.filter(p -> p.isAnnotationPresent(McpPromptParam.class)).toList();
-    List<McpSchema.PromptArgument> promptArguments = new ArrayList<>(params.size());
-    for (Parameter param : params) {
-      McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
-      final String name = promptParam.name();
-      final String title = resolveComponentAttributeValue(promptParam.title());
-      final String description = resolveComponentAttributeValue(promptParam.description());
-      final boolean required = promptParam.required();
-      McpSchema.PromptArgument promptArgument =
-          new McpSchema.PromptArgument(name, title, description, required);
-      promptArguments.add(promptArgument);
+    Parameter[] methodParams = method.getParameters();
+    List<McpSchema.PromptArgument> promptArguments = new ArrayList<>(methodParams.length);
+    for (Parameter param : methodParams) {
+      if (param.isAnnotationPresent(McpPromptParam.class)) {
+        McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
+        final String name = promptParam.name();
+        final String title = resolveComponentAttributeValue(promptParam.title());
+        final String description = resolveComponentAttributeValue(promptParam.description());
+        final boolean required = promptParam.required();
+        promptArguments.add(new McpSchema.PromptArgument(name, title, description, required));
+      }
     }
     return promptArguments;
   }
 
-  private List<Object> asTypedParameterValues(Method method, Map<String, Object> parameters) {
+  private List<Object> asTypedParameterValues(Method method, Map<String, Object> arguments) {
     Parameter[] methodParams = method.getParameters();
     List<Object> typedValues = new ArrayList<>(methodParams.length);
-
     for (Parameter param : methodParams) {
       Object rawValue = null;
       if (param.isAnnotationPresent(McpPromptParam.class)) {
         McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
-        rawValue = parameters.get(promptParam.name());
+        rawValue = arguments.get(promptParam.name());
       }
       // Fill in a default value when the parameter is not specified or unannotated
       // to ensure that the parameter type is correct when calling method.invoke()
       Class<?> targetType = param.getType();
-      Object typed = Types.convert(rawValue, targetType);
-      typedValues.add(typed);
+      Object typedValue = Types.convert(rawValue, targetType);
+      typedValues.add(typedValue);
     }
-
     return typedValues;
   }
 }
