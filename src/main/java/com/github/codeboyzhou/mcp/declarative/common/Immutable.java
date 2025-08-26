@@ -1,13 +1,12 @@
 package com.github.codeboyzhou.mcp.declarative.common;
 
-public final class Immutable<T> {
-  private final T value;
+public record Immutable<T>(T value) {
 
-  private Immutable(T value) {
-    this.value = value;
+  public static <T> Immutable<T> of(T value) {
+    return new Immutable<>(value);
   }
 
-  public static <T> T of(T value) {
-    return new Immutable<>(value).value;
+  public T get() {
+    return value;
   }
 }
