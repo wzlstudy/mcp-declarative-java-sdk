@@ -4,8 +4,8 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.common.Immutable;
-import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
-import com.google.inject.Injector;
+import com.github.codeboyzhou.mcp.declarative.di.DependencyInjector;
+import com.github.codeboyzhou.mcp.declarative.di.DependencyInjectorProvider;
 import io.modelcontextprotocol.server.McpSyncServer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -15,14 +15,14 @@ import org.reflections.Reflections;
 
 public final class McpServerComponentRegister {
 
-  private final Injector injector;
+  private final DependencyInjector injector;
 
   private final Reflections reflections;
 
   private final Immutable<McpSyncServer> server;
 
   public McpServerComponentRegister(McpSyncServer server) {
-    this.injector = InjectorProvider.getInstance().getInjector();
+    this.injector = DependencyInjectorProvider.INSTANCE.getInjector();
     this.reflections = injector.getInstance(Reflections.class);
     this.server = Immutable.of(server);
   }

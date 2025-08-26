@@ -4,7 +4,6 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition
 import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinitionProperty;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
-import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
@@ -51,7 +50,7 @@ public class McpServerToolFactory
               Object result;
               boolean isError = false;
               try {
-                Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
+                Object instance = injector.getInstance(clazz);
                 List<Object> typedValues = asTypedParameterValues(method, request.arguments());
                 result = method.invoke(instance, typedValues.toArray());
               } catch (Exception e) {
@@ -112,8 +111,7 @@ public class McpServerToolFactory
     Map<String, Object> properties = new LinkedHashMap<>();
     List<String> required = new ArrayList<>();
 
-    Reflections reflections =
-        InjectorProvider.getInstance().getInjector().getInstance(Reflections.class);
+    Reflections reflections = injector.getInstance(Reflections.class);
     Set<Field> definitionFields =
         reflections.getFieldsAnnotatedWith(McpJsonSchemaDefinitionProperty.class);
     List<Field> fields =

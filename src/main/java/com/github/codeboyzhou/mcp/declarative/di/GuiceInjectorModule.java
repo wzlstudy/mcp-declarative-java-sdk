@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.common;
+package com.github.codeboyzhou.mcp.declarative.di;
 
 import static com.google.inject.Scopes.SINGLETON;
 import static java.util.stream.Collectors.toSet;
@@ -25,13 +25,13 @@ import java.lang.reflect.Method;
 import java.util.Set;
 import org.reflections.Reflections;
 
-public final class InjectorModule extends AbstractModule {
+public final class GuiceInjectorModule extends AbstractModule {
 
   public static final String INJECTED_VARIABLE_NAME_I18N_ENABLED = "i18nEnabled";
 
   private final Class<?> mainClass;
 
-  public InjectorModule(Class<?> mainClass) {
+  public GuiceInjectorModule(Class<?> mainClass) {
     this.mainClass = mainClass;
   }
 

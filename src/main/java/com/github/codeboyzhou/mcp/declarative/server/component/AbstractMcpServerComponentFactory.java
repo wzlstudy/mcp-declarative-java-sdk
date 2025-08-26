@@ -1,11 +1,10 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
-import static com.github.codeboyzhou.mcp.declarative.common.InjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
+import static com.github.codeboyzhou.mcp.declarative.di.GuiceInjectorModule.INJECTED_VARIABLE_NAME_I18N_ENABLED;
 
-import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
+import com.github.codeboyzhou.mcp.declarative.di.DependencyInjector;
+import com.github.codeboyzhou.mcp.declarative.di.DependencyInjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
-import com.google.inject.Key;
-import com.google.inject.name.Names;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import org.slf4j.Logger;
@@ -20,14 +19,16 @@ public abstract class AbstractMcpServerComponentFactory<T> implements McpServerC
 
   protected static final String NOT_SPECIFIED = "Not Specified";
 
+  protected final DependencyInjector injector;
+
   private final ResourceBundle bundle;
 
   private final boolean i18nEnabled;
 
   protected AbstractMcpServerComponentFactory() {
     this.bundle = loadResourceBundle();
-    Key<Boolean> key = Key.get(Boolean.class, Names.named(INJECTED_VARIABLE_NAME_I18N_ENABLED));
-    this.i18nEnabled = InjectorProvider.getInstance().getInjector().getInstance(key);
+    this.injector = DependencyInjectorProvider.INSTANCE.getInjector();
+    this.i18nEnabled = injector.getVariable(Boolean.class, INJECTED_VARIABLE_NAME_I18N_ENABLED);
   }
 
   protected String resolveComponentAttributeValue(String attributeLiteralValue) {

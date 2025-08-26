@@ -1,7 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
-import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import io.modelcontextprotocol.server.McpServerFeatures;
@@ -37,7 +36,7 @@ public class McpServerResourceFactory
         (exchange, request) -> {
           Object result;
           try {
-            Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
+            Object instance = injector.getInstance(clazz);
             result = method.invoke(instance);
           } catch (Exception e) {
             log.error("Error invoking resource method", e);

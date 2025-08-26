@@ -2,7 +2,6 @@ package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
-import com.github.codeboyzhou.mcp.declarative.common.InjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
@@ -35,7 +34,7 @@ public class McpServerPromptFactory
         (exchange, request) -> {
           Object result;
           try {
-            Object instance = InjectorProvider.getInstance().getInjector().getInstance(clazz);
+            Object instance = injector.getInstance(clazz);
             List<Object> typedValues = asTypedParameterValues(method, request.arguments());
             result = method.invoke(instance, typedValues.toArray());
           } catch (Exception e) {
