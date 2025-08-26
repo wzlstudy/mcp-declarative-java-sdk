@@ -21,15 +21,15 @@ public class GuiceDependencyInjector implements DependencyInjector {
   }
 
   @Override
-  public boolean isInitialized() {
-    return injector != null;
-  }
-
-  @Override
   public <T> T getVariable(Class<T> type, String name) {
     if (isInitialized()) {
       return injector.getInstance(Key.get(type, Names.named(name)));
     }
     throw new IllegalStateException("GuiceDependencyInjector is not initialized");
+  }
+
+  @Override
+  public boolean isInitialized() {
+    return injector != null;
   }
 }

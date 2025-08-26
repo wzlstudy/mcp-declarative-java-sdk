@@ -13,6 +13,8 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
 import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
+import com.github.codeboyzhou.mcp.declarative.server.converter.McpPromptParameterConverter;
+import com.github.codeboyzhou.mcp.declarative.server.converter.McpToolParameterConverter;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
@@ -46,6 +48,10 @@ public final class GuiceInjectorModule extends AbstractModule {
     bind(McpServerResourceFactory.class).in(SINGLETON);
     bind(McpServerPromptFactory.class).in(SINGLETON);
     bind(McpServerToolFactory.class).in(SINGLETON);
+
+    // Bind all implementations of ParameterConverter
+    bind(McpPromptParameterConverter.class).in(SINGLETON);
+    bind(McpToolParameterConverter.class).in(SINGLETON);
 
     // Bind all implementations of McpServerFactory
     bind(McpStdioServerFactory.class).in(SINGLETON);

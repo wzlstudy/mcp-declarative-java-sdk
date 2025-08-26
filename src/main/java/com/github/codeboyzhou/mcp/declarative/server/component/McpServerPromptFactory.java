@@ -4,9 +4,9 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
 import com.github.codeboyzhou.mcp.declarative.reflect.MethodMetadata;
 import com.github.codeboyzhou.mcp.declarative.reflect.ReflectionCache;
+import com.github.codeboyzhou.mcp.declarative.server.converter.McpPromptParameterConverter;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
-import com.github.codeboyzhou.mcp.declarative.util.Types;
 import io.modelcontextprotocol.server.McpServerFeatures;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.lang.reflect.Method;
@@ -40,15 +40,18 @@ public class McpServerPromptFactory
         ObjectMappers.toJson(prompt),
         ReflectionCache.INSTANCE.isCached(method));
 
+    Object instance = injector.getInstance(clazz);
+    McpPromptParameterConverter converter = injector.getInstance(McpPromptParameterConverter.class);
+
     return new McpServerFeatures.SyncPromptSpecification(
         prompt,
         (exchange, request) -> {
           Object result;
           try {
-            Object instance = injector.getInstance(clazz);
-            List<Object> typedValues = asTypedParameters(metadata, request.arguments());
+            Map<String, Object> arguments = request.arguments();
+            List<Object> convertedParams = converter.convertAllParameters(metadata, arguments);
             // Use cached method for invocation
-            result = metadata.getMethod().invoke(instance, typedValues.toArray());
+            result = metadata.getMethod().invoke(instance, convertedParams.toArray());
           } catch (Exception e) {
             log.error("Error invoking prompt method {}", metadata.getMethodSignature(), e);
             result = e + ": " + e.getMessage();
@@ -76,25 +79,5 @@ public class McpServerPromptFactory
     }
 
     return promptArguments;
-  }
-
-  private List<Object> asTypedParameters(MethodMetadata metadata, Map<String, Object> arguments) {
-    Parameter[] methodParams = metadata.getParameters();
-    List<Object> typedValues = new ArrayList<>(methodParams.length);
-
-    for (Parameter param : methodParams) {
-      Object rawValue = null;
-      if (param.isAnnotationPresent(McpPromptParam.class)) {
-        McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
-        rawValue = arguments.get(promptParam.name());
-      }
-      // Fill in a default value when the parameter is not specified or unannotated
-      // to ensure that the parameter type is correct when calling method.invoke()
-      Class<?> targetType = param.getType();
-      Object typedValue = Types.convert(rawValue, targetType);
-      typedValues.add(typedValue);
-    }
-
-    return typedValues;
   }
 }

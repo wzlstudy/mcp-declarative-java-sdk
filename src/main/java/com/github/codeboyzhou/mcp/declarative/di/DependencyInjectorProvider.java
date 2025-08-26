@@ -6,9 +6,11 @@ public enum DependencyInjectorProvider {
   private volatile DependencyInjector injector;
 
   public DependencyInjectorProvider initialize(DependencyInjector injector) {
-    synchronized (this) {
-      if (this.injector == null) {
-        this.injector = injector;
+    if (this.injector == null) {
+      synchronized (this) {
+        if (this.injector == null) {
+          this.injector = injector;
+        }
       }
     }
     return this;
