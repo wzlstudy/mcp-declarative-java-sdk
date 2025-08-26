@@ -1,6 +1,8 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
+import com.github.codeboyzhou.mcp.declarative.reflect.MethodMetadata;
+import com.github.codeboyzhou.mcp.declarative.reflect.ReflectionCache;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import io.modelcontextprotocol.server.McpServerFeatures;
@@ -17,10 +19,14 @@ public class McpServerResourceFactory
 
   @Override
   public McpServerFeatures.SyncResourceSpecification create(Class<?> clazz, Method method) {
+    // Use reflection cache for performance optimization
+    MethodMetadata metadata = ReflectionCache.INSTANCE.getMethodMetadata(method);
+
     McpResource res = method.getAnnotation(McpResource.class);
     final String name = Strings.defaultIfBlank(res.name(), method.getName());
     final String title = resolveComponentAttributeValue(res.title());
     final String description = resolveComponentAttributeValue(res.description());
+
     McpSchema.Resource resource =
         McpSchema.Resource.builder()
             .uri(res.uri())
@@ -30,16 +36,22 @@ public class McpServerResourceFactory
             .mimeType(res.mimeType())
             .annotations(new McpSchema.Annotations(List.of(res.roles()), res.priority()))
             .build();
-    log.debug("Registering resource: {}", ObjectMappers.toJson(resource));
+
+    log.debug(
+        "Registering resource: {} (Cached: {})",
+        ObjectMappers.toJson(resource),
+        ReflectionCache.INSTANCE.isCached(method));
+
     return new McpServerFeatures.SyncResourceSpecification(
         resource,
         (exchange, request) -> {
           Object result;
           try {
             Object instance = injector.getInstance(clazz);
-            result = method.invoke(instance);
+            // Use cached method for invocation
+            result = metadata.getMethod().invoke(instance);
           } catch (Exception e) {
-            log.error("Error invoking resource method", e);
+            log.error("Error invoking resource method {}", metadata.getMethodSignature(), e);
             result = e + ": " + e.getMessage();
           }
           McpSchema.ResourceContents contents =

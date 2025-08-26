@@ -5,6 +5,8 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpJsonSchemaDefinition
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
 import com.github.codeboyzhou.mcp.declarative.enums.JsonSchemaDataType;
+import com.github.codeboyzhou.mcp.declarative.reflect.MethodMetadata;
+import com.github.codeboyzhou.mcp.declarative.reflect.ReflectionCache;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
@@ -30,11 +32,15 @@ public class McpServerToolFactory
 
   @Override
   public McpServerFeatures.SyncToolSpecification create(Class<?> clazz, Method method) {
+    // Use reflection cache for performance optimization
+    MethodMetadata metadata = ReflectionCache.INSTANCE.getMethodMetadata(method);
+
     McpTool toolMethod = method.getAnnotation(McpTool.class);
     final String name = Strings.defaultIfBlank(toolMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(toolMethod.title());
     final String description = resolveComponentAttributeValue(toolMethod.description());
-    McpSchema.JsonSchema paramSchema = createJsonSchema(method);
+
+    McpSchema.JsonSchema paramSchema = createJsonSchema(metadata);
     McpSchema.Tool tool =
         McpSchema.Tool.builder()
             .name(name)
@@ -42,7 +48,12 @@ public class McpServerToolFactory
             .description(description)
             .inputSchema(paramSchema)
             .build();
-    log.debug("Registering tool: {}", ObjectMappers.toJson(tool));
+
+    log.debug(
+        "Registering tool: {} (Cached: {})",
+        ObjectMappers.toJson(tool),
+        ReflectionCache.INSTANCE.isCached(method));
+
     return McpServerFeatures.SyncToolSpecification.builder()
         .tool(tool)
         .callHandler(
@@ -51,10 +62,11 @@ public class McpServerToolFactory
               boolean isError = false;
               try {
                 Object instance = injector.getInstance(clazz);
-                List<Object> typedValues = asTypedParameterValues(method, request.arguments());
-                result = method.invoke(instance, typedValues.toArray());
+                List<Object> typedValues = asTypedParameters(metadata, request.arguments());
+                // Use cached method for invocation
+                result = metadata.getMethod().invoke(instance, typedValues.toArray());
               } catch (Exception e) {
-                log.error("Error invoking tool method", e);
+                log.error("Error invoking tool method {}", metadata.getMethodSignature(), e);
                 result = e + ": " + e.getMessage();
                 isError = true;
               }
@@ -64,12 +76,12 @@ public class McpServerToolFactory
         .build();
   }
 
-  private McpSchema.JsonSchema createJsonSchema(Method method) {
+  private McpSchema.JsonSchema createJsonSchema(MethodMetadata metadata) {
     Map<String, Object> properties = new LinkedHashMap<>();
     Map<String, Object> definitions = new LinkedHashMap<>();
     List<String> required = new ArrayList<>();
 
-    Parameter[] methodParams = method.getParameters();
+    Parameter[] methodParams = metadata.getParameters();
     for (Parameter param : methodParams) {
       if (param.isAnnotationPresent(McpToolParam.class)) {
         McpToolParam toolParam = param.getAnnotation(McpToolParam.class);
@@ -142,9 +154,10 @@ public class McpServerToolFactory
     return definitionJsonSchema;
   }
 
-  private List<Object> asTypedParameterValues(Method method, Map<String, Object> arguments) {
-    Parameter[] methodParams = method.getParameters();
+  private List<Object> asTypedParameters(MethodMetadata metadata, Map<String, Object> arguments) {
+    Parameter[] methodParams = metadata.getParameters();
     List<Object> typedValues = new ArrayList<>(methodParams.length);
+
     for (Parameter param : methodParams) {
       Object rawValue = null;
       if (param.isAnnotationPresent(McpToolParam.class)) {
@@ -157,6 +170,7 @@ public class McpServerToolFactory
       Object typedValue = Types.convert(rawValue, targetType);
       typedValues.add(typedValue);
     }
+
     return typedValues;
   }
 }

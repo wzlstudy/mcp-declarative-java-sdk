@@ -2,6 +2,8 @@ package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
+import com.github.codeboyzhou.mcp.declarative.reflect.MethodMetadata;
+import com.github.codeboyzhou.mcp.declarative.reflect.ReflectionCache;
 import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import com.github.codeboyzhou.mcp.declarative.util.Strings;
 import com.github.codeboyzhou.mcp.declarative.util.Types;
@@ -22,23 +24,33 @@ public class McpServerPromptFactory
 
   @Override
   public McpServerFeatures.SyncPromptSpecification create(Class<?> clazz, Method method) {
+    // Use reflection cache for performance optimization
+    MethodMetadata metadata = ReflectionCache.INSTANCE.getMethodMetadata(method);
+
     McpPrompt promptMethod = method.getAnnotation(McpPrompt.class);
     final String name = Strings.defaultIfBlank(promptMethod.name(), method.getName());
     final String title = resolveComponentAttributeValue(promptMethod.title());
     final String description = resolveComponentAttributeValue(promptMethod.description());
-    List<McpSchema.PromptArgument> promptArguments = createPromptArguments(method);
+
+    List<McpSchema.PromptArgument> promptArguments = createPromptArguments(metadata);
     McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
-    log.debug("Registering prompt: {}", ObjectMappers.toJson(prompt));
+
+    log.debug(
+        "Registering prompt: {} (Cached: {})",
+        ObjectMappers.toJson(prompt),
+        ReflectionCache.INSTANCE.isCached(method));
+
     return new McpServerFeatures.SyncPromptSpecification(
         prompt,
         (exchange, request) -> {
           Object result;
           try {
             Object instance = injector.getInstance(clazz);
-            List<Object> typedValues = asTypedParameterValues(method, request.arguments());
-            result = method.invoke(instance, typedValues.toArray());
+            List<Object> typedValues = asTypedParameters(metadata, request.arguments());
+            // Use cached method for invocation
+            result = metadata.getMethod().invoke(instance, typedValues.toArray());
           } catch (Exception e) {
-            log.error("Error invoking prompt method", e);
+            log.error("Error invoking prompt method {}", metadata.getMethodSignature(), e);
             result = e + ": " + e.getMessage();
           }
           McpSchema.Content content = new McpSchema.TextContent(result.toString());
@@ -48,9 +60,10 @@ public class McpServerPromptFactory
         });
   }
 
-  private List<McpSchema.PromptArgument> createPromptArguments(Method method) {
-    Parameter[] methodParams = method.getParameters();
+  private List<McpSchema.PromptArgument> createPromptArguments(MethodMetadata metadata) {
+    Parameter[] methodParams = metadata.getParameters();
     List<McpSchema.PromptArgument> promptArguments = new ArrayList<>(methodParams.length);
+
     for (Parameter param : methodParams) {
       if (param.isAnnotationPresent(McpPromptParam.class)) {
         McpPromptParam promptParam = param.getAnnotation(McpPromptParam.class);
@@ -61,12 +74,14 @@ public class McpServerPromptFactory
         promptArguments.add(new McpSchema.PromptArgument(name, title, description, required));
       }
     }
+
     return promptArguments;
   }
 
-  private List<Object> asTypedParameterValues(Method method, Map<String, Object> arguments) {
-    Parameter[] methodParams = method.getParameters();
+  private List<Object> asTypedParameters(MethodMetadata metadata, Map<String, Object> arguments) {
+    Parameter[] methodParams = metadata.getParameters();
     List<Object> typedValues = new ArrayList<>(methodParams.length);
+
     for (Parameter param : methodParams) {
       Object rawValue = null;
       if (param.isAnnotationPresent(McpPromptParam.class)) {
@@ -79,6 +94,7 @@ public class McpServerPromptFactory
       Object typedValue = Types.convert(rawValue, targetType);
       typedValues.add(typedValue);
     }
+
     return typedValues;
   }
 }
