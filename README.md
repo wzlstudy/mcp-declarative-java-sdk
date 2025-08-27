@@ -143,7 +143,7 @@ Add the following Maven dependency to your project:
 <dependency>
     <groupId>io.github.codeboyzhou</groupId>
     <artifactId>mcp-declarative-java-sdk</artifactId>
-    <version>0.8.0-SNAPSHOT</version>
+    <version>0.8.0</version>
 </dependency>
 ```
 
