@@ -4,7 +4,7 @@ import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 
-public class McpStdioServerFactory extends AbstractMcpServerFactory<McpServerInfo> {
+public class McpStdioServer extends AbstractMcpServer<McpServerInfo> {
   @Override
   public McpServer.SyncSpecification<?> sync(McpServerInfo serverInfo) {
     return McpServer.sync(new StdioServerTransportProvider());

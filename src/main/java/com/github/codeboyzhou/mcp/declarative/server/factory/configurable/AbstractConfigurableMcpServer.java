@@ -8,11 +8,11 @@ import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 import java.time.Duration;
 
-public abstract class AbstractConfigurableMcpServerFactory implements ConfigurableMcpServerFactory {
+public abstract class AbstractConfigurableMcpServer implements ConfigurableMcpServer {
 
   protected final McpServerConfiguration configuration;
 
-  protected AbstractConfigurableMcpServerFactory(McpServerConfiguration configuration) {
+  protected AbstractConfigurableMcpServer(McpServerConfiguration configuration) {
     this.configuration = configuration;
   }
 

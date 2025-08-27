@@ -4,9 +4,9 @@ import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfigurati
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.StdioServerTransportProvider;
 
-public class ConfigurableMcpStdioServerFactory extends AbstractConfigurableMcpServerFactory {
+public class ConfigurableMcpStdioServer extends AbstractConfigurableMcpServer {
 
-  public ConfigurableMcpStdioServerFactory(McpServerConfiguration configuration) {
+  public ConfigurableMcpStdioServer(McpServerConfiguration configuration) {
     super(configuration);
   }
 

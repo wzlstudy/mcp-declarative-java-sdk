@@ -8,9 +8,9 @@ import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
 import java.time.Duration;
 
-public class ConfigurableMcpStreamableServerFactory extends AbstractConfigurableMcpServerFactory {
+public class ConfigurableMcpStreamableServer extends AbstractConfigurableMcpServer {
 
-  public ConfigurableMcpStreamableServerFactory(McpServerConfiguration configuration) {
+  public ConfigurableMcpStreamableServer(McpServerConfiguration configuration) {
     super(configuration);
   }
 

@@ -5,7 +5,7 @@ import com.github.codeboyzhou.mcp.declarative.util.ObjectMappers;
 import io.modelcontextprotocol.server.McpServer;
 import io.modelcontextprotocol.server.transport.HttpServletStreamableServerTransportProvider;
 
-public class McpStreamableServerFactory extends AbstractMcpServerFactory<McpStreamableServerInfo> {
+public class McpStreamableServer extends AbstractMcpServer<McpStreamableServerInfo> {
   @Override
   public McpServer.SyncSpecification<?> sync(McpStreamableServerInfo info) {
     HttpServletStreamableServerTransportProvider transportProvider =

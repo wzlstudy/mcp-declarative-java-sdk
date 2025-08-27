@@ -7,10 +7,9 @@ import com.github.codeboyzhou.mcp.declarative.server.component.McpServerComponen
 import io.modelcontextprotocol.server.McpSyncServer;
 import io.modelcontextprotocol.spec.McpSchema;
 
-public abstract class AbstractMcpServerFactory<S extends McpServerInfo>
-    implements McpServerFactory<S> {
+public abstract class AbstractMcpServer<S extends McpServerInfo> implements McpServer<S> {
 
-  public void startServer(S serverInfo) {
+  public void start(S serverInfo) {
     McpSyncServer server =
         sync(serverInfo)
             .serverInfo(serverInfo.name(), serverInfo.version())

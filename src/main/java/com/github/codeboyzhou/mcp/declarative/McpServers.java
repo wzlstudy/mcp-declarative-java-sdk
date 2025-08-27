@@ -7,12 +7,12 @@ import com.github.codeboyzhou.mcp.declarative.di.DependencyInjectorProvider;
 import com.github.codeboyzhou.mcp.declarative.di.GuiceDependencyInjector;
 import com.github.codeboyzhou.mcp.declarative.di.GuiceInjectorModule;
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServer;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServer;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServer;
 import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpServerFactories;
+import com.github.codeboyzhou.mcp.declarative.server.factory.configurable.ConfigurableMcpServerFactory;
 import com.google.inject.Guice;
 import io.modelcontextprotocol.util.Assert;
 import org.slf4j.Logger;
@@ -39,15 +39,15 @@ public class McpServers {
   }
 
   public void startStdioServer(McpServerInfo serverInfo) {
-    injector.getInstance(McpStdioServerFactory.class).startServer(serverInfo);
+    injector.getInstance(McpStdioServer.class).start(serverInfo);
   }
 
   public void startSseServer(McpSseServerInfo serverInfo) {
-    injector.getInstance(McpSseServerFactory.class).startServer(serverInfo);
+    injector.getInstance(McpSseServer.class).start(serverInfo);
   }
 
   public void startStreamableServer(McpStreamableServerInfo serverInfo) {
-    injector.getInstance(McpStreamableServerFactory.class).startServer(serverInfo);
+    injector.getInstance(McpStreamableServer.class).start(serverInfo);
   }
 
   public void startServer(String configFileName) {
@@ -63,7 +63,7 @@ public class McpServers {
 
   private void doStartServer(McpServerConfiguration configuration) {
     if (configuration.enabled()) {
-      ConfigurableMcpServerFactories.getFactory(configuration).startServer();
+      ConfigurableMcpServerFactory.getServer(configuration).startServer();
     } else {
       log.warn("MCP server is disabled, please check your configuration file.");
     }

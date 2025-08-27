@@ -6,9 +6,9 @@ import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportPro
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class McpSseServerFactory extends AbstractMcpServerFactory<McpSseServerInfo> {
+public class McpSseServer extends AbstractMcpServer<McpSseServerInfo> {
 
-  private static final Logger log = LoggerFactory.getLogger(McpSseServerFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(McpSseServer.class);
 
   @Override
   public McpServer.SyncSpecification<?> sync(McpSseServerInfo info) {

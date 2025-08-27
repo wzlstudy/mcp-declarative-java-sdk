@@ -8,11 +8,11 @@ import io.modelcontextprotocol.server.transport.HttpServletSseServerTransportPro
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ConfigurableMcpSseServerFactory extends AbstractConfigurableMcpServerFactory {
+public class ConfigurableMcpSseServer extends AbstractConfigurableMcpServer {
 
-  private static final Logger log = LoggerFactory.getLogger(ConfigurableMcpSseServerFactory.class);
+  private static final Logger log = LoggerFactory.getLogger(ConfigurableMcpSseServer.class);
 
-  public ConfigurableMcpSseServerFactory(McpServerConfiguration configuration) {
+  public ConfigurableMcpSseServer(McpServerConfiguration configuration) {
     super(configuration);
   }
 

@@ -10,14 +10,14 @@ import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
-import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPromptFactory;
-import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResourceFactory;
-import com.github.codeboyzhou.mcp.declarative.server.component.McpServerToolFactory;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerPrompt;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerResource;
+import com.github.codeboyzhou.mcp.declarative.server.component.McpServerTool;
 import com.github.codeboyzhou.mcp.declarative.server.converter.McpPromptParameterConverter;
 import com.github.codeboyzhou.mcp.declarative.server.converter.McpToolParameterConverter;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServerFactory;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerFactory;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServer;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStdioServer;
+import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServer;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Singleton;
@@ -45,18 +45,18 @@ public final class GuiceInjectorModule extends AbstractModule {
     bindClassesOfMethodsAnnotatedWith(McpTool.class);
 
     // Bind all implementations of McpServerComponentFactory
-    bind(McpServerResourceFactory.class).in(SINGLETON);
-    bind(McpServerPromptFactory.class).in(SINGLETON);
-    bind(McpServerToolFactory.class).in(SINGLETON);
+    bind(McpServerResource.class).in(SINGLETON);
+    bind(McpServerPrompt.class).in(SINGLETON);
+    bind(McpServerTool.class).in(SINGLETON);
 
     // Bind all implementations of ParameterConverter
     bind(McpPromptParameterConverter.class).in(SINGLETON);
     bind(McpToolParameterConverter.class).in(SINGLETON);
 
     // Bind all implementations of McpServerFactory
-    bind(McpStdioServerFactory.class).in(SINGLETON);
-    bind(McpSseServerFactory.class).in(SINGLETON);
-    bind(McpStreamableServerFactory.class).in(SINGLETON);
+    bind(McpStdioServer.class).in(SINGLETON);
+    bind(McpSseServer.class).in(SINGLETON);
+    bind(McpStreamableServer.class).in(SINGLETON);
 
     // Bind for boolean variable: i18nEnabled
     final boolean i18nEnabled = mainClass.isAnnotationPresent(McpI18nEnabled.class);

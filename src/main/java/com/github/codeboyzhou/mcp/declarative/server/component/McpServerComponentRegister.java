@@ -32,21 +32,20 @@ public final class McpServerComponentRegister {
   }
 
   public void registerComponents() {
-    register(McpResource.class, McpServerResourceFactory.class, McpSyncServer::addResource);
-    register(McpPrompt.class, McpServerPromptFactory.class, McpSyncServer::addPrompt);
-    register(McpTool.class, McpServerToolFactory.class, McpSyncServer::addTool);
+    register(McpResource.class, McpServerResource.class, McpSyncServer::addResource);
+    register(McpPrompt.class, McpServerPrompt.class, McpSyncServer::addPrompt);
+    register(McpTool.class, McpServerTool.class, McpSyncServer::addTool);
   }
 
   private <T> void register(
       Class<? extends Annotation> annotationClass,
-      Class<? extends McpServerComponentFactory<T>> factoryClass,
+      Class<? extends McpServerComponent<T>> componentClass,
       BiConsumer<McpSyncServer, T> serverAddComponent) {
 
     Set<Method> methods = reflections.getMethodsAnnotatedWith(annotationClass);
-    McpServerComponentFactory<T> factory = injector.getInstance(factoryClass);
+    McpServerComponent<T> component = injector.getInstance(componentClass);
     for (Method method : methods) {
-      T component = factory.create(method.getDeclaringClass(), method);
-      serverAddComponent.accept(server.get(), component);
+      serverAddComponent.accept(server.get(), component.create(method));
     }
   }
 }
