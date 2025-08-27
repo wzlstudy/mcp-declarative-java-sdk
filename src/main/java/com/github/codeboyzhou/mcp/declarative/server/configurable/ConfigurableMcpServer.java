@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory.configurable;
+package com.github.codeboyzhou.mcp.declarative.server.configurable;
 
 import io.modelcontextprotocol.server.McpServer;
 

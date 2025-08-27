@@ -10,8 +10,8 @@ import com.github.codeboyzhou.mcp.declarative.configuration.McpServerConfigurati
 import com.github.codeboyzhou.mcp.declarative.configuration.YAMLConfigurationLoader;
 import com.github.codeboyzhou.mcp.declarative.enums.ServerMode;
 import com.github.codeboyzhou.mcp.declarative.exception.McpServerConfigurationException;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 import com.github.codeboyzhou.mcp.declarative.test.TestSimpleMcpStdioServer;
 import io.modelcontextprotocol.client.McpClient;
 import io.modelcontextprotocol.client.McpSyncClient;

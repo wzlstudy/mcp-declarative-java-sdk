@@ -1,4 +1,4 @@
-package com.github.codeboyzhou.mcp.declarative.server.factory;
+package com.github.codeboyzhou.mcp.declarative.server;
 
 import com.github.codeboyzhou.mcp.declarative.server.McpServerInfo;
 

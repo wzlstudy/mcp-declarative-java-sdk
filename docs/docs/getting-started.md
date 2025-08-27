@@ -118,7 +118,7 @@ There is a Maven plugin that can handle this, just place the following configura
 import com.github.codeboyzhou.mcp.declarative.McpServers;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpSseServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpSseServerInfo;
 
 @McpI18nEnabled
 @McpServerApplication
@@ -158,7 +158,7 @@ Just run the main class like you would launch a web application, and then it's a
 import com.github.codeboyzhou.mcp.declarative.McpServers;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpI18nEnabled;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpServerApplication;
-import com.github.codeboyzhou.mcp.declarative.server.factory.McpStreamableServerInfo;
+import com.github.codeboyzhou.mcp.declarative.server.McpStreamableServerInfo;
 
 @McpI18nEnabled
 @McpServerApplication
