@@ -202,10 +202,8 @@ details of native MCP Java SDK.
 
 ```java
 import com.github.codeboyzhou.mcp.declarative.annotation.McpResource;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpResources;
 
-@McpResources
-public class MyMcpResources {
+public class McpResources {
 
   /**
    * This method defines a MCP resource to expose the OS env variables.
@@ -225,10 +223,8 @@ public class MyMcpResources {
 ```java
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompt;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpPromptParam;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpPrompts;
 
-@McpPrompts
-public class MyMcpPrompts {
+public class McpPrompts {
 
   /**
    * This method defines a MCP prompt to read a file.
@@ -248,10 +244,8 @@ public class MyMcpPrompts {
 ```java
 import com.github.codeboyzhou.mcp.declarative.annotation.McpTool;
 import com.github.codeboyzhou.mcp.declarative.annotation.McpToolParam;
-import com.github.codeboyzhou.mcp.declarative.annotation.McpTools;
 
-@McpTools
-public class MyMcpTools {
+public class McpTools {
 
   /**
    * This method defines a MCP tool to read a file.

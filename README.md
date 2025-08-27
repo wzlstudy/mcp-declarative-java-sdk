@@ -83,8 +83,7 @@ streamable:
 No need to care about the low-level details of native MCP Java SDK and how to create the MCP resources, prompts, and tools. Just annotate them like this:
 
 ```java
-@McpResources
-public class MyMcpResources {
+public class McpResources {
 
   // This method defines a MCP resource to expose the OS env variables
   @McpResource(uri = "env://variables", description = "OS env variables")
@@ -98,8 +97,7 @@ public class MyMcpResources {
 ```
 
 ```java
-@McpPrompts
-public class MyMcpPrompts {
+public class McpPrompts {
 
   // This method defines a MCP prompt to read a file
   @McpPrompt(description = "A simple prompt to read a file")
@@ -112,8 +110,7 @@ public class MyMcpPrompts {
 ```
 
 ```java
-@McpTools
-public class MyMcpTools {
+public class McpTools {
 
   // This method defines a MCP tool to read a file
   @McpTool(description = "Read complete file contents with UTF-8 encoding")
