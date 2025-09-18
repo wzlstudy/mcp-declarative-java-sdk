@@ -93,7 +93,8 @@ public class McpServerTool
       result = e + ": " + e.getMessage();
       isError = true;
     }
-    McpSchema.Content content = new McpSchema.TextContent(result.toString());
+    final String text = result == null ? "This tool returned nullable or void" : result.toString();
+    McpSchema.Content content = new McpSchema.TextContent(text);
     return new McpSchema.CallToolResult(List.of(content), isError);
   }
 

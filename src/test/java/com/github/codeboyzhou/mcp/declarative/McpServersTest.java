@@ -3,6 +3,7 @@ package com.github.codeboyzhou.mcp.declarative;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -184,19 +185,43 @@ class McpServersTest {
     List<McpSchema.Prompt> prompts = client.listPrompts().prompts();
     assertEquals(2, prompts.size());
 
-    McpSchema.Prompt prompt = prompts.get(0);
-    assertEquals("prompt1_name", prompt.name());
-    assertEquals("prompt1_title", prompt.title());
-    assertEquals("prompt1_description", prompt.description());
+    McpSchema.Prompt prompt1 =
+        prompts.stream()
+            .filter(prompt -> prompt.name().equals("prompt1_name"))
+            .findAny()
+            .orElse(null);
+    assertNotNull(prompt1);
+    assertEquals("prompt1_name", prompt1.name());
+    assertEquals("prompt1_title", prompt1.title());
+    assertEquals("prompt1_description", prompt1.description());
 
-    List<McpSchema.PromptArgument> arguments = prompt.arguments();
-    assertEquals(2, arguments.size());
-    assertEquals("param1", arguments.get(0).name());
-    assertEquals("param1_title", arguments.get(0).title());
-    assertEquals("param1_description", arguments.get(0).description());
-    assertEquals("param2", arguments.get(1).name());
-    assertEquals("param2_title", arguments.get(1).title());
-    assertEquals("param2_description", arguments.get(1).description());
+    List<McpSchema.PromptArgument> arguments1 = prompt1.arguments();
+    assertEquals(2, arguments1.size());
+    assertEquals("param1", arguments1.get(0).name());
+    assertEquals("param1_title", arguments1.get(0).title());
+    assertEquals("param1_description", arguments1.get(0).description());
+    assertEquals("param2", arguments1.get(1).name());
+    assertEquals("param2_title", arguments1.get(1).title());
+    assertEquals("param2_description", arguments1.get(1).description());
+
+    McpSchema.Prompt prompt2 =
+        prompts.stream()
+            .filter(prompt -> prompt.name().equals("prompt2_name"))
+            .findAny()
+            .orElse(null);
+    assertNotNull(prompt2);
+    assertEquals("prompt2_name", prompt2.name());
+    assertEquals("prompt2_title", prompt2.title());
+    assertEquals("prompt2_description", prompt2.description());
+
+    List<McpSchema.PromptArgument> arguments2 = prompt2.arguments();
+    assertEquals(2, arguments2.size());
+    assertEquals("param1", arguments2.get(0).name());
+    assertEquals("param1_title", arguments2.get(0).title());
+    assertEquals("param1_description", arguments2.get(0).description());
+    assertEquals("param2", arguments2.get(1).name());
+    assertEquals("param2_title", arguments2.get(1).title());
+    assertEquals("param2_description", arguments2.get(1).description());
   }
 
   private void verifyPromptsCalled(McpSyncClient client) {
@@ -219,17 +244,28 @@ class McpServersTest {
 
   private void verifyToolsRegistered(McpSyncClient client) {
     List<McpSchema.Tool> tools = client.listTools().tools();
-    assertEquals(2, tools.size());
+    assertEquals(3, tools.size());
 
-    McpSchema.Tool tool1 = tools.get(0);
+    McpSchema.Tool tool1 =
+        tools.stream().filter(tool -> tool.name().equals("tool1_name")).findAny().orElse(null);
+    assertNotNull(tool1);
     assertEquals("tool1_name", tool1.name());
     assertEquals("tool1_title", tool1.title());
     assertEquals("tool1_description", tool1.description());
 
-    McpSchema.Tool tool2 = tools.get(1);
+    McpSchema.Tool tool2 =
+        tools.stream().filter(tool -> tool.name().equals("tool2_name")).findAny().orElse(null);
+    assertNotNull(tool2);
     assertEquals("tool2_name", tool2.name());
     assertEquals("tool2_title", tool2.title());
     assertEquals("tool2_description", tool2.description());
+
+    McpSchema.Tool tool3 =
+        tools.stream().filter(tool -> tool.name().equals("tool3_name")).findAny().orElse(null);
+    assertNotNull(tool3);
+    assertEquals("tool3_name", tool3.name());
+    assertEquals("tool3_title", tool3.title());
+    assertEquals("tool3_description", tool3.description());
   }
 
   private void verifyToolsCalled(McpSyncClient client) {
@@ -248,5 +284,13 @@ class McpServersTest {
     McpSchema.TextContent content2 = (McpSchema.TextContent) result2.content().get(0);
     assertFalse(result2.isError());
     assertEquals("tool2 is called", content2.text());
+
+    String name3 = "tool3_name";
+    Map<String, Object> args3 = Map.of("param1", "value1", "param2", "value2");
+    McpSchema.CallToolRequest request3 = new McpSchema.CallToolRequest(name3, args3);
+    McpSchema.CallToolResult result3 = client.callTool(request3);
+    McpSchema.TextContent content3 = (McpSchema.TextContent) result3.content().get(0);
+    assertFalse(result3.isError());
+    assertEquals("This tool returned nullable or void", content3.text());
   }
 }
