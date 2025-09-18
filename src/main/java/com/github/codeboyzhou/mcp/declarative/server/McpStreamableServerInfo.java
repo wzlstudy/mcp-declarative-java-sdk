@@ -1,5 +1,6 @@
 package com.github.codeboyzhou.mcp.declarative.server;
 
+import io.modelcontextprotocol.common.McpTransportContext;
 import io.modelcontextprotocol.server.McpTransportContextExtractor;
 import jakarta.servlet.http.HttpServletRequest;
 import java.time.Duration;
@@ -58,7 +59,7 @@ public class McpStreamableServerInfo extends McpServerInfo {
     private boolean disallowDelete = false;
 
     private McpTransportContextExtractor<HttpServletRequest> contextExtractor =
-        (request, context) -> context;
+        request -> McpTransportContext.EMPTY;
 
     private Duration keepAliveInterval;
 
