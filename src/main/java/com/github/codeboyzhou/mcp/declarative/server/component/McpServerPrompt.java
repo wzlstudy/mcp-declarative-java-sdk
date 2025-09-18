@@ -28,11 +28,7 @@ public class McpServerPrompt
 
   private final McpPromptParameterConverter converter;
 
-  private MethodMetadata methodCache;
-
   private Object instance;
-
-  private String description;
 
   public McpServerPrompt() {
     this.converter = injector.getInstance(McpPromptParameterConverter.class);
@@ -41,30 +37,37 @@ public class McpServerPrompt
   @Override
   public McpServerFeatures.SyncPromptSpecification create(Method method) {
     // Use reflection cache for performance optimization
-    methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
+    MethodMetadata methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
     instance = injector.getInstance(methodCache.getDeclaringClass());
 
     McpPrompt promptMethod = methodCache.getMcpPromptAnnotation();
     final String name = Strings.defaultIfBlank(promptMethod.name(), methodCache.getMethodName());
     final String title = resolveComponentAttributeValue(promptMethod.title());
-    description = resolveComponentAttributeValue(promptMethod.description());
+    final String description = resolveComponentAttributeValue(promptMethod.description());
 
-    List<McpSchema.PromptArgument> promptArguments = createPromptArguments();
-    McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArguments);
+    List<McpSchema.PromptArgument> promptArgs = createPromptArguments(methodCache.getParameters());
+    McpSchema.Prompt prompt = new McpSchema.Prompt(name, title, description, promptArgs);
 
     log.debug(
         "Registering prompt: {} (Cached: {})",
         ObjectMappers.toJson(prompt),
         ReflectionCache.INSTANCE.isCached(method));
 
-    return new McpServerFeatures.SyncPromptSpecification(prompt, this);
+    return new McpServerFeatures.SyncPromptSpecification(
+        prompt, (exchange, request) -> invoke(method, description, exchange, request));
   }
 
   @Override
-  public McpSchema.GetPromptResult apply(McpSyncServerExchange ex, McpSchema.GetPromptRequest req) {
+  public McpSchema.GetPromptResult invoke(
+      Method method,
+      String description,
+      McpSyncServerExchange exchange,
+      McpSchema.GetPromptRequest request) {
+
     Object result;
+    MethodMetadata methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
     try {
-      Map<String, Object> arguments = req.arguments();
+      Map<String, Object> arguments = request.arguments();
       List<Object> convertedParams = converter.convertAllParameters(methodCache, arguments);
       // Use cached method for invocation
       result = methodCache.getMethod().invoke(instance, convertedParams.toArray());
@@ -77,8 +80,7 @@ public class McpServerPrompt
     return new McpSchema.GetPromptResult(description, List.of(message));
   }
 
-  private List<McpSchema.PromptArgument> createPromptArguments() {
-    Parameter[] methodParams = methodCache.getParameters();
+  private List<McpSchema.PromptArgument> createPromptArguments(Parameter[] methodParams) {
     List<McpSchema.PromptArgument> promptArguments = new ArrayList<>(methodParams.length);
 
     for (Parameter param : methodParams) {

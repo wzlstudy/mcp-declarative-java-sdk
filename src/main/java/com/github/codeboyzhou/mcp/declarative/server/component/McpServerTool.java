@@ -36,8 +36,6 @@ public class McpServerTool
 
   private final McpToolParameterConverter converter;
 
-  private MethodMetadata methodCache;
-
   private Object instance;
 
   public McpServerTool() {
@@ -47,7 +45,7 @@ public class McpServerTool
   @Override
   public McpServerFeatures.SyncToolSpecification create(Method method) {
     // Use reflection cache for performance optimization
-    methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
+    MethodMetadata methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
     instance = injector.getInstance(methodCache.getDeclaringClass());
 
     McpTool toolMethod = methodCache.getMcpToolAnnotation();
@@ -55,7 +53,7 @@ public class McpServerTool
     final String title = resolveComponentAttributeValue(toolMethod.title());
     final String description = resolveComponentAttributeValue(toolMethod.description());
 
-    McpSchema.JsonSchema paramSchema = createJsonSchema();
+    McpSchema.JsonSchema paramSchema = createJsonSchema(methodCache.getParameters());
     McpSchema.Tool tool =
         McpSchema.Tool.builder()
             .name(name)
@@ -69,16 +67,24 @@ public class McpServerTool
         ObjectMappers.toJson(tool),
         ReflectionCache.INSTANCE.isCached(method));
 
-    return McpServerFeatures.SyncToolSpecification.builder().tool(tool).callHandler(this).build();
+    return McpServerFeatures.SyncToolSpecification.builder()
+        .tool(tool)
+        .callHandler((exchange, request) -> invoke(method, description, exchange, request))
+        .build();
   }
 
   @Override
-  public McpSchema.CallToolResult apply(McpSyncServerExchange ex, McpSchema.CallToolRequest req) {
+  public McpSchema.CallToolResult invoke(
+      Method method,
+      String description,
+      McpSyncServerExchange exchange,
+      McpSchema.CallToolRequest request) {
 
     Object result;
     boolean isError = false;
+    MethodMetadata methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
     try {
-      Map<String, Object> arguments = req.arguments();
+      Map<String, Object> arguments = request.arguments();
       List<Object> convertedParams = converter.convertAllParameters(methodCache, arguments);
       // Use cached method for invocation
       result = methodCache.getMethod().invoke(instance, convertedParams.toArray());
@@ -91,12 +97,11 @@ public class McpServerTool
     return new McpSchema.CallToolResult(List.of(content), isError);
   }
 
-  private McpSchema.JsonSchema createJsonSchema() {
+  private McpSchema.JsonSchema createJsonSchema(Parameter[] methodParams) {
     Map<String, Object> properties = new LinkedHashMap<>();
     Map<String, Object> definitions = new LinkedHashMap<>();
     List<String> required = new ArrayList<>();
 
-    Parameter[] methodParams = methodCache.getParameters();
     for (Parameter param : methodParams) {
       if (param.isAnnotationPresent(McpToolParam.class)) {
         McpToolParam toolParam = param.getAnnotation(McpToolParam.class);

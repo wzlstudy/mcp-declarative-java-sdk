@@ -16,6 +16,16 @@ public class TestMcpTools {
           String param2,
       String param3) {
     log.debug("tool1 called with params: {}, {}, {}", param1, param2, param3);
-    return param1 + param2;
+    return "tool1 is called";
+  }
+
+  @McpTool(name = "tool2_name", title = "tool2_title", description = "tool2_description")
+  public String tool2(
+      @McpToolParam(name = "param1", description = "param1_description") String param1,
+      @McpToolParam(name = "param2", description = "param2_description", required = true)
+          String param2,
+      String param3) {
+    log.debug("tool2 called with params: {}, {}, {}", param1, param2, param3);
+    return "tool2 is called";
   }
 }

@@ -182,7 +182,7 @@ class McpServersTest {
 
   private void verifyPromptsRegistered(McpSyncClient client) {
     List<McpSchema.Prompt> prompts = client.listPrompts().prompts();
-    assertEquals(1, prompts.size());
+    assertEquals(2, prompts.size());
 
     McpSchema.Prompt prompt = prompts.get(0);
     assertEquals("prompt1_name", prompt.name());
@@ -205,17 +205,31 @@ class McpServersTest {
     McpSchema.GetPromptRequest request1 = new McpSchema.GetPromptRequest(name1, args1);
     McpSchema.GetPromptResult result1 = client.getPrompt(request1);
     McpSchema.TextContent content = (McpSchema.TextContent) result1.messages().get(0).content();
-    assertEquals(args1.get("param1") + args1.get("param2").toString(), content.text());
     assertEquals("prompt1_description", result1.description());
+    assertEquals("prompt1 is called", content.text());
+
+    String name2 = "prompt2_name";
+    Map<String, Object> args2 = Map.of("param1", "value1", "param2", "value2");
+    McpSchema.GetPromptRequest request2 = new McpSchema.GetPromptRequest(name2, args2);
+    McpSchema.GetPromptResult result2 = client.getPrompt(request2);
+    McpSchema.TextContent content2 = (McpSchema.TextContent) result2.messages().get(0).content();
+    assertEquals("prompt2_description", result2.description());
+    assertEquals("prompt2 is called", content2.text());
   }
 
   private void verifyToolsRegistered(McpSyncClient client) {
     List<McpSchema.Tool> tools = client.listTools().tools();
-    assertEquals(1, tools.size());
-    McpSchema.Tool tool = tools.get(0);
-    assertEquals("tool1_name", tool.name());
-    assertEquals("tool1_title", tool.title());
-    assertEquals("tool1_description", tool.description());
+    assertEquals(2, tools.size());
+
+    McpSchema.Tool tool1 = tools.get(0);
+    assertEquals("tool1_name", tool1.name());
+    assertEquals("tool1_title", tool1.title());
+    assertEquals("tool1_description", tool1.description());
+
+    McpSchema.Tool tool2 = tools.get(1);
+    assertEquals("tool2_name", tool2.name());
+    assertEquals("tool2_title", tool2.title());
+    assertEquals("tool2_description", tool2.description());
   }
 
   private void verifyToolsCalled(McpSyncClient client) {
@@ -224,7 +238,15 @@ class McpServersTest {
     McpSchema.CallToolRequest request1 = new McpSchema.CallToolRequest(name1, args1);
     McpSchema.CallToolResult result1 = client.callTool(request1);
     McpSchema.TextContent content = (McpSchema.TextContent) result1.content().get(0);
-    assertEquals(args1.get("param1") + args1.get("param2").toString(), content.text());
     assertFalse(result1.isError());
+    assertEquals("tool1 is called", content.text());
+
+    String name2 = "tool2_name";
+    Map<String, Object> args2 = Map.of("param1", "value1", "param2", "value2");
+    McpSchema.CallToolRequest request2 = new McpSchema.CallToolRequest(name2, args2);
+    McpSchema.CallToolResult result2 = client.callTool(request2);
+    McpSchema.TextContent content2 = (McpSchema.TextContent) result2.content().get(0);
+    assertFalse(result2.isError());
+    assertEquals("tool2 is called", content2.text());
   }
 }

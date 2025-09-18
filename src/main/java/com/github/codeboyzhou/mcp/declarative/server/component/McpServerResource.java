@@ -21,8 +21,6 @@ public class McpServerResource
 
   private static final Logger log = LoggerFactory.getLogger(McpServerResource.class);
 
-  private MethodMetadata methodCache;
-
   private Object instance;
 
   private McpSchema.Resource resource;
@@ -30,7 +28,7 @@ public class McpServerResource
   @Override
   public McpServerFeatures.SyncResourceSpecification create(Method method) {
     // Use reflection cache for performance optimization
-    methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
+    MethodMetadata methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
     instance = injector.getInstance(methodCache.getDeclaringClass());
 
     McpResource res = methodCache.getMcpResourceAnnotation();
@@ -53,14 +51,19 @@ public class McpServerResource
         ObjectMappers.toJson(resource),
         ReflectionCache.INSTANCE.isCached(method));
 
-    return new McpServerFeatures.SyncResourceSpecification(resource, this);
+    return new McpServerFeatures.SyncResourceSpecification(
+        resource, (exchange, request) -> invoke(method, description, exchange, request));
   }
 
   @Override
-  public McpSchema.ReadResourceResult apply(
-      McpSyncServerExchange ex, McpSchema.ReadResourceRequest req) {
+  public McpSchema.ReadResourceResult invoke(
+      Method method,
+      String description,
+      McpSyncServerExchange exchange,
+      McpSchema.ReadResourceRequest request) {
 
     Object result;
+    MethodMetadata methodCache = ReflectionCache.INSTANCE.getMethodMetadata(method);
     try {
       // Use cached method for invocation
       result = methodCache.getMethod().invoke(instance);

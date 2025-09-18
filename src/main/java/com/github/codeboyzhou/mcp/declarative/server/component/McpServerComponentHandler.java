@@ -1,6 +1,8 @@
 package com.github.codeboyzhou.mcp.declarative.server.component;
 
 import io.modelcontextprotocol.server.McpSyncServerExchange;
-import java.util.function.BiFunction;
+import java.lang.reflect.Method;
 
-public interface McpServerComponentHandler<U, R> extends BiFunction<McpSyncServerExchange, U, R> {}
+public interface McpServerComponentHandler<U, R> {
+  R invoke(Method method, String description, McpSyncServerExchange exchange, U request);
+}

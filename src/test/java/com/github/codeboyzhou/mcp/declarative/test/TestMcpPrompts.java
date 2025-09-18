@@ -17,6 +17,17 @@ public class TestMcpPrompts {
           String param2,
       String param3) {
     log.debug("prompt1 called with params: {}, {}, {}", param1, param2, param3);
-    return param1 + param2;
+    return "prompt1 is called";
+  }
+
+  @McpPrompt(name = "prompt2_name", title = "prompt2_title", description = "prompt2_description")
+  public String prompt2(
+      @McpPromptParam(name = "param1", title = "param1_title", description = "param1_description")
+          String param1,
+      @McpPromptParam(name = "param2", title = "param2_title", description = "param2_description")
+          String param2,
+      String param3) {
+    log.debug("prompt2 called with params: {}, {}, {}", param1, param2, param3);
+    return "prompt2 is called";
   }
 }
